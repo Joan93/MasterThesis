@@ -1,6 +1,8 @@
 # MasterThesis
 
-This is my Master Thesis Project
+This is my Master's Thesis Project, studies at Polythechnic University of Catalonia.
+    MASTEAM (Master’s Degree in Applied Telecommunications and Engineering Management)
+
 
     TITLE: Implementation of DQ in OpenWSN over a LoRaWAN Network
     

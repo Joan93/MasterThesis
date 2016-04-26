@@ -1,0 +1,8 @@
+
+
+  - https://github.com/openwsn-berkeley/ 
+  - https://github.com/OpenMote/opendq/blob/master/documentation/03-installation.tex 
+  - https://github.com/openwsn-berkeley/openwsn-fw.git
+  - https://github.com/openwsn-berkeley/openwsn-sw.git
+  - https://github.com/openwsn-berkeley/coap.git
+  - 

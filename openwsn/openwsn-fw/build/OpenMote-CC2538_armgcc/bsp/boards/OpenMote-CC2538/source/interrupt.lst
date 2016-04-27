@@ -1,0 +1,2004 @@
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 6
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.file	"interrupt.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.section	.rodata
+  19              		.align	2
+  22              	g_pui32Priority:
+  23 0000 00070000 		.word	1792
+  24 0004 00060000 		.word	1536
+  25 0008 00050000 		.word	1280
+  26 000c 00040000 		.word	1024
+  27 0010 00030000 		.word	768
+  28 0014 00020000 		.word	512
+  29 0018 00010000 		.word	256
+  30 001c 00000000 		.word	0
+  31              		.align	2
+  34              	g_pui32Regs:
+  35 0020 00000000 		.word	0
+  36 0024 18ED00E0 		.word	-536810216
+  37 0028 1CED00E0 		.word	-536810212
+  38 002c 20ED00E0 		.word	-536810208
+  39 0030 00E400E0 		.word	-536812544
+  40 0034 04E400E0 		.word	-536812540
+  41 0038 08E400E0 		.word	-536812536
+  42 003c 0CE400E0 		.word	-536812532
+  43 0040 10E400E0 		.word	-536812528
+  44 0044 14E400E0 		.word	-536812524
+  45 0048 18E400E0 		.word	-536812520
+  46 004c 1CE400E0 		.word	-536812516
+  47 0050 20E400E0 		.word	-536812512
+  48 0054 24E400E0 		.word	-536812508
+  49 0058 28E400E0 		.word	-536812504
+  50 005c 2CE400E0 		.word	-536812500
+  51 0060 30E400E0 		.word	-536812496
+  52 0064 34E400E0 		.word	-536812492
+  53 0068 38E400E0 		.word	-536812488
+  54 006c 3CE400E0 		.word	-536812484
+  55 0070 40E400E0 		.word	-536812480
+  56 0074 44E400E0 		.word	-536812476
+  57 0078 48E400E0 		.word	-536812472
+  58 007c 4CE400E0 		.word	-536812468
+  59 0080 50E400E0 		.word	-536812464
+  60 0084 54E400E0 		.word	-536812460
+  61 0088 58E400E0 		.word	-536812456
+  62 008c 5CE400E0 		.word	-536812452
+  63 0090 60E400E0 		.word	-536812448
+  64 0094 64E400E0 		.word	-536812444
+  65 0098 68E400E0 		.word	-536812440
+  66 009c 6CE400E0 		.word	-536812436
+  67 00a0 70E400E0 		.word	-536812432
+  68 00a4 74E400E0 		.word	-536812428
+  69 00a8 78E400E0 		.word	-536812424
+  70 00ac 7CE400E0 		.word	-536812420
+  71 00b0 80E400E0 		.word	-536812416
+  72 00b4 84E400E0 		.word	-536812412
+  73 00b8 88E400E0 		.word	-536812408
+  74 00bc 8CE400E0 		.word	-536812404
+  75 00c0 90E400E0 		.word	-536812400
+  76              		.align	2
+  79              	g_pui32EnRegs:
+  80 00c4 00E100E0 		.word	-536813312
+  81 00c8 04E100E0 		.word	-536813308
+  82 00cc 08E100E0 		.word	-536813304
+  83 00d0 0CE100E0 		.word	-536813300
+  84 00d4 10E100E0 		.word	-536813296
+  85              		.align	2
+  88              	g_pui32DisRegs:
+  89 00d8 80E100E0 		.word	-536813184
+  90 00dc 84E100E0 		.word	-536813180
+  91 00e0 88E100E0 		.word	-536813176
+  92 00e4 8CE100E0 		.word	-536813172
+  93 00e8 90E100E0 		.word	-536813168
+  94              		.align	2
+  97              	g_pui32PendRegs:
+  98 00ec 00E200E0 		.word	-536813056
+  99 00f0 04E200E0 		.word	-536813052
+ 100 00f4 08E200E0 		.word	-536813048
+ 101 00f8 0CE200E0 		.word	-536813044
+ 102 00fc 10E200E0 		.word	-536813040
+ 103              		.align	2
+ 106              	g_pui32UnpendRegs:
+ 107 0100 80E200E0 		.word	-536812928
+ 108 0104 84E200E0 		.word	-536812924
+ 109 0108 88E200E0 		.word	-536812920
+ 110 010c 8CE200E0 		.word	-536812916
+ 111 0110 90E200E0 		.word	-536812912
+ 112              		.text
+ 113              		.align	2
+ 114              		.thumb
+ 115              		.thumb_func
+ 117              	IntDefaultHandler:
+ 118              	.LFB0:
+ 119              		.file 1 "build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c"
+   1:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** /******************************************************************************
+   2:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** *  Filename:       interrupt.c
+   3:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** *  Revised:        $Date: 2013-03-20 14:47:53 +0100 (Wed, 20 Mar 2013) $
+   4:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** *  Revision:       $Revision: 9489 $
+   5:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** *
+   6:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** *  Description:    Driver for the NVIC Interrupt Controller.
+   7:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** *
+   8:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** *  Copyright (C) 2012 Texas Instruments Incorporated - http://www.ti.com/
+   9:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** *
+  10:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** *
+  11:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** *  Redistribution and use in source and binary forms, with or without
+  12:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** *  modification, are permitted provided that the following conditions
+  13:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** *  are met:
+  14:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** *
+  15:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** *    Redistributions of source code must retain the above copyright
+  16:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** *    notice, this list of conditions and the following disclaimer.
+  17:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** *
+  18:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** *    Redistributions in binary form must reproduce the above copyright
+  19:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** *    notice, this list of conditions and the following disclaimer in the
+  20:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** *    documentation and/or other materials provided with the distribution.
+  21:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** *
+  22:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** *    Neither the name of Texas Instruments Incorporated nor the names of
+  23:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** *    its contributors may be used to endorse or promote products derived
+  24:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** *    from this software without specific prior written permission.
+  25:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** *
+  26:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  27:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** *  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  28:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** *  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  29:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** *  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  30:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** *  OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  31:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** *  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  32:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** *  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  33:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** *  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  34:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** *  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  35:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  36:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** *  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  37:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** *
+  38:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** ******************************************************************************/
+  39:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** 
+  40:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //*****************************************************************************
+  41:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //
+  42:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! \addtogroup interrupt_api
+  43:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! @{
+  44:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //
+  45:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //*****************************************************************************
+  46:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** 
+  47:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** #include <headers/hw_ints.h>
+  48:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** #include <headers/hw_nvic.h>
+  49:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** #include <headers/hw_sys_ctrl.h>
+  50:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** #include "cpu.h"
+  51:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** #include "debug.h"
+  52:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** #include "interrupt.h"
+  53:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** 
+  54:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //*****************************************************************************
+  55:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //
+  56:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** // This is a mapping between priority grouping encodings and the number of
+  57:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** // preemption priority bits.
+  58:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //
+  59:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //*****************************************************************************
+  60:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** static const uint32_t g_pui32Priority[] =
+  61:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** {
+  62:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     NVIC_APINT_PRIGROUP_0_8, NVIC_APINT_PRIGROUP_1_7, NVIC_APINT_PRIGROUP_2_6,
+  63:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     NVIC_APINT_PRIGROUP_3_5, NVIC_APINT_PRIGROUP_4_4, NVIC_APINT_PRIGROUP_5_3,
+  64:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     NVIC_APINT_PRIGROUP_6_2, NVIC_APINT_PRIGROUP_7_1
+  65:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** };
+  66:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** 
+  67:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //*****************************************************************************
+  68:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //
+  69:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** // This is a mapping between interrupt number and the register that contains
+  70:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** // the priority encoding for that interrupt.
+  71:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //
+  72:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //*****************************************************************************
+  73:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** static const uint32_t g_pui32Regs[] =
+  74:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** {
+  75:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     0, NVIC_SYS_PRI1, NVIC_SYS_PRI2, NVIC_SYS_PRI3, NVIC_PRI0,  NVIC_PRI1,
+  76:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     NVIC_PRI2,  NVIC_PRI3,  NVIC_PRI4,  NVIC_PRI5,  NVIC_PRI6,  NVIC_PRI7,
+  77:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     NVIC_PRI8,  NVIC_PRI9,  NVIC_PRI10, NVIC_PRI11, NVIC_PRI12, NVIC_PRI13,
+  78:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     NVIC_PRI14, NVIC_PRI15, NVIC_PRI16, NVIC_PRI17, NVIC_PRI18, NVIC_PRI19,
+  79:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     NVIC_PRI20, NVIC_PRI21, NVIC_PRI22, NVIC_PRI23, NVIC_PRI24, NVIC_PRI25,
+  80:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     NVIC_PRI26, NVIC_PRI27, NVIC_PRI28, NVIC_PRI29, NVIC_PRI30, NVIC_PRI31,
+  81:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     NVIC_PRI32, NVIC_PRI33, NVIC_PRI34, NVIC_PRI35, NVIC_PRI36
+  82:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** };
+  83:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** 
+  84:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //*****************************************************************************
+  85:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //
+  86:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** // This is a mapping between interrupt number (for the peripheral interrupts
+  87:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** // only) and the register that contains the interrupt enable for that
+  88:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** // interrupt.
+  89:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //
+  90:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //*****************************************************************************
+  91:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** static const uint32_t g_pui32EnRegs[] =
+  92:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** {
+  93:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     NVIC_EN0, NVIC_EN1, NVIC_EN2, NVIC_EN3, NVIC_EN4
+  94:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** };
+  95:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** 
+  96:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //*****************************************************************************
+  97:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //
+  98:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** // This is a mapping between interrupt number (for the peripheral interrupts
+  99:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** // only) and the register that contains the interrupt disable for that
+ 100:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** // interrupt.
+ 101:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //
+ 102:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //*****************************************************************************
+ 103:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** static const uint32_t g_pui32DisRegs[] =
+ 104:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** {
+ 105:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     NVIC_DIS0, NVIC_DIS1, NVIC_DIS2, NVIC_DIS3, NVIC_DIS4
+ 106:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** };
+ 107:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** 
+ 108:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //*****************************************************************************
+ 109:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //
+ 110:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** // This is a mapping between interrupt number (for the peripheral interrupts
+ 111:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** // only) and the register that contains the interrupt pend for that interrupt.
+ 112:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //
+ 113:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //*****************************************************************************
+ 114:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** static const uint32_t g_pui32PendRegs[] =
+ 115:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** {
+ 116:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     NVIC_PEND0, NVIC_PEND1, NVIC_PEND2, NVIC_PEND3, NVIC_PEND4
+ 117:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** };
+ 118:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** 
+ 119:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //*****************************************************************************
+ 120:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //
+ 121:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** // This is a mapping between interrupt number (for the peripheral interrupts
+ 122:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** // only) and the register that contains the interrupt unpend for that
+ 123:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** // interrupt.
+ 124:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //
+ 125:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //*****************************************************************************
+ 126:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** static const uint32_t g_pui32UnpendRegs[] =
+ 127:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** {
+ 128:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     NVIC_UNPEND0, NVIC_UNPEND1, NVIC_UNPEND2, NVIC_UNPEND3, NVIC_UNPEND4
+ 129:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** };
+ 130:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** 
+ 131:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //*****************************************************************************
+ 132:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //
+ 133:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! \internal
+ 134:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! The default interrupt handler
+ 135:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //!
+ 136:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! This is the default interrupt handler for all interrupts.  It simply loops
+ 137:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! forever so that the system state is preserved for observation by a
+ 138:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! debugger.  Since interrupts should be disabled before unregistering the
+ 139:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! corresponding handler, this should never be called.
+ 140:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //!
+ 141:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! \return None
+ 142:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //
+ 143:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //*****************************************************************************
+ 144:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** static void
+ 145:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** IntDefaultHandler(void)
+ 146:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** {
+ 120              		.loc 1 146 0
+ 121              		.cfi_startproc
+ 122              		@ args = 0, pretend = 0, frame = 0
+ 123              		@ frame_needed = 1, uses_anonymous_args = 0
+ 124              		@ link register save eliminated.
+ 125 0000 80B4     		push	{r7}
+ 126              		.cfi_def_cfa_offset 4
+ 127              		.cfi_offset 7, -4
+ 128 0002 00AF     		add	r7, sp, #0
+ 129              		.cfi_def_cfa_register 7
+ 130              	.L2:
+ 147:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     //
+ 148:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     // Go into an infinite loop.
+ 149:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     //
+ 150:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     while(1)
+ 151:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     {
+ 152:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     }
+ 131              		.loc 1 152 0 discriminator 1
+ 132 0004 FEE7     		b	.L2
+ 133              		.cfi_endproc
+ 134              	.LFE0:
+ 136              		.section	vtable,"aw",%progbits
+ 137              		.align	10
+ 140              	g_pfnRAMVectors:
+ 141 0000 00000000 		.space	652
+ 141      00000000 
+ 141      00000000 
+ 141      00000000 
+ 141      00000000 
+ 142              		.text
+ 143 0006 00BF     		.align	2
+ 144              		.global	IntMasterEnable
+ 145              		.thumb
+ 146              		.thumb_func
+ 148              	IntMasterEnable:
+ 149              	.LFB1:
+ 153:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** }
+ 154:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** 
+ 155:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //*****************************************************************************
+ 156:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //
+ 157:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** // The processor vector table
+ 158:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //
+ 159:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** // This contains a list of the handlers for the various interrupt sources in
+ 160:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** // the system.  The layout of this list is defined by the hardware; assertion
+ 161:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** // of an interrupt causes the processor to start executing directly at the
+ 162:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** // address given in the corresponding location in this list.
+ 163:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //
+ 164:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //*****************************************************************************
+ 165:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** #if defined(__ICCARM__)
+ 166:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** #pragma data_alignment=1024
+ 167:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** static __no_init void (*g_pfnRAMVectors[NUM_INTERRUPTS])(void) @ "VTABLE";
+ 168:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** #elif defined(__TI_COMPILER_VERSION__) || defined(DOXYGEN)
+ 169:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** #pragma DATA_ALIGN(g_pfnRAMVectors, 1024)
+ 170:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** #pragma DATA_SECTION(g_pfnRAMVectors, ".vtable")
+ 171:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** void (*g_pfnRAMVectors[NUM_INTERRUPTS])(void);
+ 172:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** #else
+ 173:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** static __attribute__((section("vtable")))
+ 174:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** void (*g_pfnRAMVectors[NUM_INTERRUPTS])(void) __attribute__((aligned(1024)));
+ 175:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** #endif
+ 176:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** 
+ 177:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //*****************************************************************************
+ 178:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //
+ 179:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! Enables the processor interrupt
+ 180:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //!
+ 181:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! This function allows the processor to respond to interrupts.  This does not
+ 182:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! affect the set of interrupts enabled in the interrupt controller; it just
+ 183:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! gates the single interrupt from the controller to the processor.
+ 184:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //!
+ 185:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! \return Returns \b true if interrupts were disabled when the function was
+ 186:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! called or \b false if they were initially enabled.
+ 187:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //
+ 188:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //*****************************************************************************
+ 189:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** bool
+ 190:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** IntMasterEnable(void)
+ 191:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** {
+ 150              		.loc 1 191 0
+ 151              		.cfi_startproc
+ 152              		@ args = 0, pretend = 0, frame = 0
+ 153              		@ frame_needed = 1, uses_anonymous_args = 0
+ 154 0008 80B5     		push	{r7, lr}
+ 155              		.cfi_def_cfa_offset 8
+ 156              		.cfi_offset 7, -8
+ 157              		.cfi_offset 14, -4
+ 158 000a 00AF     		add	r7, sp, #0
+ 159              		.cfi_def_cfa_register 7
+ 192:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     //
+ 193:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     // Enable processor interrupts.
+ 194:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     //
+ 195:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     return(CPUcpsie());
+ 160              		.loc 1 195 0
+ 161 000c FFF7FEFF 		bl	CPUcpsie
+ 162 0010 0346     		mov	r3, r0
+ 163 0012 002B     		cmp	r3, #0
+ 164 0014 14BF     		ite	ne
+ 165 0016 0123     		movne	r3, #1
+ 166 0018 0023     		moveq	r3, #0
+ 167 001a DBB2     		uxtb	r3, r3
+ 196:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** }
+ 168              		.loc 1 196 0
+ 169 001c 1846     		mov	r0, r3
+ 170 001e 80BD     		pop	{r7, pc}
+ 171              		.cfi_endproc
+ 172              	.LFE1:
+ 174              		.align	2
+ 175              		.global	IntMasterDisable
+ 176              		.thumb
+ 177              		.thumb_func
+ 179              	IntMasterDisable:
+ 180              	.LFB2:
+ 197:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** 
+ 198:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //*****************************************************************************
+ 199:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //
+ 200:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! Disables the processor interrupt
+ 201:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //!
+ 202:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! This function prevents the processor from receiving interrupts. This does
+ 203:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! not affect the set of interrupts enabled in the interrupt controller; it
+ 204:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! just gates the single interrupt from the controller to the processor.
+ 205:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //!
+ 206:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! \return Returns \b true if interrupts were already disabled when the
+ 207:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! function was called or \b false if they were initially enabled.
+ 208:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //
+ 209:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //*****************************************************************************
+ 210:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** bool
+ 211:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** IntMasterDisable(void)
+ 212:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** {
+ 181              		.loc 1 212 0
+ 182              		.cfi_startproc
+ 183              		@ args = 0, pretend = 0, frame = 0
+ 184              		@ frame_needed = 1, uses_anonymous_args = 0
+ 185 0020 80B5     		push	{r7, lr}
+ 186              		.cfi_def_cfa_offset 8
+ 187              		.cfi_offset 7, -8
+ 188              		.cfi_offset 14, -4
+ 189 0022 00AF     		add	r7, sp, #0
+ 190              		.cfi_def_cfa_register 7
+ 213:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     //
+ 214:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     // Disable processor interrupts.
+ 215:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     //
+ 216:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     return(CPUcpsid());
+ 191              		.loc 1 216 0
+ 192 0024 FFF7FEFF 		bl	CPUcpsid
+ 193 0028 0346     		mov	r3, r0
+ 194 002a 002B     		cmp	r3, #0
+ 195 002c 14BF     		ite	ne
+ 196 002e 0123     		movne	r3, #1
+ 197 0030 0023     		moveq	r3, #0
+ 198 0032 DBB2     		uxtb	r3, r3
+ 217:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** }
+ 199              		.loc 1 217 0
+ 200 0034 1846     		mov	r0, r3
+ 201 0036 80BD     		pop	{r7, pc}
+ 202              		.cfi_endproc
+ 203              	.LFE2:
+ 205              		.align	2
+ 206              		.global	IntRegister
+ 207              		.thumb
+ 208              		.thumb_func
+ 210              	IntRegister:
+ 211              	.LFB3:
+ 218:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** 
+ 219:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //*****************************************************************************
+ 220:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //
+ 221:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! Registers a function to be called when an interrupt occurs
+ 222:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //!
+ 223:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! \param ui32Interrupt specifies the interrupt in question.
+ 224:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! \param pfnHandler is a pointer to the function to be called.
+ 225:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //!
+ 226:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! This function specifies the handler function to be called when the
+ 227:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! given interrupt is asserted to the processor.  When the interrupt occurs,
+ 228:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! if it is enabled (through IntEnable()), the handler function is called in
+ 229:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! interrupt context. Because the handler function can preempt other code, care
+ 230:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! must be taken to protect memory or peripherals that are accessed by the
+ 231:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! handler and other nonhandler code.
+ 232:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //!
+ 233:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! \note This function (directly or indirectly through a peripheral
+ 234:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! driver interrupt register function) moves the interrupt vector table from
+ 235:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! flash to SRAM.  Therefore, care must be taken when linking the application
+ 236:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! to ensure that the SRAM vector table is located at the beginning of SRAM;
+ 237:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! otherwise NVIC will not look in the correct portion of memory for the
+ 238:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! vector table (it requires the vector table be on a 1-kB memory alignment).
+ 239:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! Normally, the SRAM vector table is so placed through the use of linker
+ 240:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! scripts. See the discussion of compile-time versus runtime interrupt handler
+ 241:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! registration in the introduction to this chapter.
+ 242:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //!
+ 243:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! \return None
+ 244:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //
+ 245:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //*****************************************************************************
+ 246:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** void
+ 247:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** IntRegister(uint32_t ui32Interrupt, void (*pfnHandler)(void))
+ 248:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** {
+ 212              		.loc 1 248 0
+ 213              		.cfi_startproc
+ 214              		@ args = 0, pretend = 0, frame = 16
+ 215              		@ frame_needed = 1, uses_anonymous_args = 0
+ 216              		@ link register save eliminated.
+ 217 0038 80B4     		push	{r7}
+ 218              		.cfi_def_cfa_offset 4
+ 219              		.cfi_offset 7, -4
+ 220 003a 85B0     		sub	sp, sp, #20
+ 221              		.cfi_def_cfa_offset 24
+ 222 003c 00AF     		add	r7, sp, #0
+ 223              		.cfi_def_cfa_register 7
+ 224 003e 7860     		str	r0, [r7, #4]
+ 225 0040 3960     		str	r1, [r7]
+ 249:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     uint32_t ui32Idx, ui32Value;
+ 250:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** 
+ 251:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     //
+ 252:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     // Check the arguments.
+ 253:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     //
+ 254:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     ASSERT(ui32Interrupt < NUM_INTERRUPTS);
+ 255:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** 
+ 256:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     // Check below could be removed in final application
+ 257:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** #ifdef CC2538_USE_ALTERNATE_INTERRUPT_MAP
+ 258:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     ASSERT(IntAltMapIsEnabled());
+ 259:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** #else
+ 260:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     ASSERT(~IntAltMapIsEnabled());
+ 261:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** #endif
+ 262:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** 
+ 263:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     //
+ 264:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     // Make sure that the RAM vector table is correctly aligned.
+ 265:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     //
+ 266:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     ASSERT(((uint32_t)g_pfnRAMVectors & 0x000003ff) == 0);
+ 267:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** 
+ 268:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     //
+ 269:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     // See if the RAM vector table has been initialized.
+ 270:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     //
+ 271:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     if(HWREG(NVIC_VTABLE) != (uint32_t)g_pfnRAMVectors)
+ 226              		.loc 1 271 0
+ 227 0042 144B     		ldr	r3, .L11
+ 228 0044 1B68     		ldr	r3, [r3]
+ 229 0046 144A     		ldr	r2, .L11+4
+ 230 0048 9342     		cmp	r3, r2
+ 231 004a 18D0     		beq	.L8
+ 272:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     {
+ 273:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         //
+ 274:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         // Copy the vector table from the beginning of FLASH to the RAM vector
+ 275:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         // table.
+ 276:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         //
+ 277:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         ui32Value = HWREG(NVIC_VTABLE);
+ 232              		.loc 1 277 0
+ 233 004c 114B     		ldr	r3, .L11
+ 234 004e 1B68     		ldr	r3, [r3]
+ 235 0050 BB60     		str	r3, [r7, #8]
+ 278:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         for(ui32Idx = 0; ui32Idx < NUM_INTERRUPTS; ui32Idx++)
+ 236              		.loc 1 278 0
+ 237 0052 0023     		movs	r3, #0
+ 238 0054 FB60     		str	r3, [r7, #12]
+ 239 0056 0CE0     		b	.L9
+ 240              	.L10:
+ 279:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         {
+ 280:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****             g_pfnRAMVectors[ui32Idx] = (void (*)(void))HWREG((ui32Idx * 4) +
+ 241              		.loc 1 280 0 discriminator 3
+ 242 0058 FB68     		ldr	r3, [r7, #12]
+ 243 005a 9A00     		lsls	r2, r3, #2
+ 244 005c BB68     		ldr	r3, [r7, #8]
+ 245 005e 1344     		add	r3, r3, r2
+ 246 0060 1B68     		ldr	r3, [r3]
+ 247 0062 1946     		mov	r1, r3
+ 248 0064 0C4A     		ldr	r2, .L11+4
+ 249 0066 FB68     		ldr	r3, [r7, #12]
+ 250 0068 42F82310 		str	r1, [r2, r3, lsl #2]
+ 278:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         for(ui32Idx = 0; ui32Idx < NUM_INTERRUPTS; ui32Idx++)
+ 251              		.loc 1 278 0 discriminator 3
+ 252 006c FB68     		ldr	r3, [r7, #12]
+ 253 006e 0133     		adds	r3, r3, #1
+ 254 0070 FB60     		str	r3, [r7, #12]
+ 255              	.L9:
+ 278:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         for(ui32Idx = 0; ui32Idx < NUM_INTERRUPTS; ui32Idx++)
+ 256              		.loc 1 278 0 is_stmt 0 discriminator 1
+ 257 0072 FB68     		ldr	r3, [r7, #12]
+ 258 0074 A22B     		cmp	r3, #162
+ 259 0076 EFD9     		bls	.L10
+ 281:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****                                        ui32Value);
+ 282:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         }
+ 283:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** 
+ 284:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         //
+ 285:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         // Point NVIC at the RAM vector table.
+ 286:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         //
+ 287:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         HWREG(NVIC_VTABLE) = (uint32_t)g_pfnRAMVectors;
+ 260              		.loc 1 287 0 is_stmt 1
+ 261 0078 064B     		ldr	r3, .L11
+ 262 007a 074A     		ldr	r2, .L11+4
+ 263 007c 1A60     		str	r2, [r3]
+ 264              	.L8:
+ 288:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     }
+ 289:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** 
+ 290:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     //
+ 291:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     // Save the interrupt handler.
+ 292:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     //
+ 293:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     g_pfnRAMVectors[ui32Interrupt] = pfnHandler;
+ 265              		.loc 1 293 0
+ 266 007e 0649     		ldr	r1, .L11+4
+ 267 0080 7B68     		ldr	r3, [r7, #4]
+ 268 0082 3A68     		ldr	r2, [r7]
+ 269 0084 41F82320 		str	r2, [r1, r3, lsl #2]
+ 294:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** }
+ 270              		.loc 1 294 0
+ 271 0088 1437     		adds	r7, r7, #20
+ 272              		.cfi_def_cfa_offset 4
+ 273 008a BD46     		mov	sp, r7
+ 274              		.cfi_def_cfa_register 13
+ 275              		@ sp needed
+ 276 008c 5DF8047B 		ldr	r7, [sp], #4
+ 277              		.cfi_restore 7
+ 278              		.cfi_def_cfa_offset 0
+ 279 0090 7047     		bx	lr
+ 280              	.L12:
+ 281 0092 00BF     		.align	2
+ 282              	.L11:
+ 283 0094 08ED00E0 		.word	-536810232
+ 284 0098 00000000 		.word	g_pfnRAMVectors
+ 285              		.cfi_endproc
+ 286              	.LFE3:
+ 288              		.align	2
+ 289              		.global	IntUnregister
+ 290              		.thumb
+ 291              		.thumb_func
+ 293              	IntUnregister:
+ 294              	.LFB4:
+ 295:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** 
+ 296:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //*****************************************************************************
+ 297:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //
+ 298:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! Unregisters the function to be called when an interrupt occurs
+ 299:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //!
+ 300:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! \param ui32Interrupt specifies the interrupt in question.
+ 301:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //!
+ 302:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! This function indicates that no handler should be called when the
+ 303:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! given interrupt is asserted to the processor.  The interrupt source is
+ 304:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! automatically disabled (through IntDisable()) if necessary.
+ 305:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //!
+ 306:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! \sa See IntRegister() for important information about registering interrupt
+ 307:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! handlers.
+ 308:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //!
+ 309:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! \return None
+ 310:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //
+ 311:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //*****************************************************************************
+ 312:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** void
+ 313:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** IntUnregister(uint32_t ui32Interrupt)
+ 314:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** {
+ 295              		.loc 1 314 0
+ 296              		.cfi_startproc
+ 297              		@ args = 0, pretend = 0, frame = 8
+ 298              		@ frame_needed = 1, uses_anonymous_args = 0
+ 299              		@ link register save eliminated.
+ 300 009c 80B4     		push	{r7}
+ 301              		.cfi_def_cfa_offset 4
+ 302              		.cfi_offset 7, -4
+ 303 009e 83B0     		sub	sp, sp, #12
+ 304              		.cfi_def_cfa_offset 16
+ 305 00a0 00AF     		add	r7, sp, #0
+ 306              		.cfi_def_cfa_register 7
+ 307 00a2 7860     		str	r0, [r7, #4]
+ 315:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     //
+ 316:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     // Check the arguments.
+ 317:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     //
+ 318:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     ASSERT(ui32Interrupt < NUM_INTERRUPTS);
+ 319:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** 
+ 320:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     //
+ 321:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     // Check that at least one interrupt was dynamically registered
+ 322:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     // (by calling IntRegister())
+ 323:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     //
+ 324:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     ASSERT(HWREG(NVIC_VTABLE) == (uint32_t)g_pfnRAMVectors);
+ 325:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** 
+ 326:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     // Check below could be removed in final application
+ 327:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** #ifdef CC2538_USE_ALTERNATE_INTERRUPT_MAP
+ 328:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     ASSERT(IntAltMapIsEnabled());
+ 329:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** #else
+ 330:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     ASSERT(~IntAltMapIsEnabled());
+ 331:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** #endif
+ 332:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** 
+ 333:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** 
+ 334:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     //
+ 335:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     // Reset the interrupt handler.
+ 336:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     //
+ 337:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     g_pfnRAMVectors[ui32Interrupt] = IntDefaultHandler;
+ 308              		.loc 1 337 0
+ 309 00a4 044A     		ldr	r2, .L14
+ 310 00a6 7B68     		ldr	r3, [r7, #4]
+ 311 00a8 0449     		ldr	r1, .L14+4
+ 312 00aa 42F82310 		str	r1, [r2, r3, lsl #2]
+ 338:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** }
+ 313              		.loc 1 338 0
+ 314 00ae 0C37     		adds	r7, r7, #12
+ 315              		.cfi_def_cfa_offset 4
+ 316 00b0 BD46     		mov	sp, r7
+ 317              		.cfi_def_cfa_register 13
+ 318              		@ sp needed
+ 319 00b2 5DF8047B 		ldr	r7, [sp], #4
+ 320              		.cfi_restore 7
+ 321              		.cfi_def_cfa_offset 0
+ 322 00b6 7047     		bx	lr
+ 323              	.L15:
+ 324              		.align	2
+ 325              	.L14:
+ 326 00b8 00000000 		.word	g_pfnRAMVectors
+ 327 00bc 00000000 		.word	IntDefaultHandler
+ 328              		.cfi_endproc
+ 329              	.LFE4:
+ 331              		.align	2
+ 332              		.global	IntPriorityGroupingSet
+ 333              		.thumb
+ 334              		.thumb_func
+ 336              	IntPriorityGroupingSet:
+ 337              	.LFB5:
+ 339:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** 
+ 340:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //*****************************************************************************
+ 341:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //
+ 342:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! Sets the priority grouping of the interrupt controller
+ 343:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //!
+ 344:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! \param ui32Bits specifies the number of bits of preemptable priority.
+ 345:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //!
+ 346:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! This function specifies the split between preemptable priority levels and
+ 347:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! subpriority levels in the interrupt priority specification.  The range of
+ 348:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! the grouping values depend on the hardware implementation; on
+ 349:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! the CC2538 device family, 3 bits are available for hardware interrupt
+ 350:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! prioritization and therefore priority grouping values of three through
+ 351:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! seven have the same effect.
+ 352:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //!
+ 353:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! \return None
+ 354:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //
+ 355:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //*****************************************************************************
+ 356:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** void
+ 357:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** IntPriorityGroupingSet(uint32_t ui32Bits)
+ 358:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** {
+ 338              		.loc 1 358 0
+ 339              		.cfi_startproc
+ 340              		@ args = 0, pretend = 0, frame = 8
+ 341              		@ frame_needed = 1, uses_anonymous_args = 0
+ 342              		@ link register save eliminated.
+ 343 00c0 80B4     		push	{r7}
+ 344              		.cfi_def_cfa_offset 4
+ 345              		.cfi_offset 7, -4
+ 346 00c2 83B0     		sub	sp, sp, #12
+ 347              		.cfi_def_cfa_offset 16
+ 348 00c4 00AF     		add	r7, sp, #0
+ 349              		.cfi_def_cfa_register 7
+ 350 00c6 7860     		str	r0, [r7, #4]
+ 359:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     //
+ 360:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     // Check the arguments.
+ 361:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     //
+ 362:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     ASSERT(ui32Bits < NUM_PRIORITY);
+ 363:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** 
+ 364:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     //
+ 365:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     // Set the priority grouping.
+ 366:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     //
+ 367:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     HWREG(NVIC_APINT) = NVIC_APINT_VECTKEY | g_pui32Priority[ui32Bits];
+ 351              		.loc 1 367 0
+ 352 00c8 074A     		ldr	r2, .L17
+ 353 00ca 0849     		ldr	r1, .L17+4
+ 354 00cc 7B68     		ldr	r3, [r7, #4]
+ 355 00ce 51F82330 		ldr	r3, [r1, r3, lsl #2]
+ 356 00d2 43F0BF63 		orr	r3, r3, #100139008
+ 357 00d6 43F40033 		orr	r3, r3, #131072
+ 358 00da 1360     		str	r3, [r2]
+ 368:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** }
+ 359              		.loc 1 368 0
+ 360 00dc 0C37     		adds	r7, r7, #12
+ 361              		.cfi_def_cfa_offset 4
+ 362 00de BD46     		mov	sp, r7
+ 363              		.cfi_def_cfa_register 13
+ 364              		@ sp needed
+ 365 00e0 5DF8047B 		ldr	r7, [sp], #4
+ 366              		.cfi_restore 7
+ 367              		.cfi_def_cfa_offset 0
+ 368 00e4 7047     		bx	lr
+ 369              	.L18:
+ 370 00e6 00BF     		.align	2
+ 371              	.L17:
+ 372 00e8 0CED00E0 		.word	-536810228
+ 373 00ec 00000000 		.word	g_pui32Priority
+ 374              		.cfi_endproc
+ 375              	.LFE5:
+ 377              		.align	2
+ 378              		.global	IntPriorityGroupingGet
+ 379              		.thumb
+ 380              		.thumb_func
+ 382              	IntPriorityGroupingGet:
+ 383              	.LFB6:
+ 369:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** 
+ 370:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //*****************************************************************************
+ 371:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //
+ 372:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! Gets the priority grouping of the interrupt controller
+ 373:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //!
+ 374:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! This function returns the split between preemptable priority levels and
+ 375:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! subpriority levels in the interrupt priority specification.
+ 376:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //!
+ 377:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! \return Returns the number of bits of preemptable priority
+ 378:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //
+ 379:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //*****************************************************************************
+ 380:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** uint32_t
+ 381:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** IntPriorityGroupingGet(void)
+ 382:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** {
+ 384              		.loc 1 382 0
+ 385              		.cfi_startproc
+ 386              		@ args = 0, pretend = 0, frame = 8
+ 387              		@ frame_needed = 1, uses_anonymous_args = 0
+ 388              		@ link register save eliminated.
+ 389 00f0 80B4     		push	{r7}
+ 390              		.cfi_def_cfa_offset 4
+ 391              		.cfi_offset 7, -4
+ 392 00f2 83B0     		sub	sp, sp, #12
+ 393              		.cfi_def_cfa_offset 16
+ 394 00f4 00AF     		add	r7, sp, #0
+ 395              		.cfi_def_cfa_register 7
+ 383:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     uint32_t ui32Loop, ui32Value;
+ 384:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** 
+ 385:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     //
+ 386:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     // Read the priority grouping.
+ 387:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     //
+ 388:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     ui32Value = HWREG(NVIC_APINT) & NVIC_APINT_PRIGROUP_M;
+ 396              		.loc 1 388 0
+ 397 00f6 0E4B     		ldr	r3, .L25
+ 398 00f8 1B68     		ldr	r3, [r3]
+ 399 00fa 03F4E063 		and	r3, r3, #1792
+ 400 00fe 3B60     		str	r3, [r7]
+ 389:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** 
+ 390:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     //
+ 391:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     // Loop through the priority grouping values.
+ 392:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     //
+ 393:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     for(ui32Loop = 0; ui32Loop < NUM_PRIORITY; ui32Loop++)
+ 401              		.loc 1 393 0
+ 402 0100 0023     		movs	r3, #0
+ 403 0102 7B60     		str	r3, [r7, #4]
+ 404 0104 0AE0     		b	.L20
+ 405              	.L23:
+ 394:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     {
+ 395:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         //
+ 396:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         // Stop looping if this value matches.
+ 397:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         //
+ 398:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         if(ui32Value == g_pui32Priority[ui32Loop])
+ 406              		.loc 1 398 0
+ 407 0106 0B4A     		ldr	r2, .L25+4
+ 408 0108 7B68     		ldr	r3, [r7, #4]
+ 409 010a 52F82320 		ldr	r2, [r2, r3, lsl #2]
+ 410 010e 3B68     		ldr	r3, [r7]
+ 411 0110 9A42     		cmp	r2, r3
+ 412 0112 00D1     		bne	.L21
+ 399:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         {
+ 400:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****             break;
+ 413              		.loc 1 400 0
+ 414 0114 05E0     		b	.L22
+ 415              	.L21:
+ 393:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     {
+ 416              		.loc 1 393 0 discriminator 2
+ 417 0116 7B68     		ldr	r3, [r7, #4]
+ 418 0118 0133     		adds	r3, r3, #1
+ 419 011a 7B60     		str	r3, [r7, #4]
+ 420              	.L20:
+ 393:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     {
+ 421              		.loc 1 393 0 is_stmt 0 discriminator 1
+ 422 011c 7B68     		ldr	r3, [r7, #4]
+ 423 011e 072B     		cmp	r3, #7
+ 424 0120 F1D9     		bls	.L23
+ 425              	.L22:
+ 401:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         }
+ 402:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     }
+ 403:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** 
+ 404:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     //
+ 405:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     // Return the number of priority bits.
+ 406:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     //
+ 407:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     return(ui32Loop);
+ 426              		.loc 1 407 0 is_stmt 1
+ 427 0122 7B68     		ldr	r3, [r7, #4]
+ 408:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** }
+ 428              		.loc 1 408 0
+ 429 0124 1846     		mov	r0, r3
+ 430 0126 0C37     		adds	r7, r7, #12
+ 431              		.cfi_def_cfa_offset 4
+ 432 0128 BD46     		mov	sp, r7
+ 433              		.cfi_def_cfa_register 13
+ 434              		@ sp needed
+ 435 012a 5DF8047B 		ldr	r7, [sp], #4
+ 436              		.cfi_restore 7
+ 437              		.cfi_def_cfa_offset 0
+ 438 012e 7047     		bx	lr
+ 439              	.L26:
+ 440              		.align	2
+ 441              	.L25:
+ 442 0130 0CED00E0 		.word	-536810228
+ 443 0134 00000000 		.word	g_pui32Priority
+ 444              		.cfi_endproc
+ 445              	.LFE6:
+ 447              		.align	2
+ 448              		.global	IntPrioritySet
+ 449              		.thumb
+ 450              		.thumb_func
+ 452              	IntPrioritySet:
+ 453              	.LFB7:
+ 409:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** 
+ 410:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //*****************************************************************************
+ 411:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //
+ 412:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! Sets the priority of an interrupt
+ 413:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //!
+ 414:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! \param ui32Interrupt specifies the interrupt in question.
+ 415:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! \param ui8Priority specifies the priority of the interrupt.
+ 416:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //!
+ 417:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! This function sets the priority of an interrupt.  When multiple
+ 418:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! interrupts are asserted simultaneously, those with the highest priority
+ 419:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! are processed before the lower priority interrupts.  Smaller numbers
+ 420:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! correspond to higher interrupt priorities; priority 0 is the highest
+ 421:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! interrupt priority.
+ 422:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //!
+ 423:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! The hardware priority mechanism will looks only at the upper N bits of the
+ 424:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! priority level (where N is 3 for the CC2538 device family), so any
+ 425:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! prioritization must be performed in those bits.  The remaining bits can be
+ 426:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! used to subprioritize the interrupt sources, and may be used by the
+ 427:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! hardware priority mechanism on a future part.  This arrangement allows
+ 428:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! priorities to migrate to different NVIC implementations without changing
+ 429:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! the gross prioritization of the interrupts.
+ 430:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! Thus for CC2538 to set a priority of 3, the parameter \e ui8Priority must
+ 431:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! be set to (3<<5).
+ 432:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //!
+ 433:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! \return None
+ 434:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //
+ 435:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //*****************************************************************************
+ 436:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** void
+ 437:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** IntPrioritySet(uint32_t ui32Interrupt, uint8_t ui8Priority)
+ 438:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** {
+ 454              		.loc 1 438 0
+ 455              		.cfi_startproc
+ 456              		@ args = 0, pretend = 0, frame = 16
+ 457              		@ frame_needed = 1, uses_anonymous_args = 0
+ 458              		@ link register save eliminated.
+ 459 0138 80B4     		push	{r7}
+ 460              		.cfi_def_cfa_offset 4
+ 461              		.cfi_offset 7, -4
+ 462 013a 85B0     		sub	sp, sp, #20
+ 463              		.cfi_def_cfa_offset 24
+ 464 013c 00AF     		add	r7, sp, #0
+ 465              		.cfi_def_cfa_register 7
+ 466 013e 7860     		str	r0, [r7, #4]
+ 467 0140 0B46     		mov	r3, r1
+ 468 0142 FB70     		strb	r3, [r7, #3]
+ 439:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     uint32_t ui32Temp;
+ 440:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** 
+ 441:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     //
+ 442:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     // Check the arguments.
+ 443:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     //
+ 444:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     ASSERT((ui32Interrupt >= 4) && (ui32Interrupt < NUM_INTERRUPTS));
+ 445:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** 
+ 446:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     //
+ 447:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     // Set the interrupt priority.
+ 448:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     //
+ 449:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     ui32Temp = HWREG(g_pui32Regs[ui32Interrupt >> 2]);
+ 469              		.loc 1 449 0
+ 470 0144 7B68     		ldr	r3, [r7, #4]
+ 471 0146 9B08     		lsrs	r3, r3, #2
+ 472 0148 134A     		ldr	r2, .L28
+ 473 014a 52F82330 		ldr	r3, [r2, r3, lsl #2]
+ 474 014e 1B68     		ldr	r3, [r3]
+ 475 0150 FB60     		str	r3, [r7, #12]
+ 450:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     ui32Temp &= ~(0xFF << (8 * (ui32Interrupt & 3)));
+ 476              		.loc 1 450 0
+ 477 0152 7B68     		ldr	r3, [r7, #4]
+ 478 0154 03F00303 		and	r3, r3, #3
+ 479 0158 DB00     		lsls	r3, r3, #3
+ 480 015a 1A46     		mov	r2, r3
+ 481 015c FF23     		movs	r3, #255
+ 482 015e 9340     		lsls	r3, r3, r2
+ 483 0160 DB43     		mvns	r3, r3
+ 484 0162 1A46     		mov	r2, r3
+ 485 0164 FB68     		ldr	r3, [r7, #12]
+ 486 0166 1340     		ands	r3, r3, r2
+ 487 0168 FB60     		str	r3, [r7, #12]
+ 451:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     ui32Temp |= ui8Priority << (8 * (ui32Interrupt & 3));
+ 488              		.loc 1 451 0
+ 489 016a FB78     		ldrb	r3, [r7, #3]	@ zero_extendqisi2
+ 490 016c 7A68     		ldr	r2, [r7, #4]
+ 491 016e 02F00302 		and	r2, r2, #3
+ 492 0172 D200     		lsls	r2, r2, #3
+ 493 0174 9340     		lsls	r3, r3, r2
+ 494 0176 1A46     		mov	r2, r3
+ 495 0178 FB68     		ldr	r3, [r7, #12]
+ 496 017a 1343     		orrs	r3, r3, r2
+ 497 017c FB60     		str	r3, [r7, #12]
+ 452:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     HWREG(g_pui32Regs[ui32Interrupt >> 2]) = ui32Temp;
+ 498              		.loc 1 452 0
+ 499 017e 7B68     		ldr	r3, [r7, #4]
+ 500 0180 9B08     		lsrs	r3, r3, #2
+ 501 0182 054A     		ldr	r2, .L28
+ 502 0184 52F82330 		ldr	r3, [r2, r3, lsl #2]
+ 503 0188 1A46     		mov	r2, r3
+ 504 018a FB68     		ldr	r3, [r7, #12]
+ 505 018c 1360     		str	r3, [r2]
+ 453:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** }
+ 506              		.loc 1 453 0
+ 507 018e 1437     		adds	r7, r7, #20
+ 508              		.cfi_def_cfa_offset 4
+ 509 0190 BD46     		mov	sp, r7
+ 510              		.cfi_def_cfa_register 13
+ 511              		@ sp needed
+ 512 0192 5DF8047B 		ldr	r7, [sp], #4
+ 513              		.cfi_restore 7
+ 514              		.cfi_def_cfa_offset 0
+ 515 0196 7047     		bx	lr
+ 516              	.L29:
+ 517              		.align	2
+ 518              	.L28:
+ 519 0198 20000000 		.word	g_pui32Regs
+ 520              		.cfi_endproc
+ 521              	.LFE7:
+ 523              		.align	2
+ 524              		.global	IntPriorityGet
+ 525              		.thumb
+ 526              		.thumb_func
+ 528              	IntPriorityGet:
+ 529              	.LFB8:
+ 454:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** 
+ 455:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //*****************************************************************************
+ 456:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //
+ 457:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! Gets the priority of an interrupt
+ 458:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //!
+ 459:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! \param ui32Interrupt specifies the interrupt in question.
+ 460:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //!
+ 461:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! This function gets the priority of an interrupt.  See IntPrioritySet() for
+ 462:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! a definition of the priority value.
+ 463:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //!
+ 464:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! \return Returns the interrupt priority, or -1 if an invalid interrupt was
+ 465:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! specified
+ 466:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //
+ 467:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //*****************************************************************************
+ 468:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** int32_t
+ 469:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** IntPriorityGet(uint32_t ui32Interrupt)
+ 470:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** {
+ 530              		.loc 1 470 0
+ 531              		.cfi_startproc
+ 532              		@ args = 0, pretend = 0, frame = 8
+ 533              		@ frame_needed = 1, uses_anonymous_args = 0
+ 534              		@ link register save eliminated.
+ 535 019c 80B4     		push	{r7}
+ 536              		.cfi_def_cfa_offset 4
+ 537              		.cfi_offset 7, -4
+ 538 019e 83B0     		sub	sp, sp, #12
+ 539              		.cfi_def_cfa_offset 16
+ 540 01a0 00AF     		add	r7, sp, #0
+ 541              		.cfi_def_cfa_register 7
+ 542 01a2 7860     		str	r0, [r7, #4]
+ 471:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     //
+ 472:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     // Check the arguments.
+ 473:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     //
+ 474:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     ASSERT((ui32Interrupt >= 4) && (ui32Interrupt < NUM_INTERRUPTS));
+ 475:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** 
+ 476:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     //
+ 477:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     // Return the interrupt priority.
+ 478:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     //
+ 479:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     return((HWREG(g_pui32Regs[ui32Interrupt >> 2]) >> (8 * (ui32Interrupt & 3))) &
+ 543              		.loc 1 479 0
+ 544 01a4 7B68     		ldr	r3, [r7, #4]
+ 545 01a6 9B08     		lsrs	r3, r3, #2
+ 546 01a8 074A     		ldr	r2, .L32
+ 547 01aa 52F82330 		ldr	r3, [r2, r3, lsl #2]
+ 548 01ae 1B68     		ldr	r3, [r3]
+ 549 01b0 7A68     		ldr	r2, [r7, #4]
+ 550 01b2 02F00302 		and	r2, r2, #3
+ 551 01b6 D200     		lsls	r2, r2, #3
+ 552 01b8 D340     		lsrs	r3, r3, r2
+ 553 01ba DBB2     		uxtb	r3, r3
+ 480:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****            0xFF);
+ 481:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** }
+ 554              		.loc 1 481 0
+ 555 01bc 1846     		mov	r0, r3
+ 556 01be 0C37     		adds	r7, r7, #12
+ 557              		.cfi_def_cfa_offset 4
+ 558 01c0 BD46     		mov	sp, r7
+ 559              		.cfi_def_cfa_register 13
+ 560              		@ sp needed
+ 561 01c2 5DF8047B 		ldr	r7, [sp], #4
+ 562              		.cfi_restore 7
+ 563              		.cfi_def_cfa_offset 0
+ 564 01c6 7047     		bx	lr
+ 565              	.L33:
+ 566              		.align	2
+ 567              	.L32:
+ 568 01c8 20000000 		.word	g_pui32Regs
+ 569              		.cfi_endproc
+ 570              	.LFE8:
+ 572              		.align	2
+ 573              		.global	IntEnable
+ 574              		.thumb
+ 575              		.thumb_func
+ 577              	IntEnable:
+ 578              	.LFB9:
+ 482:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** 
+ 483:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //*****************************************************************************
+ 484:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //
+ 485:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! Enables an interrupt
+ 486:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //!
+ 487:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! \param ui32Interrupt specifies the interrupt to be enabled.
+ 488:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //!
+ 489:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! This function enables the specified interrupt in the interrupt controller.
+ 490:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! Other enables for the interrupt (such as at the peripheral level) are
+ 491:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! unaffected by this function.
+ 492:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //!
+ 493:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! \return None
+ 494:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //
+ 495:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //*****************************************************************************
+ 496:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** void
+ 497:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** IntEnable(uint32_t ui32Interrupt)
+ 498:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** {
+ 579              		.loc 1 498 0
+ 580              		.cfi_startproc
+ 581              		@ args = 0, pretend = 0, frame = 8
+ 582              		@ frame_needed = 1, uses_anonymous_args = 0
+ 583              		@ link register save eliminated.
+ 584 01cc 80B4     		push	{r7}
+ 585              		.cfi_def_cfa_offset 4
+ 586              		.cfi_offset 7, -4
+ 587 01ce 83B0     		sub	sp, sp, #12
+ 588              		.cfi_def_cfa_offset 16
+ 589 01d0 00AF     		add	r7, sp, #0
+ 590              		.cfi_def_cfa_register 7
+ 591 01d2 7860     		str	r0, [r7, #4]
+ 499:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     //
+ 500:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     // Check the arguments.
+ 501:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     //
+ 502:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     ASSERT(ui32Interrupt < NUM_INTERRUPTS);
+ 503:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** 
+ 504:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     //
+ 505:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     // Determine the interrupt to enable.
+ 506:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     //
+ 507:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     if(ui32Interrupt == FAULT_MPU)
+ 592              		.loc 1 507 0
+ 593 01d4 7B68     		ldr	r3, [r7, #4]
+ 594 01d6 042B     		cmp	r3, #4
+ 595 01d8 06D1     		bne	.L35
+ 508:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     {
+ 509:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         //
+ 510:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         // Enable the MemManage interrupt.
+ 511:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         //
+ 512:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         HWREG(NVIC_SYS_HND_CTRL) |= NVIC_SYS_HND_CTRL_MEM;
+ 596              		.loc 1 512 0
+ 597 01da 1E4A     		ldr	r2, .L40
+ 598 01dc 1D4B     		ldr	r3, .L40
+ 599 01de 1B68     		ldr	r3, [r3]
+ 600 01e0 43F48033 		orr	r3, r3, #65536
+ 601 01e4 1360     		str	r3, [r2]
+ 602 01e6 2FE0     		b	.L34
+ 603              	.L35:
+ 513:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     }
+ 514:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     else if(ui32Interrupt == FAULT_BUS)
+ 604              		.loc 1 514 0
+ 605 01e8 7B68     		ldr	r3, [r7, #4]
+ 606 01ea 052B     		cmp	r3, #5
+ 607 01ec 06D1     		bne	.L37
+ 515:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     {
+ 516:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         //
+ 517:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         // Enable the bus fault interrupt.
+ 518:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         //
+ 519:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         HWREG(NVIC_SYS_HND_CTRL) |= NVIC_SYS_HND_CTRL_BUS;
+ 608              		.loc 1 519 0
+ 609 01ee 194A     		ldr	r2, .L40
+ 610 01f0 184B     		ldr	r3, .L40
+ 611 01f2 1B68     		ldr	r3, [r3]
+ 612 01f4 43F40033 		orr	r3, r3, #131072
+ 613 01f8 1360     		str	r3, [r2]
+ 614 01fa 25E0     		b	.L34
+ 615              	.L37:
+ 520:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     }
+ 521:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     else if(ui32Interrupt == FAULT_USAGE)
+ 616              		.loc 1 521 0
+ 617 01fc 7B68     		ldr	r3, [r7, #4]
+ 618 01fe 062B     		cmp	r3, #6
+ 619 0200 06D1     		bne	.L38
+ 522:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     {
+ 523:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         //
+ 524:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         // Enable the usage fault interrupt.
+ 525:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         //
+ 526:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         HWREG(NVIC_SYS_HND_CTRL) |= NVIC_SYS_HND_CTRL_USAGE;
+ 620              		.loc 1 526 0
+ 621 0202 144A     		ldr	r2, .L40
+ 622 0204 134B     		ldr	r3, .L40
+ 623 0206 1B68     		ldr	r3, [r3]
+ 624 0208 43F48023 		orr	r3, r3, #262144
+ 625 020c 1360     		str	r3, [r2]
+ 626 020e 1BE0     		b	.L34
+ 627              	.L38:
+ 527:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     }
+ 528:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     else if(ui32Interrupt == FAULT_SYSTICK)
+ 628              		.loc 1 528 0
+ 629 0210 7B68     		ldr	r3, [r7, #4]
+ 630 0212 0F2B     		cmp	r3, #15
+ 631 0214 06D1     		bne	.L39
+ 529:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     {
+ 530:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         //
+ 531:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         // Enable the System Tick interrupt.
+ 532:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         //
+ 533:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         HWREG(NVIC_ST_CTRL) |= NVIC_ST_CTRL_INTEN;
+ 632              		.loc 1 533 0
+ 633 0216 104A     		ldr	r2, .L40+4
+ 634 0218 0F4B     		ldr	r3, .L40+4
+ 635 021a 1B68     		ldr	r3, [r3]
+ 636 021c 43F00203 		orr	r3, r3, #2
+ 637 0220 1360     		str	r3, [r2]
+ 638 0222 11E0     		b	.L34
+ 639              	.L39:
+ 534:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     }
+ 535:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     else if(ui32Interrupt >= 16)
+ 640              		.loc 1 535 0
+ 641 0224 7B68     		ldr	r3, [r7, #4]
+ 642 0226 0F2B     		cmp	r3, #15
+ 643 0228 0ED9     		bls	.L34
+ 536:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     {
+ 537:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         //
+ 538:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         // Enable the general interrupt.
+ 539:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         //
+ 540:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         HWREG(g_pui32EnRegs[(ui32Interrupt - 16) / 32]) =
+ 644              		.loc 1 540 0
+ 645 022a 7B68     		ldr	r3, [r7, #4]
+ 646 022c 103B     		subs	r3, r3, #16
+ 647 022e 5B09     		lsrs	r3, r3, #5
+ 648 0230 0A4A     		ldr	r2, .L40+8
+ 649 0232 52F82330 		ldr	r3, [r2, r3, lsl #2]
+ 650 0236 1946     		mov	r1, r3
+ 541:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****             1 << ((ui32Interrupt - 16) & 31);
+ 651              		.loc 1 541 0
+ 652 0238 7B68     		ldr	r3, [r7, #4]
+ 653 023a 103B     		subs	r3, r3, #16
+ 654 023c 03F01F03 		and	r3, r3, #31
+ 655 0240 0122     		movs	r2, #1
+ 656 0242 02FA03F3 		lsl	r3, r2, r3
+ 540:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****             1 << ((ui32Interrupt - 16) & 31);
+ 657              		.loc 1 540 0
+ 658 0246 0B60     		str	r3, [r1]
+ 659              	.L34:
+ 542:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     }
+ 543:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** }
+ 660              		.loc 1 543 0
+ 661 0248 0C37     		adds	r7, r7, #12
+ 662              		.cfi_def_cfa_offset 4
+ 663 024a BD46     		mov	sp, r7
+ 664              		.cfi_def_cfa_register 13
+ 665              		@ sp needed
+ 666 024c 5DF8047B 		ldr	r7, [sp], #4
+ 667              		.cfi_restore 7
+ 668              		.cfi_def_cfa_offset 0
+ 669 0250 7047     		bx	lr
+ 670              	.L41:
+ 671 0252 00BF     		.align	2
+ 672              	.L40:
+ 673 0254 24ED00E0 		.word	-536810204
+ 674 0258 10E000E0 		.word	-536813552
+ 675 025c C4000000 		.word	g_pui32EnRegs
+ 676              		.cfi_endproc
+ 677              	.LFE9:
+ 679              		.align	2
+ 680              		.global	IntDisable
+ 681              		.thumb
+ 682              		.thumb_func
+ 684              	IntDisable:
+ 685              	.LFB10:
+ 544:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** 
+ 545:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //*****************************************************************************
+ 546:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //
+ 547:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! Disables an interrupt
+ 548:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //!
+ 549:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! \param ui32Interrupt specifies the interrupt to be disabled.
+ 550:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //!
+ 551:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! This function disables specified interrupt in the interrupt controller.
+ 552:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! Other enables for the interrupt (such as at the peripheral level) are
+ 553:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! unaffected by this function.
+ 554:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //!
+ 555:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! \return None
+ 556:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //
+ 557:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //*****************************************************************************
+ 558:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** void
+ 559:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** IntDisable(uint32_t ui32Interrupt)
+ 560:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** {
+ 686              		.loc 1 560 0
+ 687              		.cfi_startproc
+ 688              		@ args = 0, pretend = 0, frame = 8
+ 689              		@ frame_needed = 1, uses_anonymous_args = 0
+ 690              		@ link register save eliminated.
+ 691 0260 80B4     		push	{r7}
+ 692              		.cfi_def_cfa_offset 4
+ 693              		.cfi_offset 7, -4
+ 694 0262 83B0     		sub	sp, sp, #12
+ 695              		.cfi_def_cfa_offset 16
+ 696 0264 00AF     		add	r7, sp, #0
+ 697              		.cfi_def_cfa_register 7
+ 698 0266 7860     		str	r0, [r7, #4]
+ 561:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     //
+ 562:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     // Check the arguments.
+ 563:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     //
+ 564:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     ASSERT(ui32Interrupt < NUM_INTERRUPTS);
+ 565:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** 
+ 566:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     //
+ 567:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     // Determine the interrupt to disable.
+ 568:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     //
+ 569:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     if(ui32Interrupt == FAULT_MPU)
+ 699              		.loc 1 569 0
+ 700 0268 7B68     		ldr	r3, [r7, #4]
+ 701 026a 042B     		cmp	r3, #4
+ 702 026c 06D1     		bne	.L43
+ 570:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     {
+ 571:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         //
+ 572:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         // Disable the MemManage interrupt.
+ 573:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         //
+ 574:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         HWREG(NVIC_SYS_HND_CTRL) &= ~(NVIC_SYS_HND_CTRL_MEM);
+ 703              		.loc 1 574 0
+ 704 026e 1E4A     		ldr	r2, .L48
+ 705 0270 1D4B     		ldr	r3, .L48
+ 706 0272 1B68     		ldr	r3, [r3]
+ 707 0274 23F48033 		bic	r3, r3, #65536
+ 708 0278 1360     		str	r3, [r2]
+ 709 027a 2FE0     		b	.L42
+ 710              	.L43:
+ 575:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     }
+ 576:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     else if(ui32Interrupt == FAULT_BUS)
+ 711              		.loc 1 576 0
+ 712 027c 7B68     		ldr	r3, [r7, #4]
+ 713 027e 052B     		cmp	r3, #5
+ 714 0280 06D1     		bne	.L45
+ 577:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     {
+ 578:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         //
+ 579:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         // Disable the bus fault interrupt.
+ 580:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         //
+ 581:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         HWREG(NVIC_SYS_HND_CTRL) &= ~(NVIC_SYS_HND_CTRL_BUS);
+ 715              		.loc 1 581 0
+ 716 0282 194A     		ldr	r2, .L48
+ 717 0284 184B     		ldr	r3, .L48
+ 718 0286 1B68     		ldr	r3, [r3]
+ 719 0288 23F40033 		bic	r3, r3, #131072
+ 720 028c 1360     		str	r3, [r2]
+ 721 028e 25E0     		b	.L42
+ 722              	.L45:
+ 582:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     }
+ 583:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     else if(ui32Interrupt == FAULT_USAGE)
+ 723              		.loc 1 583 0
+ 724 0290 7B68     		ldr	r3, [r7, #4]
+ 725 0292 062B     		cmp	r3, #6
+ 726 0294 06D1     		bne	.L46
+ 584:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     {
+ 585:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         //
+ 586:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         // Disable the usage fault interrupt.
+ 587:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         //
+ 588:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         HWREG(NVIC_SYS_HND_CTRL) &= ~(NVIC_SYS_HND_CTRL_USAGE);
+ 727              		.loc 1 588 0
+ 728 0296 144A     		ldr	r2, .L48
+ 729 0298 134B     		ldr	r3, .L48
+ 730 029a 1B68     		ldr	r3, [r3]
+ 731 029c 23F48023 		bic	r3, r3, #262144
+ 732 02a0 1360     		str	r3, [r2]
+ 733 02a2 1BE0     		b	.L42
+ 734              	.L46:
+ 589:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     }
+ 590:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     else if(ui32Interrupt == FAULT_SYSTICK)
+ 735              		.loc 1 590 0
+ 736 02a4 7B68     		ldr	r3, [r7, #4]
+ 737 02a6 0F2B     		cmp	r3, #15
+ 738 02a8 06D1     		bne	.L47
+ 591:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     {
+ 592:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         //
+ 593:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         // Disable the System Tick interrupt.
+ 594:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         //
+ 595:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         HWREG(NVIC_ST_CTRL) &= ~(NVIC_ST_CTRL_INTEN);
+ 739              		.loc 1 595 0
+ 740 02aa 104A     		ldr	r2, .L48+4
+ 741 02ac 0F4B     		ldr	r3, .L48+4
+ 742 02ae 1B68     		ldr	r3, [r3]
+ 743 02b0 23F00203 		bic	r3, r3, #2
+ 744 02b4 1360     		str	r3, [r2]
+ 745 02b6 11E0     		b	.L42
+ 746              	.L47:
+ 596:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     }
+ 597:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     else if(ui32Interrupt >= 16)
+ 747              		.loc 1 597 0
+ 748 02b8 7B68     		ldr	r3, [r7, #4]
+ 749 02ba 0F2B     		cmp	r3, #15
+ 750 02bc 0ED9     		bls	.L42
+ 598:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     {
+ 599:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         //
+ 600:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         // Disable the general interrupt.
+ 601:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         //
+ 602:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         HWREG(g_pui32DisRegs[(ui32Interrupt - 16) / 32]) =
+ 751              		.loc 1 602 0
+ 752 02be 7B68     		ldr	r3, [r7, #4]
+ 753 02c0 103B     		subs	r3, r3, #16
+ 754 02c2 5B09     		lsrs	r3, r3, #5
+ 755 02c4 0A4A     		ldr	r2, .L48+8
+ 756 02c6 52F82330 		ldr	r3, [r2, r3, lsl #2]
+ 757 02ca 1946     		mov	r1, r3
+ 603:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****             1 << ((ui32Interrupt - 16) & 31);
+ 758              		.loc 1 603 0
+ 759 02cc 7B68     		ldr	r3, [r7, #4]
+ 760 02ce 103B     		subs	r3, r3, #16
+ 761 02d0 03F01F03 		and	r3, r3, #31
+ 762 02d4 0122     		movs	r2, #1
+ 763 02d6 02FA03F3 		lsl	r3, r2, r3
+ 602:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****             1 << ((ui32Interrupt - 16) & 31);
+ 764              		.loc 1 602 0
+ 765 02da 0B60     		str	r3, [r1]
+ 766              	.L42:
+ 604:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     }
+ 605:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** }
+ 767              		.loc 1 605 0
+ 768 02dc 0C37     		adds	r7, r7, #12
+ 769              		.cfi_def_cfa_offset 4
+ 770 02de BD46     		mov	sp, r7
+ 771              		.cfi_def_cfa_register 13
+ 772              		@ sp needed
+ 773 02e0 5DF8047B 		ldr	r7, [sp], #4
+ 774              		.cfi_restore 7
+ 775              		.cfi_def_cfa_offset 0
+ 776 02e4 7047     		bx	lr
+ 777              	.L49:
+ 778 02e6 00BF     		.align	2
+ 779              	.L48:
+ 780 02e8 24ED00E0 		.word	-536810204
+ 781 02ec 10E000E0 		.word	-536813552
+ 782 02f0 D8000000 		.word	g_pui32DisRegs
+ 783              		.cfi_endproc
+ 784              	.LFE10:
+ 786              		.align	2
+ 787              		.global	IntPendSet
+ 788              		.thumb
+ 789              		.thumb_func
+ 791              	IntPendSet:
+ 792              	.LFB11:
+ 606:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** 
+ 607:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //*****************************************************************************
+ 608:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //
+ 609:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! Pends an interrupt
+ 610:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //!
+ 611:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! \param ui32Interrupt specifies the interrupt to be pended.
+ 612:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //!
+ 613:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! This function pends the specified interrupt in the interrupt controller.
+ 614:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! This causes the interrupt controller to execute the corresponding interrupt
+ 615:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! handler at the next available time, based on the current interrupt state
+ 616:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! priorities.  For example, if called by a higher priority interrupt handler,
+ 617:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! the specified interrupt handler is not called until after the current
+ 618:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! interrupt handler executes. The interrupt must have been enabled for
+ 619:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! it to be called.
+ 620:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //!
+ 621:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! \return None
+ 622:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //
+ 623:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //*****************************************************************************
+ 624:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** void
+ 625:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** IntPendSet(uint32_t ui32Interrupt)
+ 626:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** {
+ 793              		.loc 1 626 0
+ 794              		.cfi_startproc
+ 795              		@ args = 0, pretend = 0, frame = 8
+ 796              		@ frame_needed = 1, uses_anonymous_args = 0
+ 797              		@ link register save eliminated.
+ 798 02f4 80B4     		push	{r7}
+ 799              		.cfi_def_cfa_offset 4
+ 800              		.cfi_offset 7, -4
+ 801 02f6 83B0     		sub	sp, sp, #12
+ 802              		.cfi_def_cfa_offset 16
+ 803 02f8 00AF     		add	r7, sp, #0
+ 804              		.cfi_def_cfa_register 7
+ 805 02fa 7860     		str	r0, [r7, #4]
+ 627:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     //
+ 628:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     // Check the arguments.
+ 629:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     //
+ 630:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     ASSERT(ui32Interrupt < NUM_INTERRUPTS);
+ 631:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** 
+ 632:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     //
+ 633:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     // Determine the interrupt to pend.
+ 634:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     //
+ 635:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     if(ui32Interrupt == FAULT_NMI)
+ 806              		.loc 1 635 0
+ 807 02fc 7B68     		ldr	r3, [r7, #4]
+ 808 02fe 022B     		cmp	r3, #2
+ 809 0300 06D1     		bne	.L51
+ 636:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     {
+ 637:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         //
+ 638:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         // Pend the NMI interrupt.
+ 639:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         //
+ 640:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         HWREG(NVIC_INT_CTRL) |= NVIC_INT_CTRL_NMI_SET;
+ 810              		.loc 1 640 0
+ 811 0302 194A     		ldr	r2, .L55
+ 812 0304 184B     		ldr	r3, .L55
+ 813 0306 1B68     		ldr	r3, [r3]
+ 814 0308 43F00043 		orr	r3, r3, #-2147483648
+ 815 030c 1360     		str	r3, [r2]
+ 816 030e 25E0     		b	.L50
+ 817              	.L51:
+ 641:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     }
+ 642:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     else if(ui32Interrupt == FAULT_PENDSV)
+ 818              		.loc 1 642 0
+ 819 0310 7B68     		ldr	r3, [r7, #4]
+ 820 0312 0E2B     		cmp	r3, #14
+ 821 0314 06D1     		bne	.L53
+ 643:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     {
+ 644:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         //
+ 645:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         // Pend the PendSV interrupt.
+ 646:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         //
+ 647:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         HWREG(NVIC_INT_CTRL) |= NVIC_INT_CTRL_PEND_SV;
+ 822              		.loc 1 647 0
+ 823 0316 144A     		ldr	r2, .L55
+ 824 0318 134B     		ldr	r3, .L55
+ 825 031a 1B68     		ldr	r3, [r3]
+ 826 031c 43F08053 		orr	r3, r3, #268435456
+ 827 0320 1360     		str	r3, [r2]
+ 828 0322 1BE0     		b	.L50
+ 829              	.L53:
+ 648:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     }
+ 649:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     else if(ui32Interrupt == FAULT_SYSTICK)
+ 830              		.loc 1 649 0
+ 831 0324 7B68     		ldr	r3, [r7, #4]
+ 832 0326 0F2B     		cmp	r3, #15
+ 833 0328 06D1     		bne	.L54
+ 650:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     {
+ 651:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         //
+ 652:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         // Pend the SysTick interrupt.
+ 653:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         //
+ 654:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         HWREG(NVIC_INT_CTRL) |= NVIC_INT_CTRL_PENDSTSET;
+ 834              		.loc 1 654 0
+ 835 032a 0F4A     		ldr	r2, .L55
+ 836 032c 0E4B     		ldr	r3, .L55
+ 837 032e 1B68     		ldr	r3, [r3]
+ 838 0330 43F08063 		orr	r3, r3, #67108864
+ 839 0334 1360     		str	r3, [r2]
+ 840 0336 11E0     		b	.L50
+ 841              	.L54:
+ 655:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     }
+ 656:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     else if(ui32Interrupt >= 16)
+ 842              		.loc 1 656 0
+ 843 0338 7B68     		ldr	r3, [r7, #4]
+ 844 033a 0F2B     		cmp	r3, #15
+ 845 033c 0ED9     		bls	.L50
+ 657:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     {
+ 658:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         //
+ 659:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         // Pend the general interrupt.
+ 660:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         //
+ 661:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         HWREG(g_pui32PendRegs[(ui32Interrupt - 16) / 32]) =
+ 846              		.loc 1 661 0
+ 847 033e 7B68     		ldr	r3, [r7, #4]
+ 848 0340 103B     		subs	r3, r3, #16
+ 849 0342 5B09     		lsrs	r3, r3, #5
+ 850 0344 094A     		ldr	r2, .L55+4
+ 851 0346 52F82330 		ldr	r3, [r2, r3, lsl #2]
+ 852 034a 1946     		mov	r1, r3
+ 662:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****             1 << ((ui32Interrupt - 16) & 31);
+ 853              		.loc 1 662 0
+ 854 034c 7B68     		ldr	r3, [r7, #4]
+ 855 034e 103B     		subs	r3, r3, #16
+ 856 0350 03F01F03 		and	r3, r3, #31
+ 857 0354 0122     		movs	r2, #1
+ 858 0356 02FA03F3 		lsl	r3, r2, r3
+ 661:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****             1 << ((ui32Interrupt - 16) & 31);
+ 859              		.loc 1 661 0
+ 860 035a 0B60     		str	r3, [r1]
+ 861              	.L50:
+ 663:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     }
+ 664:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** }
+ 862              		.loc 1 664 0
+ 863 035c 0C37     		adds	r7, r7, #12
+ 864              		.cfi_def_cfa_offset 4
+ 865 035e BD46     		mov	sp, r7
+ 866              		.cfi_def_cfa_register 13
+ 867              		@ sp needed
+ 868 0360 5DF8047B 		ldr	r7, [sp], #4
+ 869              		.cfi_restore 7
+ 870              		.cfi_def_cfa_offset 0
+ 871 0364 7047     		bx	lr
+ 872              	.L56:
+ 873 0366 00BF     		.align	2
+ 874              	.L55:
+ 875 0368 04ED00E0 		.word	-536810236
+ 876 036c EC000000 		.word	g_pui32PendRegs
+ 877              		.cfi_endproc
+ 878              	.LFE11:
+ 880              		.align	2
+ 881              		.global	IntPendClear
+ 882              		.thumb
+ 883              		.thumb_func
+ 885              	IntPendClear:
+ 886              	.LFB12:
+ 665:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** 
+ 666:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //*****************************************************************************
+ 667:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //
+ 668:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! Unpends an interrupt
+ 669:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //!
+ 670:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! \param ui32Interrupt specifies the interrupt to be unpended.
+ 671:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //!
+ 672:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! This function unpends the specified interrupt in the interrupt controller.
+ 673:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! This will cause any previously generated interrupts that have not been
+ 674:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! handled yet (due to higher priority interrupts or the interrupt no having
+ 675:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! been enabled yet) to be discarded.
+ 676:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //!
+ 677:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! \return None
+ 678:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //
+ 679:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //*****************************************************************************
+ 680:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** void
+ 681:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** IntPendClear(uint32_t ui32Interrupt)
+ 682:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** {
+ 887              		.loc 1 682 0
+ 888              		.cfi_startproc
+ 889              		@ args = 0, pretend = 0, frame = 8
+ 890              		@ frame_needed = 1, uses_anonymous_args = 0
+ 891              		@ link register save eliminated.
+ 892 0370 80B4     		push	{r7}
+ 893              		.cfi_def_cfa_offset 4
+ 894              		.cfi_offset 7, -4
+ 895 0372 83B0     		sub	sp, sp, #12
+ 896              		.cfi_def_cfa_offset 16
+ 897 0374 00AF     		add	r7, sp, #0
+ 898              		.cfi_def_cfa_register 7
+ 899 0376 7860     		str	r0, [r7, #4]
+ 683:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     //
+ 684:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     // Check the arguments.
+ 685:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     //
+ 686:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     ASSERT(ui32Interrupt < NUM_INTERRUPTS);
+ 687:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** 
+ 688:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     //
+ 689:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     // Determine the interrupt to unpend.
+ 690:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     //
+ 691:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     if(ui32Interrupt == FAULT_PENDSV)
+ 900              		.loc 1 691 0
+ 901 0378 7B68     		ldr	r3, [r7, #4]
+ 902 037a 0E2B     		cmp	r3, #14
+ 903 037c 06D1     		bne	.L58
+ 692:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     {
+ 693:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         //
+ 694:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         // Unpend the PendSV interrupt.
+ 695:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         //
+ 696:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         HWREG(NVIC_INT_CTRL) |= NVIC_INT_CTRL_UNPEND_SV;
+ 904              		.loc 1 696 0
+ 905 037e 144A     		ldr	r2, .L61
+ 906 0380 134B     		ldr	r3, .L61
+ 907 0382 1B68     		ldr	r3, [r3]
+ 908 0384 43F00063 		orr	r3, r3, #134217728
+ 909 0388 1360     		str	r3, [r2]
+ 910 038a 1BE0     		b	.L57
+ 911              	.L58:
+ 697:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     }
+ 698:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     else if(ui32Interrupt == FAULT_SYSTICK)
+ 912              		.loc 1 698 0
+ 913 038c 7B68     		ldr	r3, [r7, #4]
+ 914 038e 0F2B     		cmp	r3, #15
+ 915 0390 06D1     		bne	.L60
+ 699:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     {
+ 700:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         //
+ 701:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         // Unpend the SysTick interrupt.
+ 702:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         //
+ 703:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         HWREG(NVIC_INT_CTRL) |= NVIC_INT_CTRL_PENDSTCLR;
+ 916              		.loc 1 703 0
+ 917 0392 0F4A     		ldr	r2, .L61
+ 918 0394 0E4B     		ldr	r3, .L61
+ 919 0396 1B68     		ldr	r3, [r3]
+ 920 0398 43F00073 		orr	r3, r3, #33554432
+ 921 039c 1360     		str	r3, [r2]
+ 922 039e 11E0     		b	.L57
+ 923              	.L60:
+ 704:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     }
+ 705:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     else if(ui32Interrupt >= 16)
+ 924              		.loc 1 705 0
+ 925 03a0 7B68     		ldr	r3, [r7, #4]
+ 926 03a2 0F2B     		cmp	r3, #15
+ 927 03a4 0ED9     		bls	.L57
+ 706:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     {
+ 707:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         //
+ 708:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         // Unpend the general interrupt.
+ 709:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         //
+ 710:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         HWREG(g_pui32UnpendRegs[(ui32Interrupt - 16) / 32]) =
+ 928              		.loc 1 710 0
+ 929 03a6 7B68     		ldr	r3, [r7, #4]
+ 930 03a8 103B     		subs	r3, r3, #16
+ 931 03aa 5B09     		lsrs	r3, r3, #5
+ 932 03ac 094A     		ldr	r2, .L61+4
+ 933 03ae 52F82330 		ldr	r3, [r2, r3, lsl #2]
+ 934 03b2 1946     		mov	r1, r3
+ 711:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****             1 << ((ui32Interrupt - 16) & 31);
+ 935              		.loc 1 711 0
+ 936 03b4 7B68     		ldr	r3, [r7, #4]
+ 937 03b6 103B     		subs	r3, r3, #16
+ 938 03b8 03F01F03 		and	r3, r3, #31
+ 939 03bc 0122     		movs	r2, #1
+ 940 03be 02FA03F3 		lsl	r3, r2, r3
+ 710:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****             1 << ((ui32Interrupt - 16) & 31);
+ 941              		.loc 1 710 0
+ 942 03c2 0B60     		str	r3, [r1]
+ 943              	.L57:
+ 712:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     }
+ 713:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** }
+ 944              		.loc 1 713 0
+ 945 03c4 0C37     		adds	r7, r7, #12
+ 946              		.cfi_def_cfa_offset 4
+ 947 03c6 BD46     		mov	sp, r7
+ 948              		.cfi_def_cfa_register 13
+ 949              		@ sp needed
+ 950 03c8 5DF8047B 		ldr	r7, [sp], #4
+ 951              		.cfi_restore 7
+ 952              		.cfi_def_cfa_offset 0
+ 953 03cc 7047     		bx	lr
+ 954              	.L62:
+ 955 03ce 00BF     		.align	2
+ 956              	.L61:
+ 957 03d0 04ED00E0 		.word	-536810236
+ 958 03d4 00010000 		.word	g_pui32UnpendRegs
+ 959              		.cfi_endproc
+ 960              	.LFE12:
+ 962              		.align	2
+ 963              		.global	IntPriorityMaskSet
+ 964              		.thumb
+ 965              		.thumb_func
+ 967              	IntPriorityMaskSet:
+ 968              	.LFB13:
+ 714:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** 
+ 715:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //*****************************************************************************
+ 716:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //
+ 717:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! Sets the priority masking level
+ 718:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //!
+ 719:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! \param ui32PriorityMask is the priority level that will be masked.
+ 720:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //!
+ 721:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! This function sets the interrupt priority masking level so that all
+ 722:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! interrupts at the specified or lesser priority level is masked.  This
+ 723:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! can be used to globally disable a set of interrupts with priority below
+ 724:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! a predetermined threshold.  A value of 0 disables priority
+ 725:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! masking.
+ 726:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //!
+ 727:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! Smaller numbers correspond to higher interrupt priorities.  For example,
+ 728:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! a priority level mask of 4 allows interrupts of priority level 0-3,
+ 729:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! and interrupts with a numerical priority of 4 and greater are blocked.
+ 730:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //!
+ 731:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! The hardware priority mechanism looks only at the upper N bits of the
+ 732:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! priority level (where N is 3 for the CC2538 device family), so any
+ 733:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! prioritization must be performed in those bits.
+ 734:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //!
+ 735:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! \return None
+ 736:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //
+ 737:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //*****************************************************************************
+ 738:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** void
+ 739:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** IntPriorityMaskSet(uint32_t ui32PriorityMask)
+ 740:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** {
+ 969              		.loc 1 740 0
+ 970              		.cfi_startproc
+ 971              		@ args = 0, pretend = 0, frame = 8
+ 972              		@ frame_needed = 1, uses_anonymous_args = 0
+ 973 03d8 80B5     		push	{r7, lr}
+ 974              		.cfi_def_cfa_offset 8
+ 975              		.cfi_offset 7, -8
+ 976              		.cfi_offset 14, -4
+ 977 03da 82B0     		sub	sp, sp, #8
+ 978              		.cfi_def_cfa_offset 16
+ 979 03dc 00AF     		add	r7, sp, #0
+ 980              		.cfi_def_cfa_register 7
+ 981 03de 7860     		str	r0, [r7, #4]
+ 741:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     CPUbasepriSet(ui32PriorityMask);
+ 982              		.loc 1 741 0
+ 983 03e0 7868     		ldr	r0, [r7, #4]
+ 984 03e2 FFF7FEFF 		bl	CPUbasepriSet
+ 742:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** }
+ 985              		.loc 1 742 0
+ 986 03e6 0837     		adds	r7, r7, #8
+ 987              		.cfi_def_cfa_offset 8
+ 988 03e8 BD46     		mov	sp, r7
+ 989              		.cfi_def_cfa_register 13
+ 990              		@ sp needed
+ 991 03ea 80BD     		pop	{r7, pc}
+ 992              		.cfi_endproc
+ 993              	.LFE13:
+ 995              		.align	2
+ 996              		.global	IntPriorityMaskGet
+ 997              		.thumb
+ 998              		.thumb_func
+ 1000              	IntPriorityMaskGet:
+ 1001              	.LFB14:
+ 743:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** 
+ 744:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //*****************************************************************************
+ 745:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //
+ 746:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! Gets the priority masking level
+ 747:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //!
+ 748:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! This function gets the current setting of the interrupt priority masking
+ 749:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! level.  The value returned is the priority level such that all interrupts
+ 750:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! of that priority and lesser priorities are masked.  A value of 0 disables
+ 751:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! priority masking.
+ 752:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //!
+ 753:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! Smaller numbers correspond to higher interrupt priorities.  For example,
+ 754:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! a priority level mask of 4 allows interrupts of priority level 0-3,
+ 755:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! and interrupts with a numerical priority of 4 and greater will be blocked.
+ 756:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //!
+ 757:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! The hardware priority mechanism looks only at the upper N bits of the
+ 758:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! priority level (where N is 3 for the CC2538 device family), so any
+ 759:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! prioritization must be performed in those bits.
+ 760:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //!
+ 761:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! \return Returns the value of the interrupt priority level mask
+ 762:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //
+ 763:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //*****************************************************************************
+ 764:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** uint32_t
+ 765:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** IntPriorityMaskGet(void)
+ 766:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** {
+ 1002              		.loc 1 766 0
+ 1003              		.cfi_startproc
+ 1004              		@ args = 0, pretend = 0, frame = 0
+ 1005              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1006 03ec 80B5     		push	{r7, lr}
+ 1007              		.cfi_def_cfa_offset 8
+ 1008              		.cfi_offset 7, -8
+ 1009              		.cfi_offset 14, -4
+ 1010 03ee 00AF     		add	r7, sp, #0
+ 1011              		.cfi_def_cfa_register 7
+ 767:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     return(CPUbasepriGet());
+ 1012              		.loc 1 767 0
+ 1013 03f0 FFF7FEFF 		bl	CPUbasepriGet
+ 1014 03f4 0346     		mov	r3, r0
+ 768:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** }
+ 1015              		.loc 1 768 0
+ 1016 03f6 1846     		mov	r0, r3
+ 1017 03f8 80BD     		pop	{r7, pc}
+ 1018              		.cfi_endproc
+ 1019              	.LFE14:
+ 1021 03fa 00BF     		.align	2
+ 1022              		.global	IntAltMapEnable
+ 1023              		.thumb
+ 1024              		.thumb_func
+ 1026              	IntAltMapEnable:
+ 1027              	.LFB15:
+ 769:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** 
+ 770:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //*****************************************************************************
+ 771:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //
+ 772:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! Enables the alternate interrupt mapping
+ 773:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //!
+ 774:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! This function enables the alternate (that is, smaller) interrupt map.
+ 775:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //!
+ 776:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! \sa See also IntAltMapDisable() and IntAltMapIsEnabled().
+ 777:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //!
+ 778:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! \return None
+ 779:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //
+ 780:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //*****************************************************************************
+ 781:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** void IntAltMapEnable(void)
+ 782:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** {
+ 1028              		.loc 1 782 0
+ 1029              		.cfi_startproc
+ 1030              		@ args = 0, pretend = 0, frame = 0
+ 1031              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1032              		@ link register save eliminated.
+ 1033 03fc 80B4     		push	{r7}
+ 1034              		.cfi_def_cfa_offset 4
+ 1035              		.cfi_offset 7, -4
+ 1036 03fe 00AF     		add	r7, sp, #0
+ 1037              		.cfi_def_cfa_register 7
+ 783:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     HWREG(SYS_CTRL_I_MAP) |= SYS_CTRL_I_MAP_ALTMAP;
+ 1038              		.loc 1 783 0
+ 1039 0400 044A     		ldr	r2, .L67
+ 1040 0402 044B     		ldr	r3, .L67
+ 1041 0404 1B68     		ldr	r3, [r3]
+ 1042 0406 43F00103 		orr	r3, r3, #1
+ 1043 040a 1360     		str	r3, [r2]
+ 784:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** }
+ 1044              		.loc 1 784 0
+ 1045 040c BD46     		mov	sp, r7
+ 1046              		.cfi_def_cfa_register 13
+ 1047              		@ sp needed
+ 1048 040e 5DF8047B 		ldr	r7, [sp], #4
+ 1049              		.cfi_restore 7
+ 1050              		.cfi_def_cfa_offset 0
+ 1051 0412 7047     		bx	lr
+ 1052              	.L68:
+ 1053              		.align	2
+ 1054              	.L67:
+ 1055 0414 98200D40 		.word	1074602136
+ 1056              		.cfi_endproc
+ 1057              	.LFE15:
+ 1059              		.align	2
+ 1060              		.global	IntAltMapDisable
+ 1061              		.thumb
+ 1062              		.thumb_func
+ 1064              	IntAltMapDisable:
+ 1065              	.LFB16:
+ 785:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** 
+ 786:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //*****************************************************************************
+ 787:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //
+ 788:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! Disable the alternate interrupt mapping
+ 789:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //!
+ 790:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! This function disables the alternate (that is, smaller) interrupt map.
+ 791:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //!
+ 792:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! \sa See also IntAltMapDisable() and IntAltMapIsEnabled().
+ 793:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //!
+ 794:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! \return None
+ 795:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //
+ 796:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //*****************************************************************************
+ 797:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** void IntAltMapDisable(void)
+ 798:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** {
+ 1066              		.loc 1 798 0
+ 1067              		.cfi_startproc
+ 1068              		@ args = 0, pretend = 0, frame = 0
+ 1069              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1070              		@ link register save eliminated.
+ 1071 0418 80B4     		push	{r7}
+ 1072              		.cfi_def_cfa_offset 4
+ 1073              		.cfi_offset 7, -4
+ 1074 041a 00AF     		add	r7, sp, #0
+ 1075              		.cfi_def_cfa_register 7
+ 799:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     HWREG(SYS_CTRL_I_MAP) &= ~SYS_CTRL_I_MAP_ALTMAP;
+ 1076              		.loc 1 799 0
+ 1077 041c 044A     		ldr	r2, .L70
+ 1078 041e 044B     		ldr	r3, .L70
+ 1079 0420 1B68     		ldr	r3, [r3]
+ 1080 0422 23F00103 		bic	r3, r3, #1
+ 1081 0426 1360     		str	r3, [r2]
+ 800:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** }
+ 1082              		.loc 1 800 0
+ 1083 0428 BD46     		mov	sp, r7
+ 1084              		.cfi_def_cfa_register 13
+ 1085              		@ sp needed
+ 1086 042a 5DF8047B 		ldr	r7, [sp], #4
+ 1087              		.cfi_restore 7
+ 1088              		.cfi_def_cfa_offset 0
+ 1089 042e 7047     		bx	lr
+ 1090              	.L71:
+ 1091              		.align	2
+ 1092              	.L70:
+ 1093 0430 98200D40 		.word	1074602136
+ 1094              		.cfi_endproc
+ 1095              	.LFE16:
+ 1097              		.align	2
+ 1098              		.global	IntAltMapIsEnabled
+ 1099              		.thumb
+ 1100              		.thumb_func
+ 1102              	IntAltMapIsEnabled:
+ 1103              	.LFB17:
+ 801:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** 
+ 802:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //*****************************************************************************
+ 803:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //
+ 804:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! Checks to see if the Alternate Interrupt Mapping is in use
+ 805:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //!
+ 806:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! \sa See also IntAltMapDisable() and IntAltMapIsEnabled().
+ 807:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //!
+ 808:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! \return Returns \b true if the Alternate Mapping is in use and \b false
+ 809:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //! otherwise.
+ 810:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //
+ 811:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** //*****************************************************************************
+ 812:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** bool IntAltMapIsEnabled(void)
+ 813:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** {
+ 1104              		.loc 1 813 0
+ 1105              		.cfi_startproc
+ 1106              		@ args = 0, pretend = 0, frame = 0
+ 1107              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1108              		@ link register save eliminated.
+ 1109 0434 80B4     		push	{r7}
+ 1110              		.cfi_def_cfa_offset 4
+ 1111              		.cfi_offset 7, -4
+ 1112 0436 00AF     		add	r7, sp, #0
+ 1113              		.cfi_def_cfa_register 7
+ 814:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     if(HWREG(SYS_CTRL_I_MAP) & SYS_CTRL_I_MAP_ALTMAP)
+ 1114              		.loc 1 814 0
+ 1115 0438 064B     		ldr	r3, .L75
+ 1116 043a 1B68     		ldr	r3, [r3]
+ 1117 043c 03F00103 		and	r3, r3, #1
+ 1118 0440 002B     		cmp	r3, #0
+ 1119 0442 01D0     		beq	.L73
+ 815:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     {
+ 816:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         return (true);
+ 1120              		.loc 1 816 0
+ 1121 0444 0123     		movs	r3, #1
+ 1122 0446 00E0     		b	.L74
+ 1123              	.L73:
+ 817:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     }
+ 818:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     else
+ 819:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     {
+ 820:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****         return (false);
+ 1124              		.loc 1 820 0
+ 1125 0448 0023     		movs	r3, #0
+ 1126              	.L74:
+ 821:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c ****     }
+ 822:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/interrupt.c **** }
+ 1127              		.loc 1 822 0
+ 1128 044a 1846     		mov	r0, r3
+ 1129 044c BD46     		mov	sp, r7
+ 1130              		.cfi_def_cfa_register 13
+ 1131              		@ sp needed
+ 1132 044e 5DF8047B 		ldr	r7, [sp], #4
+ 1133              		.cfi_restore 7
+ 1134              		.cfi_def_cfa_offset 0
+ 1135 0452 7047     		bx	lr
+ 1136              	.L76:
+ 1137              		.align	2
+ 1138              	.L75:
+ 1139 0454 98200D40 		.word	1074602136
+ 1140              		.cfi_endproc
+ 1141              	.LFE17:
+ 1143              	.Letext0:
+ 1144              		.file 2 "/usr/arm-none-eabi/include/machine/_default_types.h"
+ 1145              		.file 3 "/usr/arm-none-eabi/include/sys/_stdint.h"
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 interrupt.c
+     /tmp/ccAnpIU4.s:19     .rodata:0000000000000000 $d
+     /tmp/ccAnpIU4.s:22     .rodata:0000000000000000 g_pui32Priority
+     /tmp/ccAnpIU4.s:34     .rodata:0000000000000020 g_pui32Regs
+     /tmp/ccAnpIU4.s:79     .rodata:00000000000000c4 g_pui32EnRegs
+     /tmp/ccAnpIU4.s:88     .rodata:00000000000000d8 g_pui32DisRegs
+     /tmp/ccAnpIU4.s:97     .rodata:00000000000000ec g_pui32PendRegs
+     /tmp/ccAnpIU4.s:106    .rodata:0000000000000100 g_pui32UnpendRegs
+     /tmp/ccAnpIU4.s:113    .text:0000000000000000 $t
+     /tmp/ccAnpIU4.s:117    .text:0000000000000000 IntDefaultHandler
+     /tmp/ccAnpIU4.s:137    vtable:0000000000000000 $d
+     /tmp/ccAnpIU4.s:140    vtable:0000000000000000 g_pfnRAMVectors
+     /tmp/ccAnpIU4.s:148    .text:0000000000000008 IntMasterEnable
+     /tmp/ccAnpIU4.s:179    .text:0000000000000020 IntMasterDisable
+     /tmp/ccAnpIU4.s:210    .text:0000000000000038 IntRegister
+     /tmp/ccAnpIU4.s:283    .text:0000000000000094 $d
+     /tmp/ccAnpIU4.s:288    .text:000000000000009c $t
+     /tmp/ccAnpIU4.s:293    .text:000000000000009c IntUnregister
+     /tmp/ccAnpIU4.s:326    .text:00000000000000b8 $d
+     /tmp/ccAnpIU4.s:331    .text:00000000000000c0 $t
+     /tmp/ccAnpIU4.s:336    .text:00000000000000c0 IntPriorityGroupingSet
+     /tmp/ccAnpIU4.s:372    .text:00000000000000e8 $d
+     /tmp/ccAnpIU4.s:377    .text:00000000000000f0 $t
+     /tmp/ccAnpIU4.s:382    .text:00000000000000f0 IntPriorityGroupingGet
+     /tmp/ccAnpIU4.s:442    .text:0000000000000130 $d
+     /tmp/ccAnpIU4.s:447    .text:0000000000000138 $t
+     /tmp/ccAnpIU4.s:452    .text:0000000000000138 IntPrioritySet
+     /tmp/ccAnpIU4.s:519    .text:0000000000000198 $d
+     /tmp/ccAnpIU4.s:523    .text:000000000000019c $t
+     /tmp/ccAnpIU4.s:528    .text:000000000000019c IntPriorityGet
+     /tmp/ccAnpIU4.s:568    .text:00000000000001c8 $d
+     /tmp/ccAnpIU4.s:572    .text:00000000000001cc $t
+     /tmp/ccAnpIU4.s:577    .text:00000000000001cc IntEnable
+     /tmp/ccAnpIU4.s:673    .text:0000000000000254 $d
+     /tmp/ccAnpIU4.s:679    .text:0000000000000260 $t
+     /tmp/ccAnpIU4.s:684    .text:0000000000000260 IntDisable
+     /tmp/ccAnpIU4.s:780    .text:00000000000002e8 $d
+     /tmp/ccAnpIU4.s:786    .text:00000000000002f4 $t
+     /tmp/ccAnpIU4.s:791    .text:00000000000002f4 IntPendSet
+     /tmp/ccAnpIU4.s:875    .text:0000000000000368 $d
+     /tmp/ccAnpIU4.s:880    .text:0000000000000370 $t
+     /tmp/ccAnpIU4.s:885    .text:0000000000000370 IntPendClear
+     /tmp/ccAnpIU4.s:957    .text:00000000000003d0 $d
+     /tmp/ccAnpIU4.s:962    .text:00000000000003d8 $t
+     /tmp/ccAnpIU4.s:967    .text:00000000000003d8 IntPriorityMaskSet
+     /tmp/ccAnpIU4.s:1000   .text:00000000000003ec IntPriorityMaskGet
+     /tmp/ccAnpIU4.s:1026   .text:00000000000003fc IntAltMapEnable
+     /tmp/ccAnpIU4.s:1055   .text:0000000000000414 $d
+     /tmp/ccAnpIU4.s:1059   .text:0000000000000418 $t
+     /tmp/ccAnpIU4.s:1064   .text:0000000000000418 IntAltMapDisable
+     /tmp/ccAnpIU4.s:1093   .text:0000000000000430 $d
+     /tmp/ccAnpIU4.s:1097   .text:0000000000000434 $t
+     /tmp/ccAnpIU4.s:1102   .text:0000000000000434 IntAltMapIsEnabled
+     /tmp/ccAnpIU4.s:1139   .text:0000000000000454 $d
+                     .debug_frame:0000000000000010 $d
+                           .group:0000000000000000 wm4.0.59116071098782a37a9183a8102fe91b
+                           .group:0000000000000000 wm4.hw_ints.h.42.85b9479f2be35b086f1bb7cbb15bc097
+                           .group:0000000000000000 wm4.hw_nvic.h.42.f3b9efa2537e728866c85de74b3e5811
+                           .group:0000000000000000 wm4.hw_sys_ctrl.h.39.50b4d7775c38e82076d0eb3bdc2daf82
+                           .group:0000000000000000 wm4.features.h.22.2e382148a0560adabf236cddd4e880f4
+                           .group:0000000000000000 wm4._default_types.h.15.933e8edd27a65e0b69af4a865eb623d2
+                           .group:0000000000000000 wm4._intsup.h.10.35a45952db64d30146faa63a55c20c1c
+                           .group:0000000000000000 wm4._stdint.h.10.f76354baea1c7088202064e6f3d4f5e3
+                           .group:0000000000000000 wm4.stdint.h.23.373a9d32a9e4c2e88fd347156532d281
+                           .group:0000000000000000 wm4.stdbool.h.29.1c9ee6859ce8145f7838a4f2549ccec2
+                           .group:0000000000000000 wm4.hw_types.h.67.b10589a0806dcc2d274d6fab6b736519
+                           .group:0000000000000000 wm4.debug.h.41.b891e613993738d067c45a5ff528d11a
+                           .group:0000000000000000 wm4.interrupt.h.41.272fc4ec0e276feb439e7974d0f77eaf
+
+UNDEFINED SYMBOLS
+CPUcpsie
+CPUcpsid
+CPUbasepriSet
+CPUbasepriGet

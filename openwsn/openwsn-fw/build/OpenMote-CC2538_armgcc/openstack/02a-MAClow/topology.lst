@@ -1,0 +1,205 @@
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 6
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.file	"topology.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.section	.rodata
+  19              		.align	2
+  22              	rreg_uriquery:
+  23 0000 683D7563 		.ascii	"h=ucb\000"
+  23      6200
+  24 0006 0000     		.align	2
+  27              	infoBoardname:
+  28 0008 43433235 		.ascii	"CC2538\000"
+  28      333800
+  29 000f 00       		.align	2
+  32              	infouCName:
+  33 0010 43433235 		.ascii	"CC2538\000"
+  33      333800
+  34 0017 00       		.align	2
+  37              	infoRadioName:
+  38 0018 43433235 		.ascii	"CC2538 SoC\000"
+  38      33382053 
+  38      6F4300
+  39 0023 00       		.align	2
+  42              	infoStackName:
+  43 0024 4F70656E 		.ascii	"OpenWSN \000"
+  43      57534E20 
+  43      00
+  44              		.text
+  45              		.align	2
+  46              		.global	topology_isAcceptablePacket
+  47              		.thumb
+  48              		.thumb_func
+  50              	topology_isAcceptablePacket:
+  51              	.LFB0:
+  52              		.file 1 "build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c"
+   1:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c **** #include "opendefs.h"
+   2:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c **** #include "topology.h"
+   3:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c **** #include "idmanager.h"
+   4:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c **** 
+   5:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c **** //=========================== defines =========================================
+   6:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c **** 
+   7:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c **** //=========================== variables =======================================
+   8:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c **** 
+   9:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c **** //=========================== prototypes ======================================
+  10:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c **** 
+  11:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c **** //=========================== public ==========================================
+  12:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c **** 
+  13:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c **** /**
+  14:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c **** \brief Force a topology.
+  15:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c **** 
+  16:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c **** This function is used to force a certain topology, by hard-coding the list of
+  17:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c **** acceptable neighbors for a given mote. This function is invoked each time a
+  18:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c **** packet is received. If it returns FALSE, the packet is silently dropped, as if
+  19:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c **** it were never received. If it returns TRUE, the packet is accepted.
+  20:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c **** 
+  21:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c **** Typically, filtering packets is done by analyzing the IEEE802.15.4 header. An
+  22:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c **** example body for this function which forces a topology is:
+  23:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c **** 
+  24:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c ****    switch (idmanager_getMyID(ADDR_64B)->addr_64b[7]) {
+  25:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c ****       case TOPOLOGY_MOTE1:
+  26:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c ****          if (ieee802514_header->src.addr_64b[7]==TOPOLOGY_MOTE2) {
+  27:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c ****             returnVal=TRUE;
+  28:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c ****          } else {
+  29:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c ****             returnVal=FALSE;
+  30:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c ****          }
+  31:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c ****          break;
+  32:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c ****       case TOPOLOGY_MOTE2:
+  33:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c ****          if (ieee802514_header->src.addr_64b[7]==TOPOLOGY_MOTE1 ||
+  34:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c ****              ieee802514_header->src.addr_64b[7]==TOPOLOGY_MOTE3) {
+  35:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c ****             returnVal=TRUE;
+  36:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c ****          } else {
+  37:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c ****             returnVal=FALSE;
+  38:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c ****          }
+  39:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c ****          break;
+  40:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c ****       default:
+  41:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c ****          returnVal=TRUE;
+  42:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c ****    }
+  43:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c ****    return returnVal;
+  44:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c **** 
+  45:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c **** By default, however, the function should return TRUE to *not* force any
+  46:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c **** topology.
+  47:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c **** 
+  48:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c **** \param[in] ieee802514_header The parsed IEEE802.15.4 MAC header.
+  49:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c **** 
+  50:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c **** \return TRUE if the packet can be received.
+  51:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c **** \return FALSE if the packet should be silently dropped.
+  52:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c **** */
+  53:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c **** bool topology_isAcceptablePacket(ieee802154_header_iht* ieee802514_header) {
+  53              		.loc 1 53 0
+  54              		.cfi_startproc
+  55              		@ args = 0, pretend = 0, frame = 8
+  56              		@ frame_needed = 1, uses_anonymous_args = 0
+  57              		@ link register save eliminated.
+  58 0000 80B4     		push	{r7}
+  59              		.cfi_def_cfa_offset 4
+  60              		.cfi_offset 7, -4
+  61 0002 83B0     		sub	sp, sp, #12
+  62              		.cfi_def_cfa_offset 16
+  63 0004 00AF     		add	r7, sp, #0
+  64              		.cfi_def_cfa_register 7
+  65 0006 7860     		str	r0, [r7, #4]
+  54:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c **** #ifdef FORCETOPOLOGY
+  55:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c ****    bool returnVal;
+  56:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c ****    
+  57:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c ****    returnVal=FALSE;
+  58:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c ****    switch (idmanager_getMyID(ADDR_64B)->addr_64b[7]) {
+  59:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c ****       case 0xdf:
+  60:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c ****          if (
+  61:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c ****                ieee802514_header->src.addr_64b[7]==0x66
+  62:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c ****             ) {
+  63:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c ****             returnVal=TRUE;
+  64:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c ****          }
+  65:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c ****          break;
+  66:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c ****       case 0x66:
+  67:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c ****          if (
+  68:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c ****                ieee802514_header->src.addr_64b[7]==0xdf ||
+  69:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c ****                ieee802514_header->src.addr_64b[7]==0x4f
+  70:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c ****             ) {
+  71:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c ****             returnVal=TRUE;
+  72:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c ****          }
+  73:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c ****          break;
+  74:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c ****       case 0x4f:
+  75:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c ****          if (
+  76:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c ****                ieee802514_header->src.addr_64b[7]==0x66
+  77:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c ****             ) {
+  78:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c ****             returnVal=TRUE;
+  79:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c ****          }
+  80:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c ****          break;   
+  81:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c ****    }
+  82:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c ****    return returnVal;
+  83:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c **** #else
+  84:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c ****    return TRUE;
+  66              		.loc 1 84 0
+  67 0008 0123     		movs	r3, #1
+  85:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c **** #endif
+  86:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/topology.c **** }
+  68              		.loc 1 86 0
+  69 000a 1846     		mov	r0, r3
+  70 000c 0C37     		adds	r7, r7, #12
+  71              		.cfi_def_cfa_offset 4
+  72 000e BD46     		mov	sp, r7
+  73              		.cfi_def_cfa_register 13
+  74              		@ sp needed
+  75 0010 5DF8047B 		ldr	r7, [sp], #4
+  76              		.cfi_restore 7
+  77              		.cfi_def_cfa_offset 0
+  78 0014 7047     		bx	lr
+  79              		.cfi_endproc
+  80              	.LFE0:
+  82              	.Letext0:
+  83              		.file 2 "/usr/arm-none-eabi/include/machine/_default_types.h"
+  84              		.file 3 "/usr/arm-none-eabi/include/sys/_stdint.h"
+  85              		.file 4 "inc/opendefs.h"
+  86              		.file 5 "build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/IEEE802154.h"
+  87              		.file 6 "bsp/boards/OpenMote-CC2538/board_info.h"
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 topology.c
+     /tmp/cculhHiP.s:19     .rodata:0000000000000000 $d
+     /tmp/cculhHiP.s:22     .rodata:0000000000000000 rreg_uriquery
+     /tmp/cculhHiP.s:27     .rodata:0000000000000008 infoBoardname
+     /tmp/cculhHiP.s:32     .rodata:0000000000000010 infouCName
+     /tmp/cculhHiP.s:37     .rodata:0000000000000018 infoRadioName
+     /tmp/cculhHiP.s:42     .rodata:0000000000000024 infoStackName
+     /tmp/cculhHiP.s:45     .text:0000000000000000 $t
+     /tmp/cculhHiP.s:50     .text:0000000000000000 topology_isAcceptablePacket
+                     .debug_frame:0000000000000010 $d
+                           .group:0000000000000000 wm4.0.59116071098782a37a9183a8102fe91b
+                           .group:0000000000000000 wm4.features.h.22.2e382148a0560adabf236cddd4e880f4
+                           .group:0000000000000000 wm4._default_types.h.15.933e8edd27a65e0b69af4a865eb623d2
+                           .group:0000000000000000 wm4._intsup.h.10.35a45952db64d30146faa63a55c20c1c
+                           .group:0000000000000000 wm4._stdint.h.10.f76354baea1c7088202064e6f3d4f5e3
+                           .group:0000000000000000 wm4.stdint.h.23.373a9d32a9e4c2e88fd347156532d281
+                           .group:0000000000000000 wm4.toolchain_defs.h.2.e4ebbe6e0a48032a9b79077dc42e1ffd
+                           .group:0000000000000000 wm4.newlib.h.8.2702bca278809460f0af6fba1d84eb68
+                           .group:0000000000000000 wm4.config.h.220.a09b0b0de3c25be3f39d71990e617bff
+                           .group:0000000000000000 wm4._ansi.h.23.84af8eb8cd468d25cc5f45f5eb13ec51
+                           .group:0000000000000000 wm4.stddef.h.39.daafd3d79fe2f3a84d2d73d7d4e706f8
+                           .group:0000000000000000 wm4.lock.h.2.9bc98482741e5e2a9450b12934a684ea
+                           .group:0000000000000000 wm4._types.h.54.d3d34a3b7f3cc230cd159baf022b4b08
+                           .group:0000000000000000 wm4.stddef.h.158.61317cdbfb4026324507d123a50b0fd6
+                           .group:0000000000000000 wm4.reent.h.17.8bd9e4098e0428508c282cad794fae43
+                           .group:0000000000000000 wm4.cdefs.h.47.e6563c1c3863188ba4ac4eaa2c85b6f1
+                           .group:0000000000000000 wm4.string.h.15.dab3980bf35408a4c507182805e2de3a
+                           .group:0000000000000000 wm4.stddef.h.158.a7efb00f6cbc6f43213b50e183c9830c
+                           .group:0000000000000000 wm4.stdbool.h.29.1c9ee6859ce8145f7838a4f2549ccec2
+                           .group:0000000000000000 wm4.hw_types.h.67.b10589a0806dcc2d274d6fab6b736519
+                           .group:0000000000000000 wm4.interrupt.h.41.272fc4ec0e276feb439e7974d0f77eaf
+                           .group:0000000000000000 wm4.board_info.h.22.aeb00002354a4949fff54190040e37af
+                           .group:0000000000000000 wm4.opendefs.h.23.bdaf9c024be66ead04de21e3ce3dfaf2
+                           .group:0000000000000000 wm4.idmanager.h.2.8c0e2159b32ef3125cbb1e984805cbfe
+
+NO UNDEFINED SYMBOLS

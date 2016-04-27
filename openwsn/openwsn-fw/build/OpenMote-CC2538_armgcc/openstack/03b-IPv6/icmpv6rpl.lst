@@ -1,0 +1,2186 @@
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 6
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.file	"icmpv6rpl.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.section	.rodata
+  19              		.align	2
+  22              	rreg_uriquery:
+  23 0000 683D7563 		.ascii	"h=ucb\000"
+  23      6200
+  24 0006 0000     		.align	2
+  27              	infoBoardname:
+  28 0008 43433235 		.ascii	"CC2538\000"
+  28      333800
+  29 000f 00       		.align	2
+  32              	infouCName:
+  33 0010 43433235 		.ascii	"CC2538\000"
+  33      333800
+  34 0017 00       		.align	2
+  37              	infoRadioName:
+  38 0018 43433235 		.ascii	"CC2538 SoC\000"
+  38      33382053 
+  38      6F4300
+  39 0023 00       		.align	2
+  42              	infoStackName:
+  43 0024 4F70656E 		.ascii	"OpenWSN \000"
+  43      57534E20 
+  43      00
+  44 002d 000000   		.align	2
+  47              	all_routers_multicast:
+  48 0030 FF       		.byte	-1
+  49 0031 02       		.byte	2
+  50 0032 00       		.byte	0
+  51 0033 00       		.byte	0
+  52 0034 00       		.byte	0
+  53 0035 00       		.byte	0
+  54 0036 00       		.byte	0
+  55 0037 00       		.byte	0
+  56 0038 00       		.byte	0
+  57 0039 00       		.byte	0
+  58 003a 00       		.byte	0
+  59 003b 00       		.byte	0
+  60 003c 00       		.byte	0
+  61 003d 00       		.byte	0
+  62 003e 00       		.byte	0
+  63 003f 1A       		.byte	26
+  64              		.align	2
+  67              	chTemplate_default:
+  68 0040 05       		.byte	5
+  69 0041 06       		.byte	6
+  70 0042 0C       		.byte	12
+  71 0043 07       		.byte	7
+  72 0044 0F       		.byte	15
+  73 0045 04       		.byte	4
+  74 0046 0E       		.byte	14
+  75 0047 0B       		.byte	11
+  76 0048 08       		.byte	8
+  77 0049 00       		.byte	0
+  78 004a 01       		.byte	1
+  79 004b 02       		.byte	2
+  80 004c 0D       		.byte	13
+  81 004d 03       		.byte	3
+  82 004e 09       		.byte	9
+  83 004f 0A       		.byte	10
+  84              		.comm	icmpv6rpl_vars,92,4
+  85              		.text
+  86              		.align	2
+  87              		.global	icmpv6rpl_init
+  88              		.thumb
+  89              		.thumb_func
+  91              	icmpv6rpl_init:
+  92              	.LFB0:
+  93              		.file 1 "build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c"
+   1:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** #include "opendefs.h"
+   2:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** #include "icmpv6rpl.h"
+   3:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** #include "icmpv6.h"
+   4:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** #include "openserial.h"
+   5:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** #include "openqueue.h"
+   6:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** #include "neighbors.h"
+   7:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** #include "packetfunctions.h"
+   8:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** #include "openrandom.h"
+   9:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** #include "scheduler.h"
+  10:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** #include "idmanager.h"
+  11:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** #include "opentimers.h"
+  12:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** #include "IEEE802154E.h"
+  13:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** 
+  14:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** //=========================== variables =======================================
+  15:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** 
+  16:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** icmpv6rpl_vars_t             icmpv6rpl_vars;
+  17:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** 
+  18:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** //=========================== prototypes ======================================
+  19:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** 
+  20:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** // DIO-related
+  21:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** void icmpv6rpl_timer_DIO_cb(opentimer_id_t id);
+  22:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** void icmpv6rpl_timer_DIO_task(void);
+  23:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** void sendDIO(void);
+  24:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** // DAO-related
+  25:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** void icmpv6rpl_timer_DAO_cb(opentimer_id_t id);
+  26:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** void icmpv6rpl_timer_DAO_task(void);
+  27:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** void sendDAO(void);
+  28:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** 
+  29:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** //=========================== public ==========================================
+  30:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** 
+  31:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** /**
+  32:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** \brief Initialize this module.
+  33:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** */
+  34:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** void icmpv6rpl_init() {
+  94              		.loc 1 34 0
+  95              		.cfi_startproc
+  96              		@ args = 0, pretend = 0, frame = 24
+  97              		@ frame_needed = 1, uses_anonymous_args = 0
+  98 0000 B0B5     		push	{r4, r5, r7, lr}
+  99              		.cfi_def_cfa_offset 16
+ 100              		.cfi_offset 4, -16
+ 101              		.cfi_offset 5, -12
+ 102              		.cfi_offset 7, -8
+ 103              		.cfi_offset 14, -4
+ 104 0002 86B0     		sub	sp, sp, #24
+ 105              		.cfi_def_cfa_offset 40
+ 106 0004 00AF     		add	r7, sp, #0
+ 107              		.cfi_def_cfa_register 7
+  35:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    uint8_t         dodagid[16];
+  36:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    uint32_t        dioPeriod;
+  37:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    uint32_t        daoPeriod;
+  38:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    
+  39:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    // retrieve my prefix and EUI64
+  40:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    memcpy(&dodagid[0],idmanager_getMyID(ADDR_PREFIX)->prefix,8); // prefix
+ 108              		.loc 1 40 0
+ 109 0006 0520     		movs	r0, #5
+ 110 0008 FFF7FEFF 		bl	idmanager_getMyID
+ 111 000c 0346     		mov	r3, r0
+ 112 000e 0133     		adds	r3, r3, #1
+ 113 0010 3A46     		mov	r2, r7
+ 114 0012 1046     		mov	r0, r2
+ 115 0014 1946     		mov	r1, r3
+ 116 0016 0822     		movs	r2, #8
+ 117 0018 FFF7FEFF 		bl	memcpy
+  41:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    memcpy(&dodagid[8],idmanager_getMyID(ADDR_64B)->addr_64b,8);  // eui64
+ 118              		.loc 1 41 0
+ 119 001c 0220     		movs	r0, #2
+ 120 001e FFF7FEFF 		bl	idmanager_getMyID
+ 121 0022 0346     		mov	r3, r0
+ 122 0024 5A1C     		adds	r2, r3, #1
+ 123 0026 3B46     		mov	r3, r7
+ 124 0028 0833     		adds	r3, r3, #8
+ 125 002a 1846     		mov	r0, r3
+ 126 002c 1146     		mov	r1, r2
+ 127 002e 0822     		movs	r2, #8
+ 128 0030 FFF7FEFF 		bl	memcpy
+  42:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    
+  43:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    //===== reset local variables
+  44:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    memset(&icmpv6rpl_vars,0,sizeof(icmpv6rpl_vars_t));
+ 129              		.loc 1 44 0
+ 130 0034 5148     		ldr	r0, .L2
+ 131 0036 0021     		movs	r1, #0
+ 132 0038 5C22     		movs	r2, #92
+ 133 003a FFF7FEFF 		bl	memset
+  45:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    
+  46:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    //=== admin
+  47:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    
+  48:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    icmpv6rpl_vars.busySending               = FALSE;
+ 134              		.loc 1 48 0
+ 135 003e 4F4B     		ldr	r3, .L2
+ 136 0040 0022     		movs	r2, #0
+ 137 0042 1A70     		strb	r2, [r3]
+  49:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    icmpv6rpl_vars.fDodagidWritten           = 0;
+ 138              		.loc 1 49 0
+ 139 0044 4D4B     		ldr	r3, .L2
+ 140 0046 0022     		movs	r2, #0
+ 141 0048 5A70     		strb	r2, [r3, #1]
+  50:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    
+  51:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    //=== DIO
+  52:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    
+  53:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    icmpv6rpl_vars.dio.rplinstanceId         = 0x00;        ///< TODO: put correct value
+ 142              		.loc 1 53 0
+ 143 004a 4C4B     		ldr	r3, .L2
+ 144 004c 0022     		movs	r2, #0
+ 145 004e 9A70     		strb	r2, [r3, #2]
+  54:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    icmpv6rpl_vars.dio.verNumb               = 0x00;        ///< TODO: put correct value
+ 146              		.loc 1 54 0
+ 147 0050 4A4B     		ldr	r3, .L2
+ 148 0052 0022     		movs	r2, #0
+ 149 0054 DA70     		strb	r2, [r3, #3]
+  55:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    // rank: to be populated upon TX
+  56:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    icmpv6rpl_vars.dio.rplOptions            = MOP_DIO_A | \
+ 150              		.loc 1 56 0
+ 151 0056 494B     		ldr	r3, .L2
+ 152 0058 8822     		movs	r2, #136
+ 153 005a 9A71     		strb	r2, [r3, #6]
+  57:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****                                               MOP_DIO_B | \
+  58:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****                                               MOP_DIO_C | \
+  59:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****                                               PRF_DIO_A | \
+  60:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****                                               PRF_DIO_B | \
+  61:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****                                               PRF_DIO_C | \
+  62:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****                                               G_DIO ;
+  63:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    icmpv6rpl_vars.dio.DTSN                  = 0x33;        ///< TODO: put correct value
+ 154              		.loc 1 63 0
+ 155 005c 474B     		ldr	r3, .L2
+ 156 005e 3322     		movs	r2, #51
+ 157 0060 DA71     		strb	r2, [r3, #7]
+  64:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    icmpv6rpl_vars.dio.flags                 = 0x00;
+ 158              		.loc 1 64 0
+ 159 0062 464B     		ldr	r3, .L2
+ 160 0064 0022     		movs	r2, #0
+ 161 0066 1A72     		strb	r2, [r3, #8]
+  65:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    icmpv6rpl_vars.dio.reserved              = 0x00;
+ 162              		.loc 1 65 0
+ 163 0068 444B     		ldr	r3, .L2
+ 164 006a 0022     		movs	r2, #0
+ 165 006c 5A72     		strb	r2, [r3, #9]
+  66:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    memcpy(
+ 166              		.loc 1 66 0
+ 167 006e 434B     		ldr	r3, .L2
+ 168 0070 03F10A04 		add	r4, r3, #10
+ 169 0074 3D46     		mov	r5, r7
+ 170 0076 0FCD     		ldmia	r5!, {r0, r1, r2, r3}
+ 171 0078 2060     		str	r0, [r4]	@ unaligned
+ 172 007a 6160     		str	r1, [r4, #4]	@ unaligned
+ 173 007c A260     		str	r2, [r4, #8]	@ unaligned
+ 174 007e E360     		str	r3, [r4, #12]	@ unaligned
+  67:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****       &(icmpv6rpl_vars.dio.DODAGID[0]),
+  68:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****       dodagid,
+  69:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****       sizeof(icmpv6rpl_vars.dio.DODAGID)
+  70:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    ); // can be replaced later
+  71:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    
+  72:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    icmpv6rpl_vars.dioDestination.type = ADDR_128B;
+ 175              		.loc 1 72 0
+ 176 0080 3E4B     		ldr	r3, .L2
+ 177 0082 0322     		movs	r2, #3
+ 178 0084 9A76     		strb	r2, [r3, #26]
+  73:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    memcpy(&icmpv6rpl_vars.dioDestination.addr_128b[0],all_routers_multicast,sizeof(all_routers_mult
+ 179              		.loc 1 73 0
+ 180 0086 3D4B     		ldr	r3, .L2
+ 181 0088 3D4A     		ldr	r2, .L2+4
+ 182 008a 03F11B04 		add	r4, r3, #27
+ 183 008e 1546     		mov	r5, r2
+ 184 0090 0FCD     		ldmia	r5!, {r0, r1, r2, r3}
+ 185 0092 2060     		str	r0, [r4]	@ unaligned
+ 186 0094 6160     		str	r1, [r4, #4]	@ unaligned
+ 187 0096 A260     		str	r2, [r4, #8]	@ unaligned
+ 188 0098 E360     		str	r3, [r4, #12]	@ unaligned
+  74:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    
+  75:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    icmpv6rpl_vars.dioPeriod                 = TIMER_DIO_TIMEOUT;
+ 189              		.loc 1 75 0
+ 190 009a 384B     		ldr	r3, .L2
+ 191 009c 42F21072 		movw	r2, #10000
+ 192 00a0 DA62     		str	r2, [r3, #44]
+  76:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    dioPeriod                                = icmpv6rpl_vars.dioPeriod - 0x80 + (openrandom_get16b(
+ 193              		.loc 1 76 0
+ 194 00a2 364B     		ldr	r3, .L2
+ 195 00a4 DC6A     		ldr	r4, [r3, #44]
+ 196 00a6 FFF7FEFF 		bl	openrandom_get16b
+ 197 00aa 0346     		mov	r3, r0
+ 198 00ac DBB2     		uxtb	r3, r3
+ 199 00ae 2344     		add	r3, r3, r4
+ 200 00b0 803B     		subs	r3, r3, #128
+ 201 00b2 7B61     		str	r3, [r7, #20]
+  77:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    icmpv6rpl_vars.timerIdDIO                = opentimers_start(
+ 202              		.loc 1 77 0
+ 203 00b4 7869     		ldr	r0, [r7, #20]
+ 204 00b6 0021     		movs	r1, #0
+ 205 00b8 0022     		movs	r2, #0
+ 206 00ba 324B     		ldr	r3, .L2+8
+ 207 00bc FFF7FEFF 		bl	opentimers_start
+ 208 00c0 0346     		mov	r3, r0
+ 209 00c2 1A46     		mov	r2, r3
+ 210 00c4 2D4B     		ldr	r3, .L2
+ 211 00c6 83F83020 		strb	r2, [r3, #48]
+  78:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****                                                 dioPeriod,
+  79:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****                                                 TIMER_PERIODIC,
+  80:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****                                                 TIME_MS,
+  81:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****                                                 icmpv6rpl_timer_DIO_cb
+  82:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****                                              );
+  83:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    
+  84:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    //=== DAO
+  85:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    
+  86:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    icmpv6rpl_vars.dao.rplinstanceId         = 0x00;        ///< TODO: put correct value
+ 212              		.loc 1 86 0
+ 213 00ca 2C4B     		ldr	r3, .L2
+ 214 00cc 0022     		movs	r2, #0
+ 215 00ce 83F83220 		strb	r2, [r3, #50]
+  87:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    icmpv6rpl_vars.dao.K_D_flags             = FLAG_DAO_A   | \
+ 216              		.loc 1 87 0
+ 217 00d2 2A4B     		ldr	r3, .L2
+ 218 00d4 4022     		movs	r2, #64
+ 219 00d6 83F83320 		strb	r2, [r3, #51]
+  88:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****                                               FLAG_DAO_B   | \
+  89:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****                                               FLAG_DAO_C   | \
+  90:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****                                               FLAG_DAO_D   | \
+  91:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****                                               FLAG_DAO_E   | \
+  92:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****                                               PRF_DIO_C    | \
+  93:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****                                               FLAG_DAO_F   | \
+  94:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****                                               D_DAO        |
+  95:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****                                               K_DAO;
+  96:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    icmpv6rpl_vars.dao.reserved              = 0x00;
+ 220              		.loc 1 96 0
+ 221 00da 284B     		ldr	r3, .L2
+ 222 00dc 0022     		movs	r2, #0
+ 223 00de 83F83420 		strb	r2, [r3, #52]
+  97:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    icmpv6rpl_vars.dao.DAOSequence           = 0x00;
+ 224              		.loc 1 97 0
+ 225 00e2 264B     		ldr	r3, .L2
+ 226 00e4 0022     		movs	r2, #0
+ 227 00e6 83F83520 		strb	r2, [r3, #53]
+  98:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    memcpy(
+ 228              		.loc 1 98 0
+ 229 00ea 244B     		ldr	r3, .L2
+ 230 00ec 03F13604 		add	r4, r3, #54
+ 231 00f0 3D46     		mov	r5, r7
+ 232 00f2 0FCD     		ldmia	r5!, {r0, r1, r2, r3}
+ 233 00f4 2060     		str	r0, [r4]	@ unaligned
+ 234 00f6 6160     		str	r1, [r4, #4]	@ unaligned
+ 235 00f8 A260     		str	r2, [r4, #8]	@ unaligned
+ 236 00fa E360     		str	r3, [r4, #12]	@ unaligned
+  99:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****       &(icmpv6rpl_vars.dao.DODAGID[0]),
+ 100:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****       dodagid,
+ 101:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****       sizeof(icmpv6rpl_vars.dao.DODAGID)
+ 102:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    );  // can be replaced later
+ 103:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    
+ 104:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    icmpv6rpl_vars.dao_transit.type          = OPTION_TRANSIT_INFORMATION_TYPE;
+ 237              		.loc 1 104 0
+ 238 00fc 1F4B     		ldr	r3, .L2
+ 239 00fe 0622     		movs	r2, #6
+ 240 0100 83F84620 		strb	r2, [r3, #70]
+ 105:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    // optionLength: to be populated upon TX
+ 106:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    icmpv6rpl_vars.dao_transit.E_flags       = E_DAO_Transit_Info;
+ 241              		.loc 1 106 0
+ 242 0104 1D4B     		ldr	r3, .L2
+ 243 0106 0022     		movs	r2, #0
+ 244 0108 83F84820 		strb	r2, [r3, #72]
+ 107:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    icmpv6rpl_vars.dao_transit.PathControl   = PC1_A_DAO_Transit_Info | \
+ 245              		.loc 1 107 0
+ 246 010c 1B4B     		ldr	r3, .L2
+ 247 010e 4022     		movs	r2, #64
+ 248 0110 83F84920 		strb	r2, [r3, #73]
+ 108:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****                                               PC1_B_DAO_Transit_Info | \
+ 109:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****                                               PC2_A_DAO_Transit_Info | \
+ 110:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****                                               PC2_B_DAO_Transit_Info | \
+ 111:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****                                               PC3_A_DAO_Transit_Info | \
+ 112:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****                                               PC3_B_DAO_Transit_Info | \
+ 113:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****                                               PC4_A_DAO_Transit_Info | \
+ 114:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****                                               PC4_B_DAO_Transit_Info;  
+ 115:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    icmpv6rpl_vars.dao_transit.PathSequence  = 0x00; // to be incremented at each TX
+ 249              		.loc 1 115 0
+ 250 0114 194B     		ldr	r3, .L2
+ 251 0116 0022     		movs	r2, #0
+ 252 0118 83F84A20 		strb	r2, [r3, #74]
+ 116:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    icmpv6rpl_vars.dao_transit.PathLifetime  = 0xAA;
+ 253              		.loc 1 116 0
+ 254 011c 174B     		ldr	r3, .L2
+ 255 011e AA22     		movs	r2, #170
+ 256 0120 83F84B20 		strb	r2, [r3, #75]
+ 117:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    //target information
+ 118:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    icmpv6rpl_vars.dao_target.type  = OPTION_TARGET_INFORMATION_TYPE;
+ 257              		.loc 1 118 0
+ 258 0124 154B     		ldr	r3, .L2
+ 259 0126 0522     		movs	r2, #5
+ 260 0128 83F84C20 		strb	r2, [r3, #76]
+ 119:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    icmpv6rpl_vars.dao_target.optionLength  = 0;
+ 261              		.loc 1 119 0
+ 262 012c 134B     		ldr	r3, .L2
+ 263 012e 0022     		movs	r2, #0
+ 264 0130 83F84D20 		strb	r2, [r3, #77]
+ 120:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    icmpv6rpl_vars.dao_target.flags  = 0;
+ 265              		.loc 1 120 0
+ 266 0134 114B     		ldr	r3, .L2
+ 267 0136 0022     		movs	r2, #0
+ 268 0138 83F84E20 		strb	r2, [r3, #78]
+ 121:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    icmpv6rpl_vars.dao_target.prefixLength = 0;
+ 269              		.loc 1 121 0
+ 270 013c 0F4B     		ldr	r3, .L2
+ 271 013e 0022     		movs	r2, #0
+ 272 0140 83F84F20 		strb	r2, [r3, #79]
+ 122:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    
+ 123:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    icmpv6rpl_vars.daoPeriod                 = TIMER_DAO_TIMEOUT;
+ 273              		.loc 1 123 0
+ 274 0144 0D4B     		ldr	r3, .L2
+ 275 0146 4EF66022 		movw	r2, #60000
+ 276 014a 5A65     		str	r2, [r3, #84]
+ 124:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    daoPeriod                                = icmpv6rpl_vars.daoPeriod - 0x80 + (openrandom_get16b(
+ 277              		.loc 1 124 0
+ 278 014c 0B4B     		ldr	r3, .L2
+ 279 014e 5C6D     		ldr	r4, [r3, #84]
+ 280 0150 FFF7FEFF 		bl	openrandom_get16b
+ 281 0154 0346     		mov	r3, r0
+ 282 0156 DBB2     		uxtb	r3, r3
+ 283 0158 2344     		add	r3, r3, r4
+ 284 015a 803B     		subs	r3, r3, #128
+ 285 015c 3B61     		str	r3, [r7, #16]
+ 125:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    icmpv6rpl_vars.timerIdDAO                = opentimers_start(
+ 286              		.loc 1 125 0
+ 287 015e 3869     		ldr	r0, [r7, #16]
+ 288 0160 0021     		movs	r1, #0
+ 289 0162 0022     		movs	r2, #0
+ 290 0164 084B     		ldr	r3, .L2+12
+ 291 0166 FFF7FEFF 		bl	opentimers_start
+ 292 016a 0346     		mov	r3, r0
+ 293 016c 1A46     		mov	r2, r3
+ 294 016e 034B     		ldr	r3, .L2
+ 295 0170 83F85020 		strb	r2, [r3, #80]
+ 126:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****                                                 daoPeriod,
+ 127:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****                                                 TIMER_PERIODIC,
+ 128:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****                                                 TIME_MS,
+ 129:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****                                                 icmpv6rpl_timer_DAO_cb
+ 130:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****                                              );
+ 131:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    
+ 132:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** }
+ 296              		.loc 1 132 0
+ 297 0174 1837     		adds	r7, r7, #24
+ 298              		.cfi_def_cfa_offset 16
+ 299 0176 BD46     		mov	sp, r7
+ 300              		.cfi_def_cfa_register 13
+ 301              		@ sp needed
+ 302 0178 B0BD     		pop	{r4, r5, r7, pc}
+ 303              	.L3:
+ 304 017a 00BF     		.align	2
+ 305              	.L2:
+ 306 017c 00000000 		.word	icmpv6rpl_vars
+ 307 0180 30000000 		.word	all_routers_multicast
+ 308 0184 00000000 		.word	icmpv6rpl_timer_DIO_cb
+ 309 0188 00000000 		.word	icmpv6rpl_timer_DAO_cb
+ 310              		.cfi_endproc
+ 311              	.LFE0:
+ 313              		.align	2
+ 314              		.global	icmpv6rpl_writeDODAGid
+ 315              		.thumb
+ 316              		.thumb_func
+ 318              	icmpv6rpl_writeDODAGid:
+ 319              	.LFB1:
+ 133:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** 
+ 134:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** void  icmpv6rpl_writeDODAGid(uint8_t* dodagid) {
+ 320              		.loc 1 134 0
+ 321              		.cfi_startproc
+ 322              		@ args = 0, pretend = 0, frame = 8
+ 323              		@ frame_needed = 1, uses_anonymous_args = 0
+ 324 018c 80B5     		push	{r7, lr}
+ 325              		.cfi_def_cfa_offset 8
+ 326              		.cfi_offset 7, -8
+ 327              		.cfi_offset 14, -4
+ 328 018e 82B0     		sub	sp, sp, #8
+ 329              		.cfi_def_cfa_offset 16
+ 330 0190 00AF     		add	r7, sp, #0
+ 331              		.cfi_def_cfa_register 7
+ 332 0192 7860     		str	r0, [r7, #4]
+ 135:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    
+ 136:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    // write DODAGID to DIO/DAO
+ 137:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    memcpy(
+ 333              		.loc 1 137 0
+ 334 0194 0748     		ldr	r0, .L5
+ 335 0196 7968     		ldr	r1, [r7, #4]
+ 336 0198 1022     		movs	r2, #16
+ 337 019a FFF7FEFF 		bl	memcpy
+ 138:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****       &(icmpv6rpl_vars.dio.DODAGID[0]),
+ 139:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****       dodagid,
+ 140:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****       sizeof(icmpv6rpl_vars.dio.DODAGID)
+ 141:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    );
+ 142:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    memcpy(
+ 338              		.loc 1 142 0
+ 339 019e 0648     		ldr	r0, .L5+4
+ 340 01a0 7968     		ldr	r1, [r7, #4]
+ 341 01a2 1022     		movs	r2, #16
+ 342 01a4 FFF7FEFF 		bl	memcpy
+ 143:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****       &(icmpv6rpl_vars.dao.DODAGID[0]),
+ 144:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****       dodagid,
+ 145:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****       sizeof(icmpv6rpl_vars.dao.DODAGID)
+ 146:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    );
+ 147:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    
+ 148:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    // remember I got a DODAGID
+ 149:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    icmpv6rpl_vars.fDodagidWritten = 1;
+ 343              		.loc 1 149 0
+ 344 01a8 044B     		ldr	r3, .L5+8
+ 345 01aa 0122     		movs	r2, #1
+ 346 01ac 5A70     		strb	r2, [r3, #1]
+ 150:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** }
+ 347              		.loc 1 150 0
+ 348 01ae 0837     		adds	r7, r7, #8
+ 349              		.cfi_def_cfa_offset 8
+ 350 01b0 BD46     		mov	sp, r7
+ 351              		.cfi_def_cfa_register 13
+ 352              		@ sp needed
+ 353 01b2 80BD     		pop	{r7, pc}
+ 354              	.L6:
+ 355              		.align	2
+ 356              	.L5:
+ 357 01b4 0A000000 		.word	icmpv6rpl_vars+10
+ 358 01b8 36000000 		.word	icmpv6rpl_vars+54
+ 359 01bc 00000000 		.word	icmpv6rpl_vars
+ 360              		.cfi_endproc
+ 361              	.LFE1:
+ 363              		.align	2
+ 364              		.global	icmpv6rpl_getRPLIntanceID
+ 365              		.thumb
+ 366              		.thumb_func
+ 368              	icmpv6rpl_getRPLIntanceID:
+ 369              	.LFB2:
+ 151:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** 
+ 152:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** uint8_t icmpv6rpl_getRPLIntanceID(){
+ 370              		.loc 1 152 0
+ 371              		.cfi_startproc
+ 372              		@ args = 0, pretend = 0, frame = 0
+ 373              		@ frame_needed = 1, uses_anonymous_args = 0
+ 374              		@ link register save eliminated.
+ 375 01c0 80B4     		push	{r7}
+ 376              		.cfi_def_cfa_offset 4
+ 377              		.cfi_offset 7, -4
+ 378 01c2 00AF     		add	r7, sp, #0
+ 379              		.cfi_def_cfa_register 7
+ 153:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    return icmpv6rpl_vars.dao.rplinstanceId;
+ 380              		.loc 1 153 0
+ 381 01c4 034B     		ldr	r3, .L9
+ 382 01c6 93F83230 		ldrb	r3, [r3, #50]	@ zero_extendqisi2
+ 154:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** }
+ 383              		.loc 1 154 0
+ 384 01ca 1846     		mov	r0, r3
+ 385 01cc BD46     		mov	sp, r7
+ 386              		.cfi_def_cfa_register 13
+ 387              		@ sp needed
+ 388 01ce 5DF8047B 		ldr	r7, [sp], #4
+ 389              		.cfi_restore 7
+ 390              		.cfi_def_cfa_offset 0
+ 391 01d2 7047     		bx	lr
+ 392              	.L10:
+ 393              		.align	2
+ 394              	.L9:
+ 395 01d4 00000000 		.word	icmpv6rpl_vars
+ 396              		.cfi_endproc
+ 397              	.LFE2:
+ 399              		.align	2
+ 400              		.global	icmpv6rpl_getRPLDODAGid
+ 401              		.thumb
+ 402              		.thumb_func
+ 404              	icmpv6rpl_getRPLDODAGid:
+ 405              	.LFB3:
+ 155:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****                                                 
+ 156:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** void    icmpv6rpl_getRPLDODAGid(uint8_t* address_128b){
+ 406              		.loc 1 156 0
+ 407              		.cfi_startproc
+ 408              		@ args = 0, pretend = 0, frame = 8
+ 409              		@ frame_needed = 1, uses_anonymous_args = 0
+ 410              		@ link register save eliminated.
+ 411 01d8 90B4     		push	{r4, r7}
+ 412              		.cfi_def_cfa_offset 8
+ 413              		.cfi_offset 4, -8
+ 414              		.cfi_offset 7, -4
+ 415 01da 82B0     		sub	sp, sp, #8
+ 416              		.cfi_def_cfa_offset 16
+ 417 01dc 00AF     		add	r7, sp, #0
+ 418              		.cfi_def_cfa_register 7
+ 419 01de 7860     		str	r0, [r7, #4]
+ 157:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****     memcpy(address_128b,icmpv6rpl_vars.dao.DODAGID,16);
+ 420              		.loc 1 157 0
+ 421 01e0 7A68     		ldr	r2, [r7, #4]
+ 422 01e2 074B     		ldr	r3, .L12
+ 423 01e4 3633     		adds	r3, r3, #54
+ 424 01e6 1C68     		ldr	r4, [r3]	@ unaligned
+ 425 01e8 5868     		ldr	r0, [r3, #4]	@ unaligned
+ 426 01ea 9968     		ldr	r1, [r3, #8]	@ unaligned
+ 427 01ec DB68     		ldr	r3, [r3, #12]	@ unaligned
+ 428 01ee 1460     		str	r4, [r2]	@ unaligned
+ 429 01f0 5060     		str	r0, [r2, #4]	@ unaligned
+ 430 01f2 9160     		str	r1, [r2, #8]	@ unaligned
+ 431 01f4 D360     		str	r3, [r2, #12]	@ unaligned
+ 158:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** }
+ 432              		.loc 1 158 0
+ 433 01f6 0837     		adds	r7, r7, #8
+ 434              		.cfi_def_cfa_offset 8
+ 435 01f8 BD46     		mov	sp, r7
+ 436              		.cfi_def_cfa_register 13
+ 437              		@ sp needed
+ 438 01fa 90BC     		pop	{r4, r7}
+ 439              		.cfi_restore 7
+ 440              		.cfi_restore 4
+ 441              		.cfi_def_cfa_offset 0
+ 442 01fc 7047     		bx	lr
+ 443              	.L13:
+ 444 01fe 00BF     		.align	2
+ 445              	.L12:
+ 446 0200 00000000 		.word	icmpv6rpl_vars
+ 447              		.cfi_endproc
+ 448              	.LFE3:
+ 450              		.align	2
+ 451              		.global	icmpv6rpl_sendDone
+ 452              		.thumb
+ 453              		.thumb_func
+ 455              	icmpv6rpl_sendDone:
+ 456              	.LFB4:
+ 159:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** 
+ 160:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** /**
+ 161:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** \brief Called when DIO/DAO was sent.
+ 162:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** 
+ 163:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** \param[in] msg   Pointer to the message just sent.
+ 164:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** \param[in] error Outcome of the sending.
+ 165:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** */
+ 166:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** void icmpv6rpl_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
+ 457              		.loc 1 166 0
+ 458              		.cfi_startproc
+ 459              		@ args = 0, pretend = 0, frame = 8
+ 460              		@ frame_needed = 1, uses_anonymous_args = 0
+ 461 0204 80B5     		push	{r7, lr}
+ 462              		.cfi_def_cfa_offset 8
+ 463              		.cfi_offset 7, -8
+ 464              		.cfi_offset 14, -4
+ 465 0206 82B0     		sub	sp, sp, #8
+ 466              		.cfi_def_cfa_offset 16
+ 467 0208 00AF     		add	r7, sp, #0
+ 468              		.cfi_def_cfa_register 7
+ 469 020a 7860     		str	r0, [r7, #4]
+ 470 020c 0B46     		mov	r3, r1
+ 471 020e FB70     		strb	r3, [r7, #3]
+ 167:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    
+ 168:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    // take ownership over that packet
+ 169:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    msg->owner = COMPONENT_ICMPv6RPL;
+ 472              		.loc 1 169 0
+ 473 0210 7B68     		ldr	r3, [r7, #4]
+ 474 0212 1622     		movs	r2, #22
+ 475 0214 5A70     		strb	r2, [r3, #1]
+ 170:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    
+ 171:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    // make sure I created it
+ 172:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    if (msg->creator!=COMPONENT_ICMPv6RPL) {
+ 476              		.loc 1 172 0
+ 477 0216 7B68     		ldr	r3, [r7, #4]
+ 478 0218 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 479 021a 162B     		cmp	r3, #22
+ 480 021c 05D0     		beq	.L15
+ 173:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****       openserial_printError(COMPONENT_ICMPv6RPL,ERR_UNEXPECTED_SENDDONE,
+ 481              		.loc 1 173 0
+ 482 021e 1620     		movs	r0, #22
+ 483 0220 2B21     		movs	r1, #43
+ 484 0222 0022     		movs	r2, #0
+ 485 0224 0023     		movs	r3, #0
+ 486 0226 FFF7FEFF 		bl	openserial_printError
+ 487              	.L15:
+ 174:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****                             (errorparameter_t)0,
+ 175:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****                             (errorparameter_t)0);
+ 176:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    }
+ 177:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    
+ 178:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    // free packet
+ 179:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    openqueue_freePacketBuffer(msg);
+ 488              		.loc 1 179 0
+ 489 022a 7868     		ldr	r0, [r7, #4]
+ 490 022c FFF7FEFF 		bl	openqueue_freePacketBuffer
+ 180:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    
+ 181:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    // I'm not busy sending anymore
+ 182:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    icmpv6rpl_vars.busySending = FALSE;
+ 491              		.loc 1 182 0
+ 492 0230 024B     		ldr	r3, .L16
+ 493 0232 0022     		movs	r2, #0
+ 494 0234 1A70     		strb	r2, [r3]
+ 183:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** }
+ 495              		.loc 1 183 0
+ 496 0236 0837     		adds	r7, r7, #8
+ 497              		.cfi_def_cfa_offset 8
+ 498 0238 BD46     		mov	sp, r7
+ 499              		.cfi_def_cfa_register 13
+ 500              		@ sp needed
+ 501 023a 80BD     		pop	{r7, pc}
+ 502              	.L17:
+ 503              		.align	2
+ 504              	.L16:
+ 505 023c 00000000 		.word	icmpv6rpl_vars
+ 506              		.cfi_endproc
+ 507              	.LFE4:
+ 509              		.align	2
+ 510              		.global	icmpv6rpl_receive
+ 511              		.thumb
+ 512              		.thumb_func
+ 514              	icmpv6rpl_receive:
+ 515              	.LFB5:
+ 184:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** 
+ 185:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** /**
+ 186:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** \brief Called when RPL message received.
+ 187:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** 
+ 188:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** \param[in] msg   Pointer to the received message.
+ 189:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** */
+ 190:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** void icmpv6rpl_receive(OpenQueueEntry_t* msg) {
+ 516              		.loc 1 190 0
+ 517              		.cfi_startproc
+ 518              		@ args = 0, pretend = 0, frame = 32
+ 519              		@ frame_needed = 1, uses_anonymous_args = 0
+ 520 0240 B0B5     		push	{r4, r5, r7, lr}
+ 521              		.cfi_def_cfa_offset 16
+ 522              		.cfi_offset 4, -16
+ 523              		.cfi_offset 5, -12
+ 524              		.cfi_offset 7, -8
+ 525              		.cfi_offset 14, -4
+ 526 0242 88B0     		sub	sp, sp, #32
+ 527              		.cfi_def_cfa_offset 48
+ 528 0244 00AF     		add	r7, sp, #0
+ 529              		.cfi_def_cfa_register 7
+ 530 0246 7860     		str	r0, [r7, #4]
+ 191:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    uint8_t      icmpv6code;
+ 192:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    open_addr_t  myPrefix;
+ 193:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    
+ 194:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    // take ownership
+ 195:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    msg->owner      = COMPONENT_ICMPv6RPL;
+ 531              		.loc 1 195 0
+ 532 0248 7B68     		ldr	r3, [r7, #4]
+ 533 024a 1622     		movs	r2, #22
+ 534 024c 5A70     		strb	r2, [r3, #1]
+ 196:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    
+ 197:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    // retrieve ICMPv6 code
+ 198:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    icmpv6code      = (((ICMPv6_ht*)(msg->payload))->code);
+ 535              		.loc 1 198 0
+ 536 024e 7B68     		ldr	r3, [r7, #4]
+ 537 0250 5B68     		ldr	r3, [r3, #4]
+ 538 0252 5B78     		ldrb	r3, [r3, #1]
+ 539 0254 FB77     		strb	r3, [r7, #31]
+ 199:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    
+ 200:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    // toss ICMPv6 header
+ 201:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    packetfunctions_tossHeader(msg,sizeof(ICMPv6_ht));
+ 540              		.loc 1 201 0
+ 541 0256 7868     		ldr	r0, [r7, #4]
+ 542 0258 0421     		movs	r1, #4
+ 543 025a FFF7FEFF 		bl	packetfunctions_tossHeader
+ 202:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    
+ 203:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    // handle message
+ 204:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    switch (icmpv6code) {
+ 544              		.loc 1 204 0
+ 545 025e FB7F     		ldrb	r3, [r7, #31]	@ zero_extendqisi2
+ 546 0260 012B     		cmp	r3, #1
+ 547 0262 06D0     		beq	.L20
+ 548 0264 022B     		cmp	r3, #2
+ 549 0266 34D0     		beq	.L21
+ 550 0268 002B     		cmp	r3, #0
+ 551 026a 39D1     		bne	.L25
+ 205:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****       case IANA_ICMPv6_RPL_DIS:
+ 206:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****          icmpv6rpl_timer_DIO_task();
+ 552              		.loc 1 206 0
+ 553 026c FFF7FEFF 		bl	icmpv6rpl_timer_DIO_task
+ 207:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****          break;
+ 554              		.loc 1 207 0
+ 555 0270 3FE0     		b	.L23
+ 556              	.L20:
+ 208:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****       case IANA_ICMPv6_RPL_DIO:
+ 209:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****          if (idmanager_getIsDAGroot()==TRUE) {
+ 557              		.loc 1 209 0
+ 558 0272 FFF7FEFF 		bl	idmanager_getIsDAGroot
+ 559 0276 0346     		mov	r3, r0
+ 560 0278 002B     		cmp	r3, #0
+ 561 027a 00D0     		beq	.L24
+ 210:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****             // stop here if I'm in the DAG root
+ 211:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****             break; // break, don't return
+ 562              		.loc 1 211 0
+ 563 027c 39E0     		b	.L23
+ 564              	.L24:
+ 212:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****          }
+ 213:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****          
+ 214:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****          // update neighbor table
+ 215:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****          neighbors_indicateRxDIO(msg);
+ 565              		.loc 1 215 0
+ 566 027e 7868     		ldr	r0, [r7, #4]
+ 567 0280 FFF7FEFF 		bl	neighbors_indicateRxDIO
+ 216:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****          
+ 217:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****          memcpy(
+ 218:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****             &(icmpv6rpl_vars.dio),
+ 219:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****             (icmpv6rpl_dio_ht*)(msg->payload),
+ 568              		.loc 1 219 0
+ 569 0284 7B68     		ldr	r3, [r7, #4]
+ 570 0286 5A68     		ldr	r2, [r3, #4]
+ 217:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****             &(icmpv6rpl_vars.dio),
+ 571              		.loc 1 217 0
+ 572 0288 1D4B     		ldr	r3, .L26
+ 573 028a 0233     		adds	r3, r3, #2
+ 574 028c 1068     		ldr	r0, [r2]	@ unaligned
+ 575 028e 5168     		ldr	r1, [r2, #4]	@ unaligned
+ 576 0290 9568     		ldr	r5, [r2, #8]	@ unaligned
+ 577 0292 D468     		ldr	r4, [r2, #12]	@ unaligned
+ 578 0294 1860     		str	r0, [r3]	@ unaligned
+ 579 0296 5960     		str	r1, [r3, #4]	@ unaligned
+ 580 0298 9D60     		str	r5, [r3, #8]	@ unaligned
+ 581 029a DC60     		str	r4, [r3, #12]	@ unaligned
+ 582 029c 1069     		ldr	r0, [r2, #16]	@ unaligned
+ 583 029e 5169     		ldr	r1, [r2, #20]	@ unaligned
+ 584 02a0 1861     		str	r0, [r3, #16]	@ unaligned
+ 585 02a2 5961     		str	r1, [r3, #20]	@ unaligned
+ 220:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****             sizeof(icmpv6rpl_dio_ht)
+ 221:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****          );
+ 222:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****          
+ 223:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****          // write DODAGID in DIO and DAO
+ 224:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****          icmpv6rpl_writeDODAGid(&(((icmpv6rpl_dio_ht*)(msg->payload))->DODAGID[0]));
+ 586              		.loc 1 224 0
+ 587 02a4 7B68     		ldr	r3, [r7, #4]
+ 588 02a6 5B68     		ldr	r3, [r3, #4]
+ 589 02a8 0833     		adds	r3, r3, #8
+ 590 02aa 1846     		mov	r0, r3
+ 591 02ac FFF7FEFF 		bl	icmpv6rpl_writeDODAGid
+ 225:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****          
+ 226:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****          // update my prefix
+ 227:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****          myPrefix.type = ADDR_PREFIX;
+ 592              		.loc 1 227 0
+ 593 02b0 0523     		movs	r3, #5
+ 594 02b2 3B73     		strb	r3, [r7, #12]
+ 228:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****          memcpy(
+ 229:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****             myPrefix.prefix,
+ 230:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****             &((icmpv6rpl_dio_ht*)(msg->payload))->DODAGID[0],
+ 595              		.loc 1 230 0
+ 596 02b4 7B68     		ldr	r3, [r7, #4]
+ 597 02b6 5A68     		ldr	r2, [r3, #4]
+ 228:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****          memcpy(
+ 598              		.loc 1 228 0
+ 599 02b8 07F10D03 		add	r3, r7, #13
+ 600 02bc 0832     		adds	r2, r2, #8
+ 601 02be 1168     		ldr	r1, [r2]	@ unaligned
+ 602 02c0 5268     		ldr	r2, [r2, #4]	@ unaligned
+ 603 02c2 1960     		str	r1, [r3]	@ unaligned
+ 604 02c4 5A60     		str	r2, [r3, #4]	@ unaligned
+ 231:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****             sizeof(myPrefix.prefix)
+ 232:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****          );
+ 233:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****          idmanager_setMyID(&myPrefix);
+ 605              		.loc 1 233 0
+ 606 02c6 07F10C03 		add	r3, r7, #12
+ 607 02ca 1846     		mov	r0, r3
+ 608 02cc FFF7FEFF 		bl	idmanager_setMyID
+ 234:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****          
+ 235:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****          break;
+ 609              		.loc 1 235 0
+ 610 02d0 0FE0     		b	.L23
+ 611              	.L21:
+ 236:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****       
+ 237:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****       case IANA_ICMPv6_RPL_DAO:
+ 238:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****          // this should never happen
+ 239:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****          openserial_printCritical(COMPONENT_ICMPv6RPL,ERR_UNEXPECTED_DAO,
+ 612              		.loc 1 239 0
+ 613 02d2 1620     		movs	r0, #22
+ 614 02d4 0A21     		movs	r1, #10
+ 615 02d6 0022     		movs	r2, #0
+ 616 02d8 0023     		movs	r3, #0
+ 617 02da FFF7FEFF 		bl	openserial_printCritical
+ 240:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****                                (errorparameter_t)0,
+ 241:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****                                (errorparameter_t)0);
+ 242:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****          break;
+ 618              		.loc 1 242 0
+ 619 02de 08E0     		b	.L23
+ 620              	.L25:
+ 243:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****       default:
+ 244:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****          // this should never happen
+ 245:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****          openserial_printError(COMPONENT_ICMPv6RPL,ERR_MSG_UNKNOWN_TYPE,
+ 621              		.loc 1 245 0
+ 622 02e0 FB7F     		ldrb	r3, [r7, #31]	@ zero_extendqisi2
+ 623 02e2 9BB2     		uxth	r3, r3
+ 624 02e4 1620     		movs	r0, #22
+ 625 02e6 3021     		movs	r1, #48
+ 626 02e8 1A46     		mov	r2, r3
+ 627 02ea 0023     		movs	r3, #0
+ 628 02ec FFF7FEFF 		bl	openserial_printError
+ 246:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****                                (errorparameter_t)icmpv6code,
+ 247:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****                                (errorparameter_t)0);
+ 248:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****          break;
+ 629              		.loc 1 248 0
+ 630 02f0 00BF     		nop
+ 631              	.L23:
+ 249:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****       
+ 250:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    }
+ 251:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    
+ 252:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    // free message
+ 253:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    openqueue_freePacketBuffer(msg);
+ 632              		.loc 1 253 0
+ 633 02f2 7868     		ldr	r0, [r7, #4]
+ 634 02f4 FFF7FEFF 		bl	openqueue_freePacketBuffer
+ 254:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** }
+ 635              		.loc 1 254 0
+ 636 02f8 2037     		adds	r7, r7, #32
+ 637              		.cfi_def_cfa_offset 16
+ 638 02fa BD46     		mov	sp, r7
+ 639              		.cfi_def_cfa_register 13
+ 640              		@ sp needed
+ 641 02fc B0BD     		pop	{r4, r5, r7, pc}
+ 642              	.L27:
+ 643 02fe 00BF     		.align	2
+ 644              	.L26:
+ 645 0300 00000000 		.word	icmpv6rpl_vars
+ 646              		.cfi_endproc
+ 647              	.LFE5:
+ 649              		.align	2
+ 650              		.global	icmpv6rpl_timer_DIO_cb
+ 651              		.thumb
+ 652              		.thumb_func
+ 654              	icmpv6rpl_timer_DIO_cb:
+ 655              	.LFB6:
+ 255:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** 
+ 256:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** //=========================== private =========================================
+ 257:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** 
+ 258:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** //===== DIO-related
+ 259:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** 
+ 260:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** /**
+ 261:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** \brief DIO timer callback function.
+ 262:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** 
+ 263:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** \note This function is executed in interrupt context, and should only push a 
+ 264:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    task.
+ 265:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** */
+ 266:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** void icmpv6rpl_timer_DIO_cb(opentimer_id_t id) {
+ 656              		.loc 1 266 0
+ 657              		.cfi_startproc
+ 658              		@ args = 0, pretend = 0, frame = 8
+ 659              		@ frame_needed = 1, uses_anonymous_args = 0
+ 660 0304 80B5     		push	{r7, lr}
+ 661              		.cfi_def_cfa_offset 8
+ 662              		.cfi_offset 7, -8
+ 663              		.cfi_offset 14, -4
+ 664 0306 82B0     		sub	sp, sp, #8
+ 665              		.cfi_def_cfa_offset 16
+ 666 0308 00AF     		add	r7, sp, #0
+ 667              		.cfi_def_cfa_register 7
+ 668 030a 0346     		mov	r3, r0
+ 669 030c FB71     		strb	r3, [r7, #7]
+ 267:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    scheduler_push_task(icmpv6rpl_timer_DIO_task,TASKPRIO_RPL);
+ 670              		.loc 1 267 0
+ 671 030e 0348     		ldr	r0, .L29
+ 672 0310 0421     		movs	r1, #4
+ 673 0312 FFF7FEFF 		bl	scheduler_push_task
+ 268:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** }
+ 674              		.loc 1 268 0
+ 675 0316 0837     		adds	r7, r7, #8
+ 676              		.cfi_def_cfa_offset 8
+ 677 0318 BD46     		mov	sp, r7
+ 678              		.cfi_def_cfa_register 13
+ 679              		@ sp needed
+ 680 031a 80BD     		pop	{r7, pc}
+ 681              	.L30:
+ 682              		.align	2
+ 683              	.L29:
+ 684 031c 00000000 		.word	icmpv6rpl_timer_DIO_task
+ 685              		.cfi_endproc
+ 686              	.LFE6:
+ 688              		.align	2
+ 689              		.global	icmpv6rpl_timer_DIO_task
+ 690              		.thumb
+ 691              		.thumb_func
+ 693              	icmpv6rpl_timer_DIO_task:
+ 694              	.LFB7:
+ 269:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** 
+ 270:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** /**
+ 271:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** \brief Handler for DIO timer event.
+ 272:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** 
+ 273:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** \note This function is executed in task context, called by the scheduler.
+ 274:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** */
+ 275:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** void icmpv6rpl_timer_DIO_task() {
+ 695              		.loc 1 275 0
+ 696              		.cfi_startproc
+ 697              		@ args = 0, pretend = 0, frame = 8
+ 698              		@ frame_needed = 1, uses_anonymous_args = 0
+ 699 0320 90B5     		push	{r4, r7, lr}
+ 700              		.cfi_def_cfa_offset 12
+ 701              		.cfi_offset 4, -12
+ 702              		.cfi_offset 7, -8
+ 703              		.cfi_offset 14, -4
+ 704 0322 83B0     		sub	sp, sp, #12
+ 705              		.cfi_def_cfa_offset 24
+ 706 0324 00AF     		add	r7, sp, #0
+ 707              		.cfi_def_cfa_register 7
+ 276:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    uint32_t        dioPeriod;
+ 277:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    // send DIO
+ 278:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    sendDIO();
+ 708              		.loc 1 278 0
+ 709 0326 FFF7FEFF 		bl	sendDIO
+ 279:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    
+ 280:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    // arm the DIO timer with this new value
+ 281:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    dioPeriod = icmpv6rpl_vars.dioPeriod - 0x80 + (openrandom_get16b()&0xff);
+ 710              		.loc 1 281 0
+ 711 032a 0A4B     		ldr	r3, .L32
+ 712 032c DC6A     		ldr	r4, [r3, #44]
+ 713 032e FFF7FEFF 		bl	openrandom_get16b
+ 714 0332 0346     		mov	r3, r0
+ 715 0334 DBB2     		uxtb	r3, r3
+ 716 0336 2344     		add	r3, r3, r4
+ 717 0338 803B     		subs	r3, r3, #128
+ 718 033a 7B60     		str	r3, [r7, #4]
+ 282:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    opentimers_setPeriod(
+ 719              		.loc 1 282 0
+ 720 033c 054B     		ldr	r3, .L32
+ 721 033e 93F83030 		ldrb	r3, [r3, #48]	@ zero_extendqisi2
+ 722 0342 1846     		mov	r0, r3
+ 723 0344 0021     		movs	r1, #0
+ 724 0346 7A68     		ldr	r2, [r7, #4]
+ 725 0348 FFF7FEFF 		bl	opentimers_setPeriod
+ 283:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****       icmpv6rpl_vars.timerIdDIO,
+ 284:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****       TIME_MS,
+ 285:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****       dioPeriod
+ 286:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    );
+ 287:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** }
+ 726              		.loc 1 287 0
+ 727 034c 0C37     		adds	r7, r7, #12
+ 728              		.cfi_def_cfa_offset 12
+ 729 034e BD46     		mov	sp, r7
+ 730              		.cfi_def_cfa_register 13
+ 731              		@ sp needed
+ 732 0350 90BD     		pop	{r4, r7, pc}
+ 733              	.L33:
+ 734 0352 00BF     		.align	2
+ 735              	.L32:
+ 736 0354 00000000 		.word	icmpv6rpl_vars
+ 737              		.cfi_endproc
+ 738              	.LFE7:
+ 740              		.align	2
+ 741              		.global	sendDIO
+ 742              		.thumb
+ 743              		.thumb_func
+ 745              	sendDIO:
+ 746              	.LFB8:
+ 288:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** 
+ 289:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** /**
+ 290:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** \brief Prepare and a send a RPL DIO.
+ 291:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** */
+ 292:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** void sendDIO() {
+ 747              		.loc 1 292 0
+ 748              		.cfi_startproc
+ 749              		@ args = 0, pretend = 0, frame = 8
+ 750              		@ frame_needed = 1, uses_anonymous_args = 0
+ 751 0358 B0B5     		push	{r4, r5, r7, lr}
+ 752              		.cfi_def_cfa_offset 16
+ 753              		.cfi_offset 4, -16
+ 754              		.cfi_offset 5, -12
+ 755              		.cfi_offset 7, -8
+ 756              		.cfi_offset 14, -4
+ 757 035a 82B0     		sub	sp, sp, #8
+ 758              		.cfi_def_cfa_offset 24
+ 759 035c 00AF     		add	r7, sp, #0
+ 760              		.cfi_def_cfa_register 7
+ 293:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    OpenQueueEntry_t*    msg;
+ 294:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    
+ 295:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    // stop if I'm not sync'ed
+ 296:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    if (ieee154e_isSynch()==FALSE) {
+ 761              		.loc 1 296 0
+ 762 035e FFF7FEFF 		bl	ieee154e_isSynch
+ 763 0362 0346     		mov	r3, r0
+ 764 0364 83F00103 		eor	r3, r3, #1
+ 765 0368 DBB2     		uxtb	r3, r3
+ 766 036a 002B     		cmp	r3, #0
+ 767 036c 06D0     		beq	.L35
+ 297:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****       
+ 298:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****       // remove packets genereted by this module (DIO and DAO) from openqueue
+ 299:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****       openqueue_removeAllCreatedBy(COMPONENT_ICMPv6RPL);
+ 768              		.loc 1 299 0
+ 769 036e 1620     		movs	r0, #22
+ 770 0370 FFF7FEFF 		bl	openqueue_removeAllCreatedBy
+ 300:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****       
+ 301:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****       // I'm not busy sending a DIO/DAO
+ 302:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****       icmpv6rpl_vars.busySending  = FALSE;
+ 771              		.loc 1 302 0
+ 772 0374 494B     		ldr	r3, .L41
+ 773 0376 0022     		movs	r2, #0
+ 774 0378 1A70     		strb	r2, [r3]
+ 303:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****       
+ 304:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****       // stop here
+ 305:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****       return;
+ 775              		.loc 1 305 0
+ 776 037a 8BE0     		b	.L34
+ 777              	.L35:
+ 306:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    }
+ 307:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    
+ 308:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    // do not send DIO if I have the default DAG rank
+ 309:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    if (neighbors_getMyDAGrank()==DEFAULTDAGRANK) {
+ 778              		.loc 1 309 0
+ 779 037c FFF7FEFF 		bl	neighbors_getMyDAGrank
+ 780 0380 0346     		mov	r3, r0
+ 781 0382 1A46     		mov	r2, r3
+ 782 0384 4FF6FF73 		movw	r3, #65535
+ 783 0388 9A42     		cmp	r2, r3
+ 784 038a 00D1     		bne	.L37
+ 310:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****       return;
+ 785              		.loc 1 310 0
+ 786 038c 82E0     		b	.L34
+ 787              	.L37:
+ 311:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    }
+ 312:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    
+ 313:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    // do not send DIO if I'm already busy sending
+ 314:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    if (icmpv6rpl_vars.busySending==TRUE) {
+ 788              		.loc 1 314 0
+ 789 038e 434B     		ldr	r3, .L41
+ 790 0390 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 791 0392 002B     		cmp	r3, #0
+ 792 0394 00D0     		beq	.L38
+ 315:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****       return;
+ 793              		.loc 1 315 0 discriminator 2
+ 794 0396 7DE0     		b	.L34
+ 795              	.L38:
+ 316:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    }
+ 317:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    
+ 318:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    // if you get here, all good to send a DIO
+ 319:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    
+ 320:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    // I'm now busy sending
+ 321:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    icmpv6rpl_vars.busySending = TRUE;
+ 796              		.loc 1 321 0
+ 797 0398 404B     		ldr	r3, .L41
+ 798 039a 0122     		movs	r2, #1
+ 799 039c 1A70     		strb	r2, [r3]
+ 322:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    
+ 323:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    // reserve a free packet buffer for DIO
+ 324:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    msg = openqueue_getFreePacketBuffer(COMPONENT_ICMPv6RPL);
+ 800              		.loc 1 324 0
+ 801 039e 1620     		movs	r0, #22
+ 802 03a0 FFF7FEFF 		bl	openqueue_getFreePacketBuffer
+ 803 03a4 7860     		str	r0, [r7, #4]
+ 325:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    if (msg==NULL) {
+ 804              		.loc 1 325 0
+ 805 03a6 7B68     		ldr	r3, [r7, #4]
+ 806 03a8 002B     		cmp	r3, #0
+ 807 03aa 09D1     		bne	.L39
+ 326:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****       openserial_printError(COMPONENT_ICMPv6RPL,ERR_NO_FREE_PACKET_BUFFER,
+ 808              		.loc 1 326 0
+ 809 03ac 1620     		movs	r0, #22
+ 810 03ae 2C21     		movs	r1, #44
+ 811 03b0 0022     		movs	r2, #0
+ 812 03b2 0023     		movs	r3, #0
+ 813 03b4 FFF7FEFF 		bl	openserial_printError
+ 327:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****                             (errorparameter_t)0,
+ 328:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****                             (errorparameter_t)0);
+ 329:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****       icmpv6rpl_vars.busySending = FALSE;
+ 814              		.loc 1 329 0
+ 815 03b8 384B     		ldr	r3, .L41
+ 816 03ba 0022     		movs	r2, #0
+ 817 03bc 1A70     		strb	r2, [r3]
+ 330:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****       
+ 331:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****       return;
+ 818              		.loc 1 331 0
+ 819 03be 69E0     		b	.L34
+ 820              	.L39:
+ 332:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    }
+ 333:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    
+ 334:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    // take ownership
+ 335:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    msg->creator                             = COMPONENT_ICMPv6RPL;
+ 821              		.loc 1 335 0
+ 822 03c0 7B68     		ldr	r3, [r7, #4]
+ 823 03c2 1622     		movs	r2, #22
+ 824 03c4 1A70     		strb	r2, [r3]
+ 336:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    msg->owner                               = COMPONENT_ICMPv6RPL;
+ 825              		.loc 1 336 0
+ 826 03c6 7B68     		ldr	r3, [r7, #4]
+ 827 03c8 1622     		movs	r2, #22
+ 828 03ca 5A70     		strb	r2, [r3, #1]
+ 337:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    
+ 338:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    // set transport information
+ 339:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    msg->l4_protocol                         = IANA_ICMPv6;
+ 829              		.loc 1 339 0
+ 830 03cc 7B68     		ldr	r3, [r7, #4]
+ 831 03ce 3A22     		movs	r2, #58
+ 832 03d0 5A72     		strb	r2, [r3, #9]
+ 340:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    msg->l4_sourcePortORicmpv6Type           = IANA_ICMPv6_RPL;
+ 833              		.loc 1 340 0
+ 834 03d2 7B68     		ldr	r3, [r7, #4]
+ 835 03d4 9B22     		movs	r2, #155
+ 836 03d6 9A81     		strh	r2, [r3, #12]	@ movhi
+ 341:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    
+ 342:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    // set DIO destination
+ 343:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    memcpy(&(msg->l3_destinationAdd),&icmpv6rpl_vars.dioDestination,sizeof(open_addr_t));
+ 837              		.loc 1 343 0
+ 838 03d8 7B68     		ldr	r3, [r7, #4]
+ 839 03da 03F11502 		add	r2, r3, #21
+ 840 03de 2F4B     		ldr	r3, .L41
+ 841 03e0 1A33     		adds	r3, r3, #26
+ 842 03e2 1D68     		ldr	r5, [r3]	@ unaligned
+ 843 03e4 5C68     		ldr	r4, [r3, #4]	@ unaligned
+ 844 03e6 9868     		ldr	r0, [r3, #8]	@ unaligned
+ 845 03e8 D968     		ldr	r1, [r3, #12]	@ unaligned
+ 846 03ea 1560     		str	r5, [r2]	@ unaligned
+ 847 03ec 5460     		str	r4, [r2, #4]	@ unaligned
+ 848 03ee 9060     		str	r0, [r2, #8]	@ unaligned
+ 849 03f0 D160     		str	r1, [r2, #12]	@ unaligned
+ 850 03f2 1B7C     		ldrb	r3, [r3, #16]
+ 851 03f4 1374     		strb	r3, [r2, #16]
+ 344:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    
+ 345:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    //===== DIO payload
+ 346:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    // note: DIO is already mostly populated
+ 347:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    icmpv6rpl_vars.dio.rank                  = neighbors_getMyDAGrank();
+ 852              		.loc 1 347 0
+ 853 03f6 FFF7FEFF 		bl	neighbors_getMyDAGrank
+ 854 03fa 0346     		mov	r3, r0
+ 855 03fc 1A46     		mov	r2, r3
+ 856 03fe 274B     		ldr	r3, .L41
+ 857 0400 9A80     		strh	r2, [r3, #4]	@ movhi
+ 348:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    packetfunctions_reserveHeaderSize(msg,sizeof(icmpv6rpl_dio_ht));
+ 858              		.loc 1 348 0
+ 859 0402 7868     		ldr	r0, [r7, #4]
+ 860 0404 1821     		movs	r1, #24
+ 861 0406 FFF7FEFF 		bl	packetfunctions_reserveHeaderSize
+ 349:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    memcpy(
+ 350:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****       ((icmpv6rpl_dio_ht*)(msg->payload)),
+ 862              		.loc 1 350 0
+ 863 040a 7B68     		ldr	r3, [r7, #4]
+ 864 040c 5A68     		ldr	r2, [r3, #4]
+ 349:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    memcpy(
+ 865              		.loc 1 349 0
+ 866 040e 234B     		ldr	r3, .L41
+ 867 0410 0233     		adds	r3, r3, #2
+ 868 0412 1868     		ldr	r0, [r3]	@ unaligned
+ 869 0414 5968     		ldr	r1, [r3, #4]	@ unaligned
+ 870 0416 9D68     		ldr	r5, [r3, #8]	@ unaligned
+ 871 0418 DC68     		ldr	r4, [r3, #12]	@ unaligned
+ 872 041a 1060     		str	r0, [r2]	@ unaligned
+ 873 041c 5160     		str	r1, [r2, #4]	@ unaligned
+ 874 041e 9560     		str	r5, [r2, #8]	@ unaligned
+ 875 0420 D460     		str	r4, [r2, #12]	@ unaligned
+ 876 0422 1869     		ldr	r0, [r3, #16]	@ unaligned
+ 877 0424 5969     		ldr	r1, [r3, #20]	@ unaligned
+ 878 0426 1061     		str	r0, [r2, #16]	@ unaligned
+ 879 0428 5161     		str	r1, [r2, #20]	@ unaligned
+ 351:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****       &(icmpv6rpl_vars.dio),
+ 352:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****       sizeof(icmpv6rpl_dio_ht)
+ 353:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    );
+ 354:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    
+ 355:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    // reverse the rank bytes order in Big Endian
+ 356:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    *(msg->payload+2) = (icmpv6rpl_vars.dio.rank >> 8) & 0xFF;
+ 880              		.loc 1 356 0
+ 881 042a 7B68     		ldr	r3, [r7, #4]
+ 882 042c 5B68     		ldr	r3, [r3, #4]
+ 883 042e 0233     		adds	r3, r3, #2
+ 884 0430 1A4A     		ldr	r2, .L41
+ 885 0432 9288     		ldrh	r2, [r2, #4]
+ 886 0434 120A     		lsrs	r2, r2, #8
+ 887 0436 92B2     		uxth	r2, r2
+ 888 0438 D2B2     		uxtb	r2, r2
+ 889 043a 1A70     		strb	r2, [r3]
+ 357:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    *(msg->payload+3) = icmpv6rpl_vars.dio.rank        & 0xFF;
+ 890              		.loc 1 357 0
+ 891 043c 7B68     		ldr	r3, [r7, #4]
+ 892 043e 5B68     		ldr	r3, [r3, #4]
+ 893 0440 0333     		adds	r3, r3, #3
+ 894 0442 164A     		ldr	r2, .L41
+ 895 0444 9288     		ldrh	r2, [r2, #4]
+ 896 0446 D2B2     		uxtb	r2, r2
+ 897 0448 1A70     		strb	r2, [r3]
+ 358:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    
+ 359:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    //===== ICMPv6 header
+ 360:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    packetfunctions_reserveHeaderSize(msg,sizeof(ICMPv6_ht));
+ 898              		.loc 1 360 0
+ 899 044a 7868     		ldr	r0, [r7, #4]
+ 900 044c 0421     		movs	r1, #4
+ 901 044e FFF7FEFF 		bl	packetfunctions_reserveHeaderSize
+ 361:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    ((ICMPv6_ht*)(msg->payload))->type       = msg->l4_sourcePortORicmpv6Type;
+ 902              		.loc 1 361 0
+ 903 0452 7B68     		ldr	r3, [r7, #4]
+ 904 0454 5B68     		ldr	r3, [r3, #4]
+ 905 0456 7A68     		ldr	r2, [r7, #4]
+ 906 0458 9289     		ldrh	r2, [r2, #12]
+ 907 045a D2B2     		uxtb	r2, r2
+ 908 045c 1A70     		strb	r2, [r3]
+ 362:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    ((ICMPv6_ht*)(msg->payload))->code       = IANA_ICMPv6_RPL_DIO;
+ 909              		.loc 1 362 0
+ 910 045e 7B68     		ldr	r3, [r7, #4]
+ 911 0460 5B68     		ldr	r3, [r3, #4]
+ 912 0462 0122     		movs	r2, #1
+ 913 0464 5A70     		strb	r2, [r3, #1]
+ 363:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    packetfunctions_calculateChecksum(msg,(uint8_t*)&(((ICMPv6_ht*)(msg->payload))->checksum));//cal
+ 914              		.loc 1 363 0
+ 915 0466 7B68     		ldr	r3, [r7, #4]
+ 916 0468 5B68     		ldr	r3, [r3, #4]
+ 917 046a 0233     		adds	r3, r3, #2
+ 918 046c 7868     		ldr	r0, [r7, #4]
+ 919 046e 1946     		mov	r1, r3
+ 920 0470 FFF7FEFF 		bl	packetfunctions_calculateChecksum
+ 364:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    
+ 365:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    //send
+ 366:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    if (icmpv6_send(msg)!=E_SUCCESS) {
+ 921              		.loc 1 366 0
+ 922 0474 7868     		ldr	r0, [r7, #4]
+ 923 0476 FFF7FEFF 		bl	icmpv6_send
+ 924 047a 0346     		mov	r3, r0
+ 925 047c 002B     		cmp	r3, #0
+ 926 047e 06D0     		beq	.L40
+ 367:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****       icmpv6rpl_vars.busySending = FALSE;
+ 927              		.loc 1 367 0
+ 928 0480 064B     		ldr	r3, .L41
+ 929 0482 0022     		movs	r2, #0
+ 930 0484 1A70     		strb	r2, [r3]
+ 368:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****       openqueue_freePacketBuffer(msg);
+ 931              		.loc 1 368 0
+ 932 0486 7868     		ldr	r0, [r7, #4]
+ 933 0488 FFF7FEFF 		bl	openqueue_freePacketBuffer
+ 934 048c 02E0     		b	.L34
+ 935              	.L40:
+ 369:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    } else {
+ 370:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****       icmpv6rpl_vars.busySending = FALSE; 
+ 936              		.loc 1 370 0
+ 937 048e 034B     		ldr	r3, .L41
+ 938 0490 0022     		movs	r2, #0
+ 939 0492 1A70     		strb	r2, [r3]
+ 940              	.L34:
+ 371:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    }
+ 372:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** }
+ 941              		.loc 1 372 0
+ 942 0494 0837     		adds	r7, r7, #8
+ 943              		.cfi_def_cfa_offset 16
+ 944 0496 BD46     		mov	sp, r7
+ 945              		.cfi_def_cfa_register 13
+ 946              		@ sp needed
+ 947 0498 B0BD     		pop	{r4, r5, r7, pc}
+ 948              	.L42:
+ 949 049a 00BF     		.align	2
+ 950              	.L41:
+ 951 049c 00000000 		.word	icmpv6rpl_vars
+ 952              		.cfi_endproc
+ 953              	.LFE8:
+ 955              		.align	2
+ 956              		.global	icmpv6rpl_timer_DAO_cb
+ 957              		.thumb
+ 958              		.thumb_func
+ 960              	icmpv6rpl_timer_DAO_cb:
+ 961              	.LFB9:
+ 373:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** 
+ 374:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** //===== DAO-related
+ 375:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** 
+ 376:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** /**
+ 377:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** \brief DAO timer callback function.
+ 378:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** 
+ 379:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** \note This function is executed in interrupt context, and should only push a
+ 380:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    task.
+ 381:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** */
+ 382:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** void icmpv6rpl_timer_DAO_cb(opentimer_id_t id) {
+ 962              		.loc 1 382 0
+ 963              		.cfi_startproc
+ 964              		@ args = 0, pretend = 0, frame = 8
+ 965              		@ frame_needed = 1, uses_anonymous_args = 0
+ 966 04a0 80B5     		push	{r7, lr}
+ 967              		.cfi_def_cfa_offset 8
+ 968              		.cfi_offset 7, -8
+ 969              		.cfi_offset 14, -4
+ 970 04a2 82B0     		sub	sp, sp, #8
+ 971              		.cfi_def_cfa_offset 16
+ 972 04a4 00AF     		add	r7, sp, #0
+ 973              		.cfi_def_cfa_register 7
+ 974 04a6 0346     		mov	r3, r0
+ 975 04a8 FB71     		strb	r3, [r7, #7]
+ 383:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    scheduler_push_task(icmpv6rpl_timer_DAO_task,TASKPRIO_RPL);
+ 976              		.loc 1 383 0
+ 977 04aa 0348     		ldr	r0, .L44
+ 978 04ac 0421     		movs	r1, #4
+ 979 04ae FFF7FEFF 		bl	scheduler_push_task
+ 384:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** }
+ 980              		.loc 1 384 0
+ 981 04b2 0837     		adds	r7, r7, #8
+ 982              		.cfi_def_cfa_offset 8
+ 983 04b4 BD46     		mov	sp, r7
+ 984              		.cfi_def_cfa_register 13
+ 985              		@ sp needed
+ 986 04b6 80BD     		pop	{r7, pc}
+ 987              	.L45:
+ 988              		.align	2
+ 989              	.L44:
+ 990 04b8 00000000 		.word	icmpv6rpl_timer_DAO_task
+ 991              		.cfi_endproc
+ 992              	.LFE9:
+ 994              		.align	2
+ 995              		.global	icmpv6rpl_timer_DAO_task
+ 996              		.thumb
+ 997              		.thumb_func
+ 999              	icmpv6rpl_timer_DAO_task:
+ 1000              	.LFB10:
+ 385:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** 
+ 386:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** /**
+ 387:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** \brief Handler for DAO timer event.
+ 388:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** 
+ 389:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** \note This function is executed in task context, called by the scheduler.
+ 390:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** */
+ 391:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** void icmpv6rpl_timer_DAO_task() {
+ 1001              		.loc 1 391 0
+ 1002              		.cfi_startproc
+ 1003              		@ args = 0, pretend = 0, frame = 8
+ 1004              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1005 04bc 90B5     		push	{r4, r7, lr}
+ 1006              		.cfi_def_cfa_offset 12
+ 1007              		.cfi_offset 4, -12
+ 1008              		.cfi_offset 7, -8
+ 1009              		.cfi_offset 14, -4
+ 1010 04be 83B0     		sub	sp, sp, #12
+ 1011              		.cfi_def_cfa_offset 24
+ 1012 04c0 00AF     		add	r7, sp, #0
+ 1013              		.cfi_def_cfa_register 7
+ 392:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    uint32_t        daoPeriod;
+ 393:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    
+ 394:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    // send DAO
+ 395:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    sendDAO();
+ 1014              		.loc 1 395 0
+ 1015 04c2 FFF7FEFF 		bl	sendDAO
+ 396:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    
+ 397:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    // arm the DAO timer with this new value
+ 398:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    daoPeriod = icmpv6rpl_vars.daoPeriod - 0x80 + (openrandom_get16b()&0xff);
+ 1016              		.loc 1 398 0
+ 1017 04c6 0A4B     		ldr	r3, .L47
+ 1018 04c8 5C6D     		ldr	r4, [r3, #84]
+ 1019 04ca FFF7FEFF 		bl	openrandom_get16b
+ 1020 04ce 0346     		mov	r3, r0
+ 1021 04d0 DBB2     		uxtb	r3, r3
+ 1022 04d2 2344     		add	r3, r3, r4
+ 1023 04d4 803B     		subs	r3, r3, #128
+ 1024 04d6 7B60     		str	r3, [r7, #4]
+ 399:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    opentimers_setPeriod(
+ 1025              		.loc 1 399 0
+ 1026 04d8 054B     		ldr	r3, .L47
+ 1027 04da 93F85030 		ldrb	r3, [r3, #80]	@ zero_extendqisi2
+ 1028 04de 1846     		mov	r0, r3
+ 1029 04e0 0021     		movs	r1, #0
+ 1030 04e2 7A68     		ldr	r2, [r7, #4]
+ 1031 04e4 FFF7FEFF 		bl	opentimers_setPeriod
+ 400:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****       icmpv6rpl_vars.timerIdDAO,
+ 401:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****       TIME_MS,
+ 402:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****       daoPeriod
+ 403:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    );
+ 404:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** }
+ 1032              		.loc 1 404 0
+ 1033 04e8 0C37     		adds	r7, r7, #12
+ 1034              		.cfi_def_cfa_offset 12
+ 1035 04ea BD46     		mov	sp, r7
+ 1036              		.cfi_def_cfa_register 13
+ 1037              		@ sp needed
+ 1038 04ec 90BD     		pop	{r4, r7, pc}
+ 1039              	.L48:
+ 1040 04ee 00BF     		.align	2
+ 1041              	.L47:
+ 1042 04f0 00000000 		.word	icmpv6rpl_vars
+ 1043              		.cfi_endproc
+ 1044              	.LFE10:
+ 1046              		.align	2
+ 1047              		.global	sendDAO
+ 1048              		.thumb
+ 1049              		.thumb_func
+ 1051              	sendDAO:
+ 1052              	.LFB11:
+ 405:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** 
+ 406:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** /**
+ 407:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** \brief Prepare and a send a RPL DAO.
+ 408:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** */
+ 409:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** void sendDAO() {
+ 1053              		.loc 1 409 0
+ 1054              		.cfi_startproc
+ 1055              		@ args = 0, pretend = 0, frame = 40
+ 1056              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1057 04f4 B0B5     		push	{r4, r5, r7, lr}
+ 1058              		.cfi_def_cfa_offset 16
+ 1059              		.cfi_offset 4, -16
+ 1060              		.cfi_offset 5, -12
+ 1061              		.cfi_offset 7, -8
+ 1062              		.cfi_offset 14, -4
+ 1063 04f6 8AB0     		sub	sp, sp, #40
+ 1064              		.cfi_def_cfa_offset 56
+ 1065 04f8 00AF     		add	r7, sp, #0
+ 1066              		.cfi_def_cfa_register 7
+ 410:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    OpenQueueEntry_t*    msg;                // pointer to DAO messages
+ 411:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    uint8_t              nbrIdx;             // running neighbor index
+ 412:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    uint8_t              numTransitParents,numTargetParents;  // the number of parents indicated in 
+ 413:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    open_addr_t         address;
+ 414:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    open_addr_t*        prefix;
+ 415:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    
+ 416:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    if (ieee154e_isSynch()==FALSE) {
+ 1067              		.loc 1 416 0
+ 1068 04fa FFF7FEFF 		bl	ieee154e_isSynch
+ 1069 04fe 0346     		mov	r3, r0
+ 1070 0500 83F00103 		eor	r3, r3, #1
+ 1071 0504 DBB2     		uxtb	r3, r3
+ 1072 0506 002B     		cmp	r3, #0
+ 1073 0508 06D0     		beq	.L50
+ 417:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****       // I'm not sync'ed 
+ 418:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****       
+ 419:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****       // delete packets genereted by this module (DIO and DAO) from openqueue
+ 420:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****       openqueue_removeAllCreatedBy(COMPONENT_ICMPv6RPL);
+ 1074              		.loc 1 420 0
+ 1075 050a 1620     		movs	r0, #22
+ 1076 050c FFF7FEFF 		bl	openqueue_removeAllCreatedBy
+ 421:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****       
+ 422:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****       // I'm not busy sending a DIO/DAO
+ 423:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****       icmpv6rpl_vars.busySending = FALSE;
+ 1077              		.loc 1 423 0
+ 1078 0510 854B     		ldr	r3, .L65
+ 1079 0512 0022     		movs	r2, #0
+ 1080 0514 1A70     		strb	r2, [r3]
+ 424:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****       
+ 425:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****       // stop here
+ 426:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****       return;
+ 1081              		.loc 1 426 0
+ 1082 0516 03E1     		b	.L49
+ 1083              	.L50:
+ 427:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    }
+ 428:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    
+ 429:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    // dont' send a DAO if you're the DAG root
+ 430:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    if (idmanager_getIsDAGroot()==TRUE) {
+ 1084              		.loc 1 430 0
+ 1085 0518 FFF7FEFF 		bl	idmanager_getIsDAGroot
+ 1086 051c 0346     		mov	r3, r0
+ 1087 051e 002B     		cmp	r3, #0
+ 1088 0520 00D0     		beq	.L52
+ 431:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****       return;
+ 1089              		.loc 1 431 0
+ 1090 0522 FDE0     		b	.L49
+ 1091              	.L52:
+ 432:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    }
+ 433:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    
+ 434:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    // dont' send a DAO if you did not acquire a DAGrank
+ 435:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    if (neighbors_getMyDAGrank()==DEFAULTDAGRANK) {
+ 1092              		.loc 1 435 0
+ 1093 0524 FFF7FEFF 		bl	neighbors_getMyDAGrank
+ 1094 0528 0346     		mov	r3, r0
+ 1095 052a 1A46     		mov	r2, r3
+ 1096 052c 4FF6FF73 		movw	r3, #65535
+ 1097 0530 9A42     		cmp	r2, r3
+ 1098 0532 00D1     		bne	.L53
+ 436:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****        return;
+ 1099              		.loc 1 436 0
+ 1100 0534 F4E0     		b	.L49
+ 1101              	.L53:
+ 437:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    }
+ 438:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    
+ 439:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    // dont' send a DAO if you're still busy sending the previous one
+ 440:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    if (icmpv6rpl_vars.busySending==TRUE) {
+ 1102              		.loc 1 440 0
+ 1103 0536 7C4B     		ldr	r3, .L65
+ 1104 0538 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 1105 053a 002B     		cmp	r3, #0
+ 1106 053c 00D0     		beq	.L54
+ 441:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****       return;
+ 1107              		.loc 1 441 0
+ 1108 053e EFE0     		b	.L49
+ 1109              	.L54:
+ 442:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    }
+ 443:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    
+ 444:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    // if you get here, you start construct DAO
+ 445:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    
+ 446:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    // reserve a free packet buffer for DAO
+ 447:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    msg = openqueue_getFreePacketBuffer(COMPONENT_ICMPv6RPL);
+ 1110              		.loc 1 447 0
+ 1111 0540 1620     		movs	r0, #22
+ 1112 0542 FFF7FEFF 		bl	openqueue_getFreePacketBuffer
+ 1113 0546 3862     		str	r0, [r7, #32]
+ 448:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    if (msg==NULL) {
+ 1114              		.loc 1 448 0
+ 1115 0548 3B6A     		ldr	r3, [r7, #32]
+ 1116 054a 002B     		cmp	r3, #0
+ 1117 054c 06D1     		bne	.L55
+ 449:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****       openserial_printError(COMPONENT_ICMPv6RPL,ERR_NO_FREE_PACKET_BUFFER,
+ 1118              		.loc 1 449 0
+ 1119 054e 1620     		movs	r0, #22
+ 1120 0550 2C21     		movs	r1, #44
+ 1121 0552 0022     		movs	r2, #0
+ 1122 0554 0023     		movs	r3, #0
+ 1123 0556 FFF7FEFF 		bl	openserial_printError
+ 450:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****                             (errorparameter_t)0,
+ 451:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****                             (errorparameter_t)0);
+ 452:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****       return;
+ 1124              		.loc 1 452 0
+ 1125 055a E1E0     		b	.L49
+ 1126              	.L55:
+ 453:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    }
+ 454:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    
+ 455:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    // take ownership
+ 456:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    msg->creator                             = COMPONENT_ICMPv6RPL;
+ 1127              		.loc 1 456 0
+ 1128 055c 3B6A     		ldr	r3, [r7, #32]
+ 1129 055e 1622     		movs	r2, #22
+ 1130 0560 1A70     		strb	r2, [r3]
+ 457:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    msg->owner                               = COMPONENT_ICMPv6RPL;
+ 1131              		.loc 1 457 0
+ 1132 0562 3B6A     		ldr	r3, [r7, #32]
+ 1133 0564 1622     		movs	r2, #22
+ 1134 0566 5A70     		strb	r2, [r3, #1]
+ 458:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    
+ 459:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    // set transport information
+ 460:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    msg->l4_protocol                         = IANA_ICMPv6;
+ 1135              		.loc 1 460 0
+ 1136 0568 3B6A     		ldr	r3, [r7, #32]
+ 1137 056a 3A22     		movs	r2, #58
+ 1138 056c 5A72     		strb	r2, [r3, #9]
+ 461:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    msg->l4_sourcePortORicmpv6Type           = IANA_ICMPv6_RPL;
+ 1139              		.loc 1 461 0
+ 1140 056e 3B6A     		ldr	r3, [r7, #32]
+ 1141 0570 9B22     		movs	r2, #155
+ 1142 0572 9A81     		strh	r2, [r3, #12]	@ movhi
+ 462:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    
+ 463:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    // set DAO destination
+ 464:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    msg->l3_destinationAdd.type=ADDR_128B;
+ 1143              		.loc 1 464 0
+ 1144 0574 3B6A     		ldr	r3, [r7, #32]
+ 1145 0576 0322     		movs	r2, #3
+ 1146 0578 5A75     		strb	r2, [r3, #21]
+ 465:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    memcpy(msg->l3_destinationAdd.addr_128b,icmpv6rpl_vars.dio.DODAGID,sizeof(icmpv6rpl_vars.dio.DOD
+ 1147              		.loc 1 465 0
+ 1148 057a 3B6A     		ldr	r3, [r7, #32]
+ 1149 057c 03F11602 		add	r2, r3, #22
+ 1150 0580 694B     		ldr	r3, .L65
+ 1151 0582 0A33     		adds	r3, r3, #10
+ 1152 0584 1C68     		ldr	r4, [r3]	@ unaligned
+ 1153 0586 5868     		ldr	r0, [r3, #4]	@ unaligned
+ 1154 0588 9968     		ldr	r1, [r3, #8]	@ unaligned
+ 1155 058a DB68     		ldr	r3, [r3, #12]	@ unaligned
+ 1156 058c 1460     		str	r4, [r2]	@ unaligned
+ 1157 058e 5060     		str	r0, [r2, #4]	@ unaligned
+ 1158 0590 9160     		str	r1, [r2, #8]	@ unaligned
+ 1159 0592 D360     		str	r3, [r2, #12]	@ unaligned
+ 466:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    
+ 467:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    //===== fill in packet
+ 468:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    
+ 469:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    //NOTE: limit to preferrred parent only the number of DAO transit addresses to send
+ 470:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    
+ 471:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    //=== transit option -- from RFC 6550, page 55 - 1 transit information header per parent is requ
+ 472:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    //getting only preferred parent as transit
+ 473:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    numTransitParents=0;
+ 1160              		.loc 1 473 0
+ 1161 0594 0023     		movs	r3, #0
+ 1162 0596 FB77     		strb	r3, [r7, #31]
+ 474:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    neighbors_getPreferredParentEui64(&address);
+ 1163              		.loc 1 474 0
+ 1164 0598 3B1D     		adds	r3, r7, #4
+ 1165 059a 1846     		mov	r0, r3
+ 1166 059c FFF7FEFF 		bl	neighbors_getPreferredParentEui64
+ 475:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    packetfunctions_writeAddress(msg,&address,OW_BIG_ENDIAN);
+ 1167              		.loc 1 475 0
+ 1168 05a0 3B1D     		adds	r3, r7, #4
+ 1169 05a2 386A     		ldr	r0, [r7, #32]
+ 1170 05a4 1946     		mov	r1, r3
+ 1171 05a6 0022     		movs	r2, #0
+ 1172 05a8 FFF7FEFF 		bl	packetfunctions_writeAddress
+ 476:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    prefix=idmanager_getMyID(ADDR_PREFIX);
+ 1173              		.loc 1 476 0
+ 1174 05ac 0520     		movs	r0, #5
+ 1175 05ae FFF7FEFF 		bl	idmanager_getMyID
+ 1176 05b2 B861     		str	r0, [r7, #24]
+ 477:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    packetfunctions_writeAddress(msg,prefix,OW_BIG_ENDIAN);
+ 1177              		.loc 1 477 0
+ 1178 05b4 386A     		ldr	r0, [r7, #32]
+ 1179 05b6 B969     		ldr	r1, [r7, #24]
+ 1180 05b8 0022     		movs	r2, #0
+ 1181 05ba FFF7FEFF 		bl	packetfunctions_writeAddress
+ 478:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    // update transit info fields
+ 479:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    // from rfc6550 p.55 -- Variable, depending on whether or not the DODAG ParentAddress subfield i
+ 480:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    // poipoi xv: it is not very clear if this includes all fields in the header. or as target info 
+ 481:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    // using the same pattern as in target information.
+ 482:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    icmpv6rpl_vars.dao_transit.optionLength  = LENGTH_ADDR128b + sizeof(icmpv6rpl_dao_transit_ht)-2;
+ 1182              		.loc 1 482 0
+ 1183 05be 5A4B     		ldr	r3, .L65
+ 1184 05c0 1422     		movs	r2, #20
+ 1185 05c2 83F84720 		strb	r2, [r3, #71]
+ 483:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    icmpv6rpl_vars.dao_transit.PathControl=0; //todo. this is to set the preference of this parent. 
+ 1186              		.loc 1 483 0
+ 1187 05c6 584B     		ldr	r3, .L65
+ 1188 05c8 0022     		movs	r2, #0
+ 1189 05ca 83F84920 		strb	r2, [r3, #73]
+ 484:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    icmpv6rpl_vars.dao_transit.type=OPTION_TRANSIT_INFORMATION_TYPE;
+ 1190              		.loc 1 484 0
+ 1191 05ce 564B     		ldr	r3, .L65
+ 1192 05d0 0622     		movs	r2, #6
+ 1193 05d2 83F84620 		strb	r2, [r3, #70]
+ 485:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****            
+ 486:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    // write transit info in packet
+ 487:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    packetfunctions_reserveHeaderSize(msg,sizeof(icmpv6rpl_dao_transit_ht));
+ 1194              		.loc 1 487 0
+ 1195 05d6 386A     		ldr	r0, [r7, #32]
+ 1196 05d8 0621     		movs	r1, #6
+ 1197 05da FFF7FEFF 		bl	packetfunctions_reserveHeaderSize
+ 488:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    memcpy(
+ 489:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****           ((icmpv6rpl_dao_transit_ht*)(msg->payload)),
+ 1198              		.loc 1 489 0
+ 1199 05de 3B6A     		ldr	r3, [r7, #32]
+ 1200 05e0 5A68     		ldr	r2, [r3, #4]
+ 488:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    memcpy(
+ 1201              		.loc 1 488 0
+ 1202 05e2 514B     		ldr	r3, .L65
+ 1203 05e4 4633     		adds	r3, r3, #70
+ 1204 05e6 1968     		ldr	r1, [r3]	@ unaligned
+ 1205 05e8 1160     		str	r1, [r2]	@ unaligned
+ 1206 05ea 9B88     		ldrh	r3, [r3, #4]	@ unaligned
+ 1207 05ec 9380     		strh	r3, [r2, #4]	@ unaligned
+ 490:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****           &(icmpv6rpl_vars.dao_transit),
+ 491:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****           sizeof(icmpv6rpl_dao_transit_ht)
+ 492:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    );
+ 493:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    numTransitParents++;
+ 1208              		.loc 1 493 0
+ 1209 05ee FB7F     		ldrb	r3, [r7, #31]	@ zero_extendqisi2
+ 1210 05f0 0133     		adds	r3, r3, #1
+ 1211 05f2 FB77     		strb	r3, [r7, #31]
+ 494:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    
+ 495:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    //target information is required. RFC 6550 page 55.
+ 496:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    /*
+ 497:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    One or more Transit Information options MUST be preceded by one or
+ 498:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    more RPL Target options.   
+ 499:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    */
+ 500:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****     numTargetParents                        = 0;
+ 1212              		.loc 1 500 0
+ 1213 05f4 0023     		movs	r3, #0
+ 1214 05f6 87F82630 		strb	r3, [r7, #38]
+ 501:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****     for (nbrIdx=0;nbrIdx<MAXNUMNEIGHBORS;nbrIdx++) {
+ 1215              		.loc 1 501 0
+ 1216 05fa 0023     		movs	r3, #0
+ 1217 05fc 87F82730 		strb	r3, [r7, #39]
+ 1218 0600 47E0     		b	.L56
+ 1219              	.L60:
+ 502:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****       if ((neighbors_isNeighborWithHigherDAGrank(nbrIdx))==TRUE) {
+ 1220              		.loc 1 502 0
+ 1221 0602 97F82730 		ldrb	r3, [r7, #39]	@ zero_extendqisi2
+ 1222 0606 1846     		mov	r0, r3
+ 1223 0608 FFF7FEFF 		bl	neighbors_isNeighborWithHigherDAGrank
+ 1224 060c 0346     		mov	r3, r0
+ 1225 060e 002B     		cmp	r3, #0
+ 1226 0610 35D0     		beq	.L57
+ 503:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****          // this neighbor is of higher DAGrank as I am. so it is my child
+ 504:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****          
+ 505:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****          // write it's address in DAO RFC6550 page 80 check point 1.
+ 506:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****          neighbors_getNeighbor(&address,ADDR_64B,nbrIdx); 
+ 1227              		.loc 1 506 0
+ 1228 0612 3A1D     		adds	r2, r7, #4
+ 1229 0614 97F82730 		ldrb	r3, [r7, #39]	@ zero_extendqisi2
+ 1230 0618 1046     		mov	r0, r2
+ 1231 061a 0221     		movs	r1, #2
+ 1232 061c 1A46     		mov	r2, r3
+ 1233 061e FFF7FEFF 		bl	neighbors_getNeighbor
+ 507:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****          packetfunctions_writeAddress(msg,&address,OW_BIG_ENDIAN);
+ 1234              		.loc 1 507 0
+ 1235 0622 3B1D     		adds	r3, r7, #4
+ 1236 0624 386A     		ldr	r0, [r7, #32]
+ 1237 0626 1946     		mov	r1, r3
+ 1238 0628 0022     		movs	r2, #0
+ 1239 062a FFF7FEFF 		bl	packetfunctions_writeAddress
+ 508:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****          prefix=idmanager_getMyID(ADDR_PREFIX);
+ 1240              		.loc 1 508 0
+ 1241 062e 0520     		movs	r0, #5
+ 1242 0630 FFF7FEFF 		bl	idmanager_getMyID
+ 1243 0634 B861     		str	r0, [r7, #24]
+ 509:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****          packetfunctions_writeAddress(msg,prefix,OW_BIG_ENDIAN);
+ 1244              		.loc 1 509 0
+ 1245 0636 386A     		ldr	r0, [r7, #32]
+ 1246 0638 B969     		ldr	r1, [r7, #24]
+ 1247 063a 0022     		movs	r2, #0
+ 1248 063c FFF7FEFF 		bl	packetfunctions_writeAddress
+ 510:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****         
+ 511:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****          // update target info fields 
+ 512:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****          // from rfc6550 p.55 -- Variable, length of the option in octets excluding the Type and Le
+ 513:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****          // poipoi xv: assuming that type and length fields refer to the 2 first bytes of the heade
+ 514:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****          icmpv6rpl_vars.dao_target.optionLength  = LENGTH_ADDR128b +sizeof(icmpv6rpl_dao_target_ht)
+ 1249              		.loc 1 514 0
+ 1250 0640 394B     		ldr	r3, .L65
+ 1251 0642 1222     		movs	r2, #18
+ 1252 0644 83F84D20 		strb	r2, [r3, #77]
+ 515:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****          icmpv6rpl_vars.dao_target.type  = OPTION_TARGET_INFORMATION_TYPE;
+ 1253              		.loc 1 515 0
+ 1254 0648 374B     		ldr	r3, .L65
+ 1255 064a 0522     		movs	r2, #5
+ 1256 064c 83F84C20 		strb	r2, [r3, #76]
+ 516:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****          icmpv6rpl_vars.dao_target.flags  = 0;       //must be 0
+ 1257              		.loc 1 516 0
+ 1258 0650 354B     		ldr	r3, .L65
+ 1259 0652 0022     		movs	r2, #0
+ 1260 0654 83F84E20 		strb	r2, [r3, #78]
+ 517:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****          icmpv6rpl_vars.dao_target.prefixLength = 128; //128 leading bits  -- full address.
+ 1261              		.loc 1 517 0
+ 1262 0658 334B     		ldr	r3, .L65
+ 1263 065a 8022     		movs	r2, #128
+ 1264 065c 83F84F20 		strb	r2, [r3, #79]
+ 518:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****          
+ 519:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****          // write transit info in packet
+ 520:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****          packetfunctions_reserveHeaderSize(msg,sizeof(icmpv6rpl_dao_target_ht));
+ 1265              		.loc 1 520 0
+ 1266 0660 386A     		ldr	r0, [r7, #32]
+ 1267 0662 0421     		movs	r1, #4
+ 1268 0664 FFF7FEFF 		bl	packetfunctions_reserveHeaderSize
+ 521:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****          memcpy(
+ 522:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****                ((icmpv6rpl_dao_target_ht*)(msg->payload)),
+ 1269              		.loc 1 522 0
+ 1270 0668 3B6A     		ldr	r3, [r7, #32]
+ 1271 066a 5A68     		ldr	r2, [r3, #4]
+ 521:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****          memcpy(
+ 1272              		.loc 1 521 0
+ 1273 066c 2E4B     		ldr	r3, .L65
+ 1274 066e 4C33     		adds	r3, r3, #76
+ 1275 0670 1868     		ldr	r0, [r3]	@ unaligned
+ 1276 0672 1060     		str	r0, [r2]	@ unaligned
+ 523:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****                &(icmpv6rpl_vars.dao_target),
+ 524:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****                sizeof(icmpv6rpl_dao_target_ht)
+ 525:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****          );
+ 526:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****          
+ 527:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****          // remember I found it
+ 528:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****          numTargetParents++;
+ 1277              		.loc 1 528 0
+ 1278 0674 97F82630 		ldrb	r3, [r7, #38]	@ zero_extendqisi2
+ 1279 0678 0133     		adds	r3, r3, #1
+ 1280 067a 87F82630 		strb	r3, [r7, #38]
+ 1281              	.L57:
+ 529:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****       }  
+ 530:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****       //limit to MAX_TARGET_PARENTS the number of DAO target addresses to send
+ 531:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****       //section 8.2.1 pag 67 RFC6550 -- using a subset
+ 532:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****       // poipoi TODO base selection on ETX rather than first X.
+ 533:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****       if (numTargetParents>=MAX_TARGET_PARENTS) break;
+ 1282              		.loc 1 533 0
+ 1283 067e 97F82630 		ldrb	r3, [r7, #38]	@ zero_extendqisi2
+ 1284 0682 002B     		cmp	r3, #0
+ 1285 0684 00D0     		beq	.L58
+ 1286 0686 08E0     		b	.L59
+ 1287              	.L58:
+ 501:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****       if ((neighbors_isNeighborWithHigherDAGrank(nbrIdx))==TRUE) {
+ 1288              		.loc 1 501 0 discriminator 2
+ 1289 0688 97F82730 		ldrb	r3, [r7, #39]	@ zero_extendqisi2
+ 1290 068c 0133     		adds	r3, r3, #1
+ 1291 068e 87F82730 		strb	r3, [r7, #39]
+ 1292              	.L56:
+ 501:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****       if ((neighbors_isNeighborWithHigherDAGrank(nbrIdx))==TRUE) {
+ 1293              		.loc 1 501 0 is_stmt 0 discriminator 1
+ 1294 0692 97F82730 		ldrb	r3, [r7, #39]	@ zero_extendqisi2
+ 1295 0696 092B     		cmp	r3, #9
+ 1296 0698 B3D9     		bls	.L60
+ 1297              	.L59:
+ 534:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    }
+ 535:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    
+ 536:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    
+ 537:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    // stop here if no parents found
+ 538:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    if (numTransitParents==0) {
+ 1298              		.loc 1 538 0 is_stmt 1
+ 1299 069a FB7F     		ldrb	r3, [r7, #31]	@ zero_extendqisi2
+ 1300 069c 002B     		cmp	r3, #0
+ 1301 069e 03D1     		bne	.L61
+ 539:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****       openqueue_freePacketBuffer(msg);
+ 1302              		.loc 1 539 0
+ 1303 06a0 386A     		ldr	r0, [r7, #32]
+ 1304 06a2 FFF7FEFF 		bl	openqueue_freePacketBuffer
+ 540:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****       return;
+ 1305              		.loc 1 540 0
+ 1306 06a6 3BE0     		b	.L49
+ 1307              	.L61:
+ 541:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    }
+ 542:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    
+ 543:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    icmpv6rpl_vars.dao_transit.PathSequence++; //increment path sequence.
+ 1308              		.loc 1 543 0
+ 1309 06a8 1F4B     		ldr	r3, .L65
+ 1310 06aa 93F84A30 		ldrb	r3, [r3, #74]	@ zero_extendqisi2
+ 1311 06ae 0133     		adds	r3, r3, #1
+ 1312 06b0 DAB2     		uxtb	r2, r3
+ 1313 06b2 1D4B     		ldr	r3, .L65
+ 1314 06b4 83F84A20 		strb	r2, [r3, #74]
+ 544:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    // if you get here, you will send a DAO
+ 545:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    
+ 546:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    
+ 547:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    //=== DAO header
+ 548:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    packetfunctions_reserveHeaderSize(msg,sizeof(icmpv6rpl_dao_ht));
+ 1315              		.loc 1 548 0
+ 1316 06b8 386A     		ldr	r0, [r7, #32]
+ 1317 06ba 1421     		movs	r1, #20
+ 1318 06bc FFF7FEFF 		bl	packetfunctions_reserveHeaderSize
+ 549:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    memcpy(
+ 550:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****       ((icmpv6rpl_dao_ht*)(msg->payload)),
+ 1319              		.loc 1 550 0
+ 1320 06c0 3B6A     		ldr	r3, [r7, #32]
+ 1321 06c2 5A68     		ldr	r2, [r3, #4]
+ 549:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    memcpy(
+ 1322              		.loc 1 549 0
+ 1323 06c4 184B     		ldr	r3, .L65
+ 1324 06c6 3233     		adds	r3, r3, #50
+ 1325 06c8 1968     		ldr	r1, [r3]	@ unaligned
+ 1326 06ca 5D68     		ldr	r5, [r3, #4]	@ unaligned
+ 1327 06cc 9C68     		ldr	r4, [r3, #8]	@ unaligned
+ 1328 06ce D868     		ldr	r0, [r3, #12]	@ unaligned
+ 1329 06d0 1160     		str	r1, [r2]	@ unaligned
+ 1330 06d2 5560     		str	r5, [r2, #4]	@ unaligned
+ 1331 06d4 9460     		str	r4, [r2, #8]	@ unaligned
+ 1332 06d6 D060     		str	r0, [r2, #12]	@ unaligned
+ 1333 06d8 1969     		ldr	r1, [r3, #16]	@ unaligned
+ 1334 06da 1161     		str	r1, [r2, #16]	@ unaligned
+ 551:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****       &(icmpv6rpl_vars.dao),
+ 552:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****       sizeof(icmpv6rpl_dao_ht)
+ 553:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    );
+ 554:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    
+ 555:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    //=== ICMPv6 header
+ 556:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    packetfunctions_reserveHeaderSize(msg,sizeof(ICMPv6_ht));
+ 1335              		.loc 1 556 0
+ 1336 06dc 386A     		ldr	r0, [r7, #32]
+ 1337 06de 0421     		movs	r1, #4
+ 1338 06e0 FFF7FEFF 		bl	packetfunctions_reserveHeaderSize
+ 557:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    ((ICMPv6_ht*)(msg->payload))->type       = msg->l4_sourcePortORicmpv6Type;
+ 1339              		.loc 1 557 0
+ 1340 06e4 3B6A     		ldr	r3, [r7, #32]
+ 1341 06e6 5B68     		ldr	r3, [r3, #4]
+ 1342 06e8 3A6A     		ldr	r2, [r7, #32]
+ 1343 06ea 9289     		ldrh	r2, [r2, #12]
+ 1344 06ec D2B2     		uxtb	r2, r2
+ 1345 06ee 1A70     		strb	r2, [r3]
+ 558:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    ((ICMPv6_ht*)(msg->payload))->code       = IANA_ICMPv6_RPL_DAO;
+ 1346              		.loc 1 558 0
+ 1347 06f0 3B6A     		ldr	r3, [r7, #32]
+ 1348 06f2 5B68     		ldr	r3, [r3, #4]
+ 1349 06f4 0222     		movs	r2, #2
+ 1350 06f6 5A70     		strb	r2, [r3, #1]
+ 559:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    packetfunctions_calculateChecksum(msg,(uint8_t*)&(((ICMPv6_ht*)(msg->payload))->checksum)); //ca
+ 1351              		.loc 1 559 0
+ 1352 06f8 3B6A     		ldr	r3, [r7, #32]
+ 1353 06fa 5B68     		ldr	r3, [r3, #4]
+ 1354 06fc 0233     		adds	r3, r3, #2
+ 1355 06fe 386A     		ldr	r0, [r7, #32]
+ 1356 0700 1946     		mov	r1, r3
+ 1357 0702 FFF7FEFF 		bl	packetfunctions_calculateChecksum
+ 560:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    
+ 561:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    //===== send
+ 562:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    if (icmpv6_send(msg)==E_SUCCESS) {
+ 1358              		.loc 1 562 0
+ 1359 0706 386A     		ldr	r0, [r7, #32]
+ 1360 0708 FFF7FEFF 		bl	icmpv6_send
+ 1361 070c 0346     		mov	r3, r0
+ 1362 070e 002B     		cmp	r3, #0
+ 1363 0710 03D1     		bne	.L62
+ 563:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****       icmpv6rpl_vars.busySending = TRUE;
+ 1364              		.loc 1 563 0
+ 1365 0712 054B     		ldr	r3, .L65
+ 1366 0714 0122     		movs	r2, #1
+ 1367 0716 1A70     		strb	r2, [r3]
+ 1368 0718 02E0     		b	.L49
+ 1369              	.L62:
+ 564:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    } else {
+ 565:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****       openqueue_freePacketBuffer(msg);
+ 1370              		.loc 1 565 0
+ 1371 071a 386A     		ldr	r0, [r7, #32]
+ 1372 071c FFF7FEFF 		bl	openqueue_freePacketBuffer
+ 1373              	.L49:
+ 566:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    }
+ 567:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** }
+ 1374              		.loc 1 567 0
+ 1375 0720 2837     		adds	r7, r7, #40
+ 1376              		.cfi_def_cfa_offset 16
+ 1377 0722 BD46     		mov	sp, r7
+ 1378              		.cfi_def_cfa_register 13
+ 1379              		@ sp needed
+ 1380 0724 B0BD     		pop	{r4, r5, r7, pc}
+ 1381              	.L66:
+ 1382 0726 00BF     		.align	2
+ 1383              	.L65:
+ 1384 0728 00000000 		.word	icmpv6rpl_vars
+ 1385              		.cfi_endproc
+ 1386              	.LFE11:
+ 1388              		.align	2
+ 1389              		.global	icmpv6rpl_setDIOPeriod
+ 1390              		.thumb
+ 1391              		.thumb_func
+ 1393              	icmpv6rpl_setDIOPeriod:
+ 1394              	.LFB12:
+ 568:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** 
+ 569:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** void icmpv6rpl_setDIOPeriod(uint16_t dioPeriod){
+ 1395              		.loc 1 569 0
+ 1396              		.cfi_startproc
+ 1397              		@ args = 0, pretend = 0, frame = 16
+ 1398              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1399 072c 90B5     		push	{r4, r7, lr}
+ 1400              		.cfi_def_cfa_offset 12
+ 1401              		.cfi_offset 4, -12
+ 1402              		.cfi_offset 7, -8
+ 1403              		.cfi_offset 14, -4
+ 1404 072e 85B0     		sub	sp, sp, #20
+ 1405              		.cfi_def_cfa_offset 32
+ 1406 0730 00AF     		add	r7, sp, #0
+ 1407              		.cfi_def_cfa_register 7
+ 1408 0732 0346     		mov	r3, r0
+ 1409 0734 FB80     		strh	r3, [r7, #6]	@ movhi
+ 570:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    uint32_t        dioPeriodRandom;
+ 571:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    
+ 572:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    icmpv6rpl_vars.dioPeriod = dioPeriod;
+ 1410              		.loc 1 572 0
+ 1411 0736 FB88     		ldrh	r3, [r7, #6]
+ 1412 0738 0A4A     		ldr	r2, .L68
+ 1413 073a D362     		str	r3, [r2, #44]
+ 573:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    dioPeriodRandom = icmpv6rpl_vars.dioPeriod - 0x80 + (openrandom_get16b()&0xff);
+ 1414              		.loc 1 573 0
+ 1415 073c 094B     		ldr	r3, .L68
+ 1416 073e DC6A     		ldr	r4, [r3, #44]
+ 1417 0740 FFF7FEFF 		bl	openrandom_get16b
+ 1418 0744 0346     		mov	r3, r0
+ 1419 0746 DBB2     		uxtb	r3, r3
+ 1420 0748 2344     		add	r3, r3, r4
+ 1421 074a 803B     		subs	r3, r3, #128
+ 1422 074c FB60     		str	r3, [r7, #12]
+ 574:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    opentimers_setPeriod(
+ 1423              		.loc 1 574 0
+ 1424 074e 054B     		ldr	r3, .L68
+ 1425 0750 93F83030 		ldrb	r3, [r3, #48]	@ zero_extendqisi2
+ 1426 0754 1846     		mov	r0, r3
+ 1427 0756 0021     		movs	r1, #0
+ 1428 0758 FA68     		ldr	r2, [r7, #12]
+ 1429 075a FFF7FEFF 		bl	opentimers_setPeriod
+ 575:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****        icmpv6rpl_vars.timerIdDIO,
+ 576:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****        TIME_MS,
+ 577:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****        dioPeriodRandom
+ 578:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    );
+ 579:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** }
+ 1430              		.loc 1 579 0
+ 1431 075e 1437     		adds	r7, r7, #20
+ 1432              		.cfi_def_cfa_offset 12
+ 1433 0760 BD46     		mov	sp, r7
+ 1434              		.cfi_def_cfa_register 13
+ 1435              		@ sp needed
+ 1436 0762 90BD     		pop	{r4, r7, pc}
+ 1437              	.L69:
+ 1438              		.align	2
+ 1439              	.L68:
+ 1440 0764 00000000 		.word	icmpv6rpl_vars
+ 1441              		.cfi_endproc
+ 1442              	.LFE12:
+ 1444              		.align	2
+ 1445              		.global	icmpv6rpl_setDAOPeriod
+ 1446              		.thumb
+ 1447              		.thumb_func
+ 1449              	icmpv6rpl_setDAOPeriod:
+ 1450              	.LFB13:
+ 580:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** 
+ 581:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** void icmpv6rpl_setDAOPeriod(uint16_t daoPeriod){
+ 1451              		.loc 1 581 0
+ 1452              		.cfi_startproc
+ 1453              		@ args = 0, pretend = 0, frame = 16
+ 1454              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1455 0768 90B5     		push	{r4, r7, lr}
+ 1456              		.cfi_def_cfa_offset 12
+ 1457              		.cfi_offset 4, -12
+ 1458              		.cfi_offset 7, -8
+ 1459              		.cfi_offset 14, -4
+ 1460 076a 85B0     		sub	sp, sp, #20
+ 1461              		.cfi_def_cfa_offset 32
+ 1462 076c 00AF     		add	r7, sp, #0
+ 1463              		.cfi_def_cfa_register 7
+ 1464 076e 0346     		mov	r3, r0
+ 1465 0770 FB80     		strh	r3, [r7, #6]	@ movhi
+ 582:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    uint32_t        daoPeriodRandom;
+ 583:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    
+ 584:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    icmpv6rpl_vars.daoPeriod = daoPeriod;
+ 1466              		.loc 1 584 0
+ 1467 0772 FB88     		ldrh	r3, [r7, #6]
+ 1468 0774 0A4A     		ldr	r2, .L71
+ 1469 0776 5365     		str	r3, [r2, #84]
+ 585:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    daoPeriodRandom = icmpv6rpl_vars.daoPeriod - 0x80 + (openrandom_get16b()&0xff);
+ 1470              		.loc 1 585 0
+ 1471 0778 094B     		ldr	r3, .L71
+ 1472 077a 5C6D     		ldr	r4, [r3, #84]
+ 1473 077c FFF7FEFF 		bl	openrandom_get16b
+ 1474 0780 0346     		mov	r3, r0
+ 1475 0782 DBB2     		uxtb	r3, r3
+ 1476 0784 2344     		add	r3, r3, r4
+ 1477 0786 803B     		subs	r3, r3, #128
+ 1478 0788 FB60     		str	r3, [r7, #12]
+ 586:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    opentimers_setPeriod(
+ 1479              		.loc 1 586 0
+ 1480 078a 054B     		ldr	r3, .L71
+ 1481 078c 93F85030 		ldrb	r3, [r3, #80]	@ zero_extendqisi2
+ 1482 0790 1846     		mov	r0, r3
+ 1483 0792 0021     		movs	r1, #0
+ 1484 0794 FA68     		ldr	r2, [r7, #12]
+ 1485 0796 FFF7FEFF 		bl	opentimers_setPeriod
+ 587:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****        icmpv6rpl_vars.timerIdDAO,
+ 588:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****        TIME_MS,
+ 589:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****        daoPeriodRandom
+ 590:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c ****    );
+ 591:build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.c **** }
+ 1486              		.loc 1 591 0
+ 1487 079a 1437     		adds	r7, r7, #20
+ 1488              		.cfi_def_cfa_offset 12
+ 1489 079c BD46     		mov	sp, r7
+ 1490              		.cfi_def_cfa_register 13
+ 1491              		@ sp needed
+ 1492 079e 90BD     		pop	{r4, r7, pc}
+ 1493              	.L72:
+ 1494              		.align	2
+ 1495              	.L71:
+ 1496 07a0 00000000 		.word	icmpv6rpl_vars
+ 1497              		.cfi_endproc
+ 1498              	.LFE13:
+ 1500              	.Letext0:
+ 1501              		.file 2 "/usr/arm-none-eabi/include/machine/_default_types.h"
+ 1502              		.file 3 "/usr/arm-none-eabi/include/sys/_stdint.h"
+ 1503              		.file 4 "inc/opendefs.h"
+ 1504              		.file 5 "drivers/common/opentimers.h"
+ 1505              		.file 6 "build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6rpl.h"
+ 1506              		.file 7 "build/OpenMote-CC2538_armgcc/openstack/03b-IPv6/icmpv6.h"
+ 1507              		.file 8 "kernel/scheduler.h"
+ 1508              		.file 9 "bsp/boards/OpenMote-CC2538/board_info.h"
+ 1509              		.file 10 "openstack/02a-MAClow/IEEE802154E.h"
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 icmpv6rpl.c
+     /tmp/ccrAAIyO.s:19     .rodata:0000000000000000 $d
+     /tmp/ccrAAIyO.s:22     .rodata:0000000000000000 rreg_uriquery
+     /tmp/ccrAAIyO.s:27     .rodata:0000000000000008 infoBoardname
+     /tmp/ccrAAIyO.s:32     .rodata:0000000000000010 infouCName
+     /tmp/ccrAAIyO.s:37     .rodata:0000000000000018 infoRadioName
+     /tmp/ccrAAIyO.s:42     .rodata:0000000000000024 infoStackName
+     /tmp/ccrAAIyO.s:47     .rodata:0000000000000030 all_routers_multicast
+     /tmp/ccrAAIyO.s:67     .rodata:0000000000000040 chTemplate_default
+                            *COM*:000000000000005c icmpv6rpl_vars
+     /tmp/ccrAAIyO.s:86     .text:0000000000000000 $t
+     /tmp/ccrAAIyO.s:91     .text:0000000000000000 icmpv6rpl_init
+     /tmp/ccrAAIyO.s:306    .text:000000000000017c $d
+     /tmp/ccrAAIyO.s:654    .text:0000000000000304 icmpv6rpl_timer_DIO_cb
+     /tmp/ccrAAIyO.s:960    .text:00000000000004a0 icmpv6rpl_timer_DAO_cb
+     /tmp/ccrAAIyO.s:313    .text:000000000000018c $t
+     /tmp/ccrAAIyO.s:318    .text:000000000000018c icmpv6rpl_writeDODAGid
+     /tmp/ccrAAIyO.s:357    .text:00000000000001b4 $d
+     /tmp/ccrAAIyO.s:363    .text:00000000000001c0 $t
+     /tmp/ccrAAIyO.s:368    .text:00000000000001c0 icmpv6rpl_getRPLIntanceID
+     /tmp/ccrAAIyO.s:395    .text:00000000000001d4 $d
+     /tmp/ccrAAIyO.s:399    .text:00000000000001d8 $t
+     /tmp/ccrAAIyO.s:404    .text:00000000000001d8 icmpv6rpl_getRPLDODAGid
+     /tmp/ccrAAIyO.s:446    .text:0000000000000200 $d
+     /tmp/ccrAAIyO.s:450    .text:0000000000000204 $t
+     /tmp/ccrAAIyO.s:455    .text:0000000000000204 icmpv6rpl_sendDone
+     /tmp/ccrAAIyO.s:505    .text:000000000000023c $d
+     /tmp/ccrAAIyO.s:509    .text:0000000000000240 $t
+     /tmp/ccrAAIyO.s:514    .text:0000000000000240 icmpv6rpl_receive
+     /tmp/ccrAAIyO.s:693    .text:0000000000000320 icmpv6rpl_timer_DIO_task
+     /tmp/ccrAAIyO.s:645    .text:0000000000000300 $d
+     /tmp/ccrAAIyO.s:649    .text:0000000000000304 $t
+     /tmp/ccrAAIyO.s:684    .text:000000000000031c $d
+     /tmp/ccrAAIyO.s:688    .text:0000000000000320 $t
+     /tmp/ccrAAIyO.s:745    .text:0000000000000358 sendDIO
+     /tmp/ccrAAIyO.s:736    .text:0000000000000354 $d
+     /tmp/ccrAAIyO.s:740    .text:0000000000000358 $t
+     /tmp/ccrAAIyO.s:951    .text:000000000000049c $d
+     /tmp/ccrAAIyO.s:955    .text:00000000000004a0 $t
+     /tmp/ccrAAIyO.s:990    .text:00000000000004b8 $d
+     /tmp/ccrAAIyO.s:999    .text:00000000000004bc icmpv6rpl_timer_DAO_task
+     /tmp/ccrAAIyO.s:994    .text:00000000000004bc $t
+     /tmp/ccrAAIyO.s:1051   .text:00000000000004f4 sendDAO
+     /tmp/ccrAAIyO.s:1042   .text:00000000000004f0 $d
+     /tmp/ccrAAIyO.s:1046   .text:00000000000004f4 $t
+     /tmp/ccrAAIyO.s:1384   .text:0000000000000728 $d
+     /tmp/ccrAAIyO.s:1388   .text:000000000000072c $t
+     /tmp/ccrAAIyO.s:1393   .text:000000000000072c icmpv6rpl_setDIOPeriod
+     /tmp/ccrAAIyO.s:1440   .text:0000000000000764 $d
+     /tmp/ccrAAIyO.s:1444   .text:0000000000000768 $t
+     /tmp/ccrAAIyO.s:1449   .text:0000000000000768 icmpv6rpl_setDAOPeriod
+     /tmp/ccrAAIyO.s:1496   .text:00000000000007a0 $d
+                     .debug_frame:0000000000000010 $d
+                           .group:0000000000000000 wm4.0.59116071098782a37a9183a8102fe91b
+                           .group:0000000000000000 wm4.features.h.22.2e382148a0560adabf236cddd4e880f4
+                           .group:0000000000000000 wm4._default_types.h.15.933e8edd27a65e0b69af4a865eb623d2
+                           .group:0000000000000000 wm4._intsup.h.10.35a45952db64d30146faa63a55c20c1c
+                           .group:0000000000000000 wm4._stdint.h.10.f76354baea1c7088202064e6f3d4f5e3
+                           .group:0000000000000000 wm4.stdint.h.23.373a9d32a9e4c2e88fd347156532d281
+                           .group:0000000000000000 wm4.toolchain_defs.h.2.e4ebbe6e0a48032a9b79077dc42e1ffd
+                           .group:0000000000000000 wm4.newlib.h.8.2702bca278809460f0af6fba1d84eb68
+                           .group:0000000000000000 wm4.config.h.220.a09b0b0de3c25be3f39d71990e617bff
+                           .group:0000000000000000 wm4._ansi.h.23.84af8eb8cd468d25cc5f45f5eb13ec51
+                           .group:0000000000000000 wm4.stddef.h.39.daafd3d79fe2f3a84d2d73d7d4e706f8
+                           .group:0000000000000000 wm4.lock.h.2.9bc98482741e5e2a9450b12934a684ea
+                           .group:0000000000000000 wm4._types.h.54.d3d34a3b7f3cc230cd159baf022b4b08
+                           .group:0000000000000000 wm4.stddef.h.158.61317cdbfb4026324507d123a50b0fd6
+                           .group:0000000000000000 wm4.reent.h.17.8bd9e4098e0428508c282cad794fae43
+                           .group:0000000000000000 wm4.cdefs.h.47.e6563c1c3863188ba4ac4eaa2c85b6f1
+                           .group:0000000000000000 wm4.string.h.15.dab3980bf35408a4c507182805e2de3a
+                           .group:0000000000000000 wm4.stddef.h.158.a7efb00f6cbc6f43213b50e183c9830c
+                           .group:0000000000000000 wm4.stdbool.h.29.1c9ee6859ce8145f7838a4f2549ccec2
+                           .group:0000000000000000 wm4.hw_types.h.67.b10589a0806dcc2d274d6fab6b736519
+                           .group:0000000000000000 wm4.interrupt.h.41.272fc4ec0e276feb439e7974d0f77eaf
+                           .group:0000000000000000 wm4.board_info.h.22.aeb00002354a4949fff54190040e37af
+                           .group:0000000000000000 wm4.opendefs.h.23.bdaf9c024be66ead04de21e3ce3dfaf2
+                           .group:0000000000000000 wm4.opentimers.h.8.044f2d040a134cdb0ddb58adfc2508be
+                           .group:0000000000000000 wm4.icmpv6rpl.h.15.0573bca2230f8b0d62a096dd795549d0
+                           .group:0000000000000000 wm4.openserial.h.8.a9fe077ce3323e4f6730d3ecdff542cc
+                           .group:0000000000000000 wm4.neighbors.h.15.9f35f180a0332d1bc442efb0ec51905c
+                           .group:0000000000000000 wm4.scheduler.h.2.d8d85f436d0d4b3991926a15b8490cf4
+                           .group:0000000000000000 wm4.idmanager.h.2.8c0e2159b32ef3125cbb1e984805cbfe
+                           .group:0000000000000000 wm4.schedule.h.2.80d40225a0ebadc3afa75a6755f49055
+                           .group:0000000000000000 wm4.processIE.h.2.08a2f2ba75e9146930605c9ce967d701
+                           .group:0000000000000000 wm4.IEEE802154E.h.25.7e65f5c386a4972498bd1c3f001ddfd0
+
+UNDEFINED SYMBOLS
+idmanager_getMyID
+memcpy
+memset
+openrandom_get16b
+opentimers_start
+openserial_printError
+openqueue_freePacketBuffer
+packetfunctions_tossHeader
+idmanager_getIsDAGroot
+neighbors_indicateRxDIO
+idmanager_setMyID
+openserial_printCritical
+scheduler_push_task
+opentimers_setPeriod
+ieee154e_isSynch
+openqueue_removeAllCreatedBy
+neighbors_getMyDAGrank
+openqueue_getFreePacketBuffer
+packetfunctions_reserveHeaderSize
+packetfunctions_calculateChecksum
+icmpv6_send
+neighbors_getPreferredParentEui64
+packetfunctions_writeAddress
+neighbors_isNeighborWithHigherDAGrank
+neighbors_getNeighbor

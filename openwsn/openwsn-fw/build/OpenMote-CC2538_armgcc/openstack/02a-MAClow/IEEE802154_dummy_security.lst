@@ -1,0 +1,370 @@
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 6
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.file	"IEEE802154_dummy_security.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.section	.rodata
+  19              		.align	2
+  22              	rreg_uriquery:
+  23 0000 683D7563 		.ascii	"h=ucb\000"
+  23      6200
+  24 0006 0000     		.align	2
+  27              	infoBoardname:
+  28 0008 43433235 		.ascii	"CC2538\000"
+  28      333800
+  29 000f 00       		.align	2
+  32              	infouCName:
+  33 0010 43433235 		.ascii	"CC2538\000"
+  33      333800
+  34 0017 00       		.align	2
+  37              	infoRadioName:
+  38 0018 43433235 		.ascii	"CC2538 SoC\000"
+  38      33382053 
+  38      6F4300
+  39 0023 00       		.align	2
+  42              	infoStackName:
+  43 0024 4F70656E 		.ascii	"OpenWSN \000"
+  43      57534E20 
+  43      00
+  44              		.text
+  45              		.align	2
+  46              		.thumb
+  47              		.thumb_func
+  49              	init:
+  50              	.LFB0:
+  51              		.file 1 "build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/IEEE802154_dummy_security.c"
+   1:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/IEEE802154_dummy_security.c **** /**
+   2:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/IEEE802154_dummy_security.c **** \brief Dummy IEEE802154 security implementation that is linked when security is disabled.
+   3:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/IEEE802154_dummy_security.c ****   
+   4:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/IEEE802154_dummy_security.c **** \author Malisa Vucinic <malishav@gmail.com>, June 2015.
+   5:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/IEEE802154_dummy_security.c **** */
+   6:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/IEEE802154_dummy_security.c **** 
+   7:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/IEEE802154_dummy_security.c **** #include "IEEE802154_dummy_security.h"
+   8:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/IEEE802154_dummy_security.c **** 
+   9:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/IEEE802154_dummy_security.c **** static void init(void) {
+  52              		.loc 1 9 0
+  53              		.cfi_startproc
+  54              		@ args = 0, pretend = 0, frame = 0
+  55              		@ frame_needed = 1, uses_anonymous_args = 0
+  56              		@ link register save eliminated.
+  57 0000 80B4     		push	{r7}
+  58              		.cfi_def_cfa_offset 4
+  59              		.cfi_offset 7, -4
+  60 0002 00AF     		add	r7, sp, #0
+  61              		.cfi_def_cfa_register 7
+  10:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/IEEE802154_dummy_security.c ****    return;
+  62              		.loc 1 10 0
+  63 0004 00BF     		nop
+  11:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/IEEE802154_dummy_security.c **** }
+  64              		.loc 1 11 0
+  65 0006 BD46     		mov	sp, r7
+  66              		.cfi_def_cfa_register 13
+  67              		@ sp needed
+  68 0008 5DF8047B 		ldr	r7, [sp], #4
+  69              		.cfi_restore 7
+  70              		.cfi_def_cfa_offset 0
+  71 000c 7047     		bx	lr
+  72              		.cfi_endproc
+  73              	.LFE0:
+  75 000e 00BF     		.align	2
+  76              		.thumb
+  77              		.thumb_func
+  79              	prependAuxiliarySecurityHeader:
+  80              	.LFB1:
+  12:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/IEEE802154_dummy_security.c **** 
+  13:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/IEEE802154_dummy_security.c **** static void prependAuxiliarySecurityHeader(OpenQueueEntry_t* msg){
+  81              		.loc 1 13 0
+  82              		.cfi_startproc
+  83              		@ args = 0, pretend = 0, frame = 8
+  84              		@ frame_needed = 1, uses_anonymous_args = 0
+  85              		@ link register save eliminated.
+  86 0010 80B4     		push	{r7}
+  87              		.cfi_def_cfa_offset 4
+  88              		.cfi_offset 7, -4
+  89 0012 83B0     		sub	sp, sp, #12
+  90              		.cfi_def_cfa_offset 16
+  91 0014 00AF     		add	r7, sp, #0
+  92              		.cfi_def_cfa_register 7
+  93 0016 7860     		str	r0, [r7, #4]
+  14:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/IEEE802154_dummy_security.c ****    return;
+  94              		.loc 1 14 0
+  95 0018 00BF     		nop
+  15:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/IEEE802154_dummy_security.c **** }
+  96              		.loc 1 15 0
+  97 001a 0C37     		adds	r7, r7, #12
+  98              		.cfi_def_cfa_offset 4
+  99 001c BD46     		mov	sp, r7
+ 100              		.cfi_def_cfa_register 13
+ 101              		@ sp needed
+ 102 001e 5DF8047B 		ldr	r7, [sp], #4
+ 103              		.cfi_restore 7
+ 104              		.cfi_def_cfa_offset 0
+ 105 0022 7047     		bx	lr
+ 106              		.cfi_endproc
+ 107              	.LFE1:
+ 109              		.align	2
+ 110              		.thumb
+ 111              		.thumb_func
+ 113              	retrieveAuxiliarySecurityHeader:
+ 114              	.LFB2:
+  16:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/IEEE802154_dummy_security.c **** 
+  17:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/IEEE802154_dummy_security.c **** static void retrieveAuxiliarySecurityHeader(OpenQueueEntry_t* msg, ieee802154_header_iht* tempheade
+ 115              		.loc 1 17 0
+ 116              		.cfi_startproc
+ 117              		@ args = 0, pretend = 0, frame = 8
+ 118              		@ frame_needed = 1, uses_anonymous_args = 0
+ 119              		@ link register save eliminated.
+ 120 0024 80B4     		push	{r7}
+ 121              		.cfi_def_cfa_offset 4
+ 122              		.cfi_offset 7, -4
+ 123 0026 83B0     		sub	sp, sp, #12
+ 124              		.cfi_def_cfa_offset 16
+ 125 0028 00AF     		add	r7, sp, #0
+ 126              		.cfi_def_cfa_register 7
+ 127 002a 7860     		str	r0, [r7, #4]
+ 128 002c 3960     		str	r1, [r7]
+  18:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/IEEE802154_dummy_security.c ****    return;
+ 129              		.loc 1 18 0
+ 130 002e 00BF     		nop
+  19:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/IEEE802154_dummy_security.c **** }
+ 131              		.loc 1 19 0
+ 132 0030 0C37     		adds	r7, r7, #12
+ 133              		.cfi_def_cfa_offset 4
+ 134 0032 BD46     		mov	sp, r7
+ 135              		.cfi_def_cfa_register 13
+ 136              		@ sp needed
+ 137 0034 5DF8047B 		ldr	r7, [sp], #4
+ 138              		.cfi_restore 7
+ 139              		.cfi_def_cfa_offset 0
+ 140 0038 7047     		bx	lr
+ 141              		.cfi_endproc
+ 142              	.LFE2:
+ 144 003a 00BF     		.align	2
+ 145              		.thumb
+ 146              		.thumb_func
+ 148              	outgoingFrame:
+ 149              	.LFB3:
+  20:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/IEEE802154_dummy_security.c **** 
+  21:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/IEEE802154_dummy_security.c **** static owerror_t outgoingFrame(OpenQueueEntry_t* msg) {
+ 150              		.loc 1 21 0
+ 151              		.cfi_startproc
+ 152              		@ args = 0, pretend = 0, frame = 8
+ 153              		@ frame_needed = 1, uses_anonymous_args = 0
+ 154              		@ link register save eliminated.
+ 155 003c 80B4     		push	{r7}
+ 156              		.cfi_def_cfa_offset 4
+ 157              		.cfi_offset 7, -4
+ 158 003e 83B0     		sub	sp, sp, #12
+ 159              		.cfi_def_cfa_offset 16
+ 160 0040 00AF     		add	r7, sp, #0
+ 161              		.cfi_def_cfa_register 7
+ 162 0042 7860     		str	r0, [r7, #4]
+  22:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/IEEE802154_dummy_security.c ****    return E_SUCCESS;
+ 163              		.loc 1 22 0
+ 164 0044 0023     		movs	r3, #0
+  23:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/IEEE802154_dummy_security.c **** }
+ 165              		.loc 1 23 0
+ 166 0046 1846     		mov	r0, r3
+ 167 0048 0C37     		adds	r7, r7, #12
+ 168              		.cfi_def_cfa_offset 4
+ 169 004a BD46     		mov	sp, r7
+ 170              		.cfi_def_cfa_register 13
+ 171              		@ sp needed
+ 172 004c 5DF8047B 		ldr	r7, [sp], #4
+ 173              		.cfi_restore 7
+ 174              		.cfi_def_cfa_offset 0
+ 175 0050 7047     		bx	lr
+ 176              		.cfi_endproc
+ 177              	.LFE3:
+ 179 0052 00BF     		.align	2
+ 180              		.thumb
+ 181              		.thumb_func
+ 183              	incomingFrame:
+ 184              	.LFB4:
+  24:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/IEEE802154_dummy_security.c **** 
+  25:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/IEEE802154_dummy_security.c **** static owerror_t incomingFrame(OpenQueueEntry_t* msg) {
+ 185              		.loc 1 25 0
+ 186              		.cfi_startproc
+ 187              		@ args = 0, pretend = 0, frame = 8
+ 188              		@ frame_needed = 1, uses_anonymous_args = 0
+ 189              		@ link register save eliminated.
+ 190 0054 80B4     		push	{r7}
+ 191              		.cfi_def_cfa_offset 4
+ 192              		.cfi_offset 7, -4
+ 193 0056 83B0     		sub	sp, sp, #12
+ 194              		.cfi_def_cfa_offset 16
+ 195 0058 00AF     		add	r7, sp, #0
+ 196              		.cfi_def_cfa_register 7
+ 197 005a 7860     		str	r0, [r7, #4]
+  26:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/IEEE802154_dummy_security.c ****    return E_SUCCESS;
+ 198              		.loc 1 26 0
+ 199 005c 0023     		movs	r3, #0
+  27:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/IEEE802154_dummy_security.c **** }
+ 200              		.loc 1 27 0
+ 201 005e 1846     		mov	r0, r3
+ 202 0060 0C37     		adds	r7, r7, #12
+ 203              		.cfi_def_cfa_offset 4
+ 204 0062 BD46     		mov	sp, r7
+ 205              		.cfi_def_cfa_register 13
+ 206              		@ sp needed
+ 207 0064 5DF8047B 		ldr	r7, [sp], #4
+ 208              		.cfi_restore 7
+ 209              		.cfi_def_cfa_offset 0
+ 210 0068 7047     		bx	lr
+ 211              		.cfi_endproc
+ 212              	.LFE4:
+ 214 006a 00BF     		.align	2
+ 215              		.thumb
+ 216              		.thumb_func
+ 218              	authenticationTagLen:
+ 219              	.LFB5:
+  28:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/IEEE802154_dummy_security.c **** 
+  29:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/IEEE802154_dummy_security.c **** static uint8_t authenticationTagLen(uint8_t sec_level) {
+ 220              		.loc 1 29 0
+ 221              		.cfi_startproc
+ 222              		@ args = 0, pretend = 0, frame = 8
+ 223              		@ frame_needed = 1, uses_anonymous_args = 0
+ 224              		@ link register save eliminated.
+ 225 006c 80B4     		push	{r7}
+ 226              		.cfi_def_cfa_offset 4
+ 227              		.cfi_offset 7, -4
+ 228 006e 83B0     		sub	sp, sp, #12
+ 229              		.cfi_def_cfa_offset 16
+ 230 0070 00AF     		add	r7, sp, #0
+ 231              		.cfi_def_cfa_register 7
+ 232 0072 0346     		mov	r3, r0
+ 233 0074 FB71     		strb	r3, [r7, #7]
+  30:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/IEEE802154_dummy_security.c ****    return (uint8_t) 0;
+ 234              		.loc 1 30 0
+ 235 0076 0023     		movs	r3, #0
+  31:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/IEEE802154_dummy_security.c **** }
+ 236              		.loc 1 31 0
+ 237 0078 1846     		mov	r0, r3
+ 238 007a 0C37     		adds	r7, r7, #12
+ 239              		.cfi_def_cfa_offset 4
+ 240 007c BD46     		mov	sp, r7
+ 241              		.cfi_def_cfa_register 13
+ 242              		@ sp needed
+ 243 007e 5DF8047B 		ldr	r7, [sp], #4
+ 244              		.cfi_restore 7
+ 245              		.cfi_def_cfa_offset 0
+ 246 0082 7047     		bx	lr
+ 247              		.cfi_endproc
+ 248              	.LFE5:
+ 250              		.align	2
+ 251              		.thumb
+ 252              		.thumb_func
+ 254              	auxiliaryHeaderLen:
+ 255              	.LFB6:
+  32:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/IEEE802154_dummy_security.c **** 
+  33:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/IEEE802154_dummy_security.c **** static uint8_t auxiliaryHeaderLen(uint8_t kid, uint8_t sup, uint8_t size) {
+ 256              		.loc 1 33 0
+ 257              		.cfi_startproc
+ 258              		@ args = 0, pretend = 0, frame = 8
+ 259              		@ frame_needed = 1, uses_anonymous_args = 0
+ 260              		@ link register save eliminated.
+ 261 0084 80B4     		push	{r7}
+ 262              		.cfi_def_cfa_offset 4
+ 263              		.cfi_offset 7, -4
+ 264 0086 83B0     		sub	sp, sp, #12
+ 265              		.cfi_def_cfa_offset 16
+ 266 0088 00AF     		add	r7, sp, #0
+ 267              		.cfi_def_cfa_register 7
+ 268 008a 0346     		mov	r3, r0
+ 269 008c FB71     		strb	r3, [r7, #7]
+ 270 008e 0B46     		mov	r3, r1
+ 271 0090 BB71     		strb	r3, [r7, #6]
+ 272 0092 1346     		mov	r3, r2
+ 273 0094 7B71     		strb	r3, [r7, #5]
+  34:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/IEEE802154_dummy_security.c ****    return (uint8_t) 0;
+ 274              		.loc 1 34 0
+ 275 0096 0023     		movs	r3, #0
+  35:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/IEEE802154_dummy_security.c **** }
+ 276              		.loc 1 35 0
+ 277 0098 1846     		mov	r0, r3
+ 278 009a 0C37     		adds	r7, r7, #12
+ 279              		.cfi_def_cfa_offset 4
+ 280 009c BD46     		mov	sp, r7
+ 281              		.cfi_def_cfa_register 13
+ 282              		@ sp needed
+ 283 009e 5DF8047B 		ldr	r7, [sp], #4
+ 284              		.cfi_restore 7
+ 285              		.cfi_def_cfa_offset 0
+ 286 00a2 7047     		bx	lr
+ 287              		.cfi_endproc
+ 288              	.LFE6:
+ 290              		.global	IEEE802154_dummy_security
+ 291              		.section	.rodata
+ 292 002d 000000   		.align	2
+ 295              	IEEE802154_dummy_security:
+ 296 0030 00000000 		.word	init
+ 297 0034 00000000 		.word	prependAuxiliarySecurityHeader
+ 298 0038 00000000 		.word	retrieveAuxiliarySecurityHeader
+ 299 003c 00000000 		.word	outgoingFrame
+ 300 0040 00000000 		.word	incomingFrame
+ 301 0044 00000000 		.word	authenticationTagLen
+ 302 0048 00000000 		.word	auxiliaryHeaderLen
+ 303              		.text
+ 304              	.Letext0:
+ 305              		.file 2 "/usr/arm-none-eabi/include/machine/_default_types.h"
+ 306              		.file 3 "/usr/arm-none-eabi/include/sys/_stdint.h"
+ 307              		.file 4 "inc/opendefs.h"
+ 308              		.file 5 "build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/IEEE802154.h"
+ 309              		.file 6 "build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/ieee802154_security_driver.h"
+ 310              		.file 7 "bsp/boards/OpenMote-CC2538/board_info.h"
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 IEEE802154_dummy_security.c
+     /tmp/ccH0zj0v.s:19     .rodata:0000000000000000 $d
+     /tmp/ccH0zj0v.s:22     .rodata:0000000000000000 rreg_uriquery
+     /tmp/ccH0zj0v.s:27     .rodata:0000000000000008 infoBoardname
+     /tmp/ccH0zj0v.s:32     .rodata:0000000000000010 infouCName
+     /tmp/ccH0zj0v.s:37     .rodata:0000000000000018 infoRadioName
+     /tmp/ccH0zj0v.s:42     .rodata:0000000000000024 infoStackName
+     /tmp/ccH0zj0v.s:45     .text:0000000000000000 $t
+     /tmp/ccH0zj0v.s:49     .text:0000000000000000 init
+     /tmp/ccH0zj0v.s:79     .text:0000000000000010 prependAuxiliarySecurityHeader
+     /tmp/ccH0zj0v.s:113    .text:0000000000000024 retrieveAuxiliarySecurityHeader
+     /tmp/ccH0zj0v.s:148    .text:000000000000003c outgoingFrame
+     /tmp/ccH0zj0v.s:183    .text:0000000000000054 incomingFrame
+     /tmp/ccH0zj0v.s:218    .text:000000000000006c authenticationTagLen
+     /tmp/ccH0zj0v.s:254    .text:0000000000000084 auxiliaryHeaderLen
+     /tmp/ccH0zj0v.s:295    .rodata:0000000000000030 IEEE802154_dummy_security
+                     .debug_frame:0000000000000010 $d
+                           .group:0000000000000000 wm4.0.59116071098782a37a9183a8102fe91b
+                           .group:0000000000000000 wm4.features.h.22.2e382148a0560adabf236cddd4e880f4
+                           .group:0000000000000000 wm4._default_types.h.15.933e8edd27a65e0b69af4a865eb623d2
+                           .group:0000000000000000 wm4._intsup.h.10.35a45952db64d30146faa63a55c20c1c
+                           .group:0000000000000000 wm4._stdint.h.10.f76354baea1c7088202064e6f3d4f5e3
+                           .group:0000000000000000 wm4.stdint.h.23.373a9d32a9e4c2e88fd347156532d281
+                           .group:0000000000000000 wm4.toolchain_defs.h.2.e4ebbe6e0a48032a9b79077dc42e1ffd
+                           .group:0000000000000000 wm4.newlib.h.8.2702bca278809460f0af6fba1d84eb68
+                           .group:0000000000000000 wm4.config.h.220.a09b0b0de3c25be3f39d71990e617bff
+                           .group:0000000000000000 wm4._ansi.h.23.84af8eb8cd468d25cc5f45f5eb13ec51
+                           .group:0000000000000000 wm4.stddef.h.39.daafd3d79fe2f3a84d2d73d7d4e706f8
+                           .group:0000000000000000 wm4.lock.h.2.9bc98482741e5e2a9450b12934a684ea
+                           .group:0000000000000000 wm4._types.h.54.d3d34a3b7f3cc230cd159baf022b4b08
+                           .group:0000000000000000 wm4.stddef.h.158.61317cdbfb4026324507d123a50b0fd6
+                           .group:0000000000000000 wm4.reent.h.17.8bd9e4098e0428508c282cad794fae43
+                           .group:0000000000000000 wm4.cdefs.h.47.e6563c1c3863188ba4ac4eaa2c85b6f1
+                           .group:0000000000000000 wm4.string.h.15.dab3980bf35408a4c507182805e2de3a
+                           .group:0000000000000000 wm4.stddef.h.158.a7efb00f6cbc6f43213b50e183c9830c
+                           .group:0000000000000000 wm4.stdbool.h.29.1c9ee6859ce8145f7838a4f2549ccec2
+                           .group:0000000000000000 wm4.hw_types.h.67.b10589a0806dcc2d274d6fab6b736519
+                           .group:0000000000000000 wm4.interrupt.h.41.272fc4ec0e276feb439e7974d0f77eaf
+                           .group:0000000000000000 wm4.board_info.h.22.aeb00002354a4949fff54190040e37af
+                           .group:0000000000000000 wm4.opendefs.h.23.bdaf9c024be66ead04de21e3ce3dfaf2
+                           .group:0000000000000000 wm4.ieee802154_security_driver.h.25.3e7716a2733ac284f1d61c5052e387c6
+
+NO UNDEFINED SYMBOLS

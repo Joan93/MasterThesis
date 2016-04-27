@@ -1,0 +1,541 @@
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 6
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.file	"uinject.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.section	.rodata
+  19              		.align	2
+  22              	rreg_uriquery:
+  23 0000 683D7563 		.ascii	"h=ucb\000"
+  23      6200
+  24 0006 0000     		.align	2
+  27              	infoBoardname:
+  28 0008 43433235 		.ascii	"CC2538\000"
+  28      333800
+  29 000f 00       		.align	2
+  32              	infouCName:
+  33 0010 43433235 		.ascii	"CC2538\000"
+  33      333800
+  34 0017 00       		.align	2
+  37              	infoRadioName:
+  38 0018 43433235 		.ascii	"CC2538 SoC\000"
+  38      33382053 
+  38      6F4300
+  39 0023 00       		.align	2
+  42              	infoStackName:
+  43 0024 4F70656E 		.ascii	"OpenWSN \000"
+  43      57534E20 
+  43      00
+  44 002d 000000   		.align	2
+  47              	chTemplate_default:
+  48 0030 05       		.byte	5
+  49 0031 06       		.byte	6
+  50 0032 0C       		.byte	12
+  51 0033 07       		.byte	7
+  52 0034 0F       		.byte	15
+  53 0035 04       		.byte	4
+  54 0036 0E       		.byte	14
+  55 0037 0B       		.byte	11
+  56 0038 08       		.byte	8
+  57 0039 00       		.byte	0
+  58 003a 01       		.byte	1
+  59 003b 02       		.byte	2
+  60 003c 0D       		.byte	13
+  61 003d 03       		.byte	3
+  62 003e 09       		.byte	9
+  63 003f 0A       		.byte	10
+  64              		.comm	uinject_vars,4,4
+  65              		.align	2
+  68              	uinject_dst_addr:
+  69 0040 BB       		.byte	-69
+  70 0041 BB       		.byte	-69
+  71 0042 00       		.byte	0
+  72 0043 00       		.byte	0
+  73 0044 00       		.byte	0
+  74 0045 00       		.byte	0
+  75 0046 00       		.byte	0
+  76 0047 00       		.byte	0
+  77 0048 00       		.byte	0
+  78 0049 00       		.byte	0
+  79 004a 00       		.byte	0
+  80 004b 00       		.byte	0
+  81 004c 00       		.byte	0
+  82 004d 00       		.byte	0
+  83 004e 00       		.byte	0
+  84 004f 01       		.byte	1
+  85              		.text
+  86              		.align	2
+  87              		.global	uinject_init
+  88              		.thumb
+  89              		.thumb_func
+  91              	uinject_init:
+  92              	.LFB0:
+  93              		.file 1 "build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c"
+   1:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c **** #include "opendefs.h"
+   2:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c **** #include "uinject.h"
+   3:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c **** #include "openudp.h"
+   4:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c **** #include "openqueue.h"
+   5:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c **** #include "opentimers.h"
+   6:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c **** #include "openserial.h"
+   7:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c **** #include "packetfunctions.h"
+   8:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c **** #include "scheduler.h"
+   9:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c **** #include "IEEE802154E.h"
+  10:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c **** #include "idmanager.h"
+  11:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c **** 
+  12:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c **** //=========================== variables =======================================
+  13:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c **** 
+  14:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c **** uinject_vars_t uinject_vars;
+  15:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c **** 
+  16:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c **** static const uint8_t uinject_dst_addr[]   = {
+  17:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c ****    0xbb, 0xbb, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  18:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c ****    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01
+  19:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c **** }; 
+  20:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c **** 
+  21:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c **** //=========================== prototypes ======================================
+  22:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c **** 
+  23:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c **** void uinject_timer_cb(opentimer_id_t id);
+  24:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c **** void uinject_task_cb(void);
+  25:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c **** 
+  26:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c **** //=========================== public ==========================================
+  27:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c **** 
+  28:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c **** void uinject_init() {
+  94              		.loc 1 28 0
+  95              		.cfi_startproc
+  96              		@ args = 0, pretend = 0, frame = 0
+  97              		@ frame_needed = 1, uses_anonymous_args = 0
+  98 0000 80B5     		push	{r7, lr}
+  99              		.cfi_def_cfa_offset 8
+ 100              		.cfi_offset 7, -8
+ 101              		.cfi_offset 14, -4
+ 102 0002 00AF     		add	r7, sp, #0
+ 103              		.cfi_def_cfa_register 7
+  29:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c ****    
+  30:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c ****    // clear local variables
+  31:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c ****    memset(&uinject_vars,0,sizeof(uinject_vars_t));
+ 104              		.loc 1 31 0
+ 105 0004 0848     		ldr	r0, .L2
+ 106 0006 0021     		movs	r1, #0
+ 107 0008 0422     		movs	r2, #4
+ 108 000a FFF7FEFF 		bl	memset
+  32:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c ****    
+  33:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c ****    // start periodic timer
+  34:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c ****    uinject_vars.timerId                    = opentimers_start(
+ 109              		.loc 1 34 0
+ 110 000e 47F23050 		movw	r0, #30000
+ 111 0012 0021     		movs	r1, #0
+ 112 0014 0022     		movs	r2, #0
+ 113 0016 054B     		ldr	r3, .L2+4
+ 114 0018 FFF7FEFF 		bl	opentimers_start
+ 115 001c 0346     		mov	r3, r0
+ 116 001e 1A46     		mov	r2, r3
+ 117 0020 014B     		ldr	r3, .L2
+ 118 0022 1A70     		strb	r2, [r3]
+  35:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c ****       UINJECT_PERIOD_MS,
+  36:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c ****       TIMER_PERIODIC,TIME_MS,
+  37:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c ****       uinject_timer_cb
+  38:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c ****    );
+  39:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c **** }
+ 119              		.loc 1 39 0
+ 120 0024 80BD     		pop	{r7, pc}
+ 121              	.L3:
+ 122 0026 00BF     		.align	2
+ 123              	.L2:
+ 124 0028 00000000 		.word	uinject_vars
+ 125 002c 00000000 		.word	uinject_timer_cb
+ 126              		.cfi_endproc
+ 127              	.LFE0:
+ 129              		.align	2
+ 130              		.global	uinject_sendDone
+ 131              		.thumb
+ 132              		.thumb_func
+ 134              	uinject_sendDone:
+ 135              	.LFB1:
+  40:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c **** 
+  41:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c **** void uinject_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
+ 136              		.loc 1 41 0
+ 137              		.cfi_startproc
+ 138              		@ args = 0, pretend = 0, frame = 8
+ 139              		@ frame_needed = 1, uses_anonymous_args = 0
+ 140 0030 80B5     		push	{r7, lr}
+ 141              		.cfi_def_cfa_offset 8
+ 142              		.cfi_offset 7, -8
+ 143              		.cfi_offset 14, -4
+ 144 0032 82B0     		sub	sp, sp, #8
+ 145              		.cfi_def_cfa_offset 16
+ 146 0034 00AF     		add	r7, sp, #0
+ 147              		.cfi_def_cfa_register 7
+ 148 0036 7860     		str	r0, [r7, #4]
+ 149 0038 0B46     		mov	r3, r1
+ 150 003a FB70     		strb	r3, [r7, #3]
+  42:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c ****    openqueue_freePacketBuffer(msg);
+ 151              		.loc 1 42 0
+ 152 003c 7868     		ldr	r0, [r7, #4]
+ 153 003e FFF7FEFF 		bl	openqueue_freePacketBuffer
+  43:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c **** }
+ 154              		.loc 1 43 0
+ 155 0042 0837     		adds	r7, r7, #8
+ 156              		.cfi_def_cfa_offset 8
+ 157 0044 BD46     		mov	sp, r7
+ 158              		.cfi_def_cfa_register 13
+ 159              		@ sp needed
+ 160 0046 80BD     		pop	{r7, pc}
+ 161              		.cfi_endproc
+ 162              	.LFE1:
+ 164              		.align	2
+ 165              		.global	uinject_receive
+ 166              		.thumb
+ 167              		.thumb_func
+ 169              	uinject_receive:
+ 170              	.LFB2:
+  44:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c **** 
+  45:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c **** void uinject_receive(OpenQueueEntry_t* pkt) {
+ 171              		.loc 1 45 0
+ 172              		.cfi_startproc
+ 173              		@ args = 0, pretend = 0, frame = 8
+ 174              		@ frame_needed = 1, uses_anonymous_args = 0
+ 175 0048 80B5     		push	{r7, lr}
+ 176              		.cfi_def_cfa_offset 8
+ 177              		.cfi_offset 7, -8
+ 178              		.cfi_offset 14, -4
+ 179 004a 82B0     		sub	sp, sp, #8
+ 180              		.cfi_def_cfa_offset 16
+ 181 004c 00AF     		add	r7, sp, #0
+ 182              		.cfi_def_cfa_register 7
+ 183 004e 7860     		str	r0, [r7, #4]
+  46:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c ****    
+  47:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c ****    openqueue_freePacketBuffer(pkt);
+ 184              		.loc 1 47 0
+ 185 0050 7868     		ldr	r0, [r7, #4]
+ 186 0052 FFF7FEFF 		bl	openqueue_freePacketBuffer
+  48:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c ****    
+  49:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c ****    openserial_printError(
+ 187              		.loc 1 49 0
+ 188 0056 2420     		movs	r0, #36
+ 189 0058 0221     		movs	r1, #2
+ 190 005a 0022     		movs	r2, #0
+ 191 005c 0023     		movs	r3, #0
+ 192 005e FFF7FEFF 		bl	openserial_printError
+  50:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c ****       COMPONENT_UINJECT,
+  51:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c ****       ERR_RCVD_ECHO_REPLY,
+  52:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c ****       (errorparameter_t)0,
+  53:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c ****       (errorparameter_t)0
+  54:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c ****    );
+  55:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c **** }
+ 193              		.loc 1 55 0
+ 194 0062 0837     		adds	r7, r7, #8
+ 195              		.cfi_def_cfa_offset 8
+ 196 0064 BD46     		mov	sp, r7
+ 197              		.cfi_def_cfa_register 13
+ 198              		@ sp needed
+ 199 0066 80BD     		pop	{r7, pc}
+ 200              		.cfi_endproc
+ 201              	.LFE2:
+ 203              		.align	2
+ 204              		.global	uinject_timer_cb
+ 205              		.thumb
+ 206              		.thumb_func
+ 208              	uinject_timer_cb:
+ 209              	.LFB3:
+  56:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c **** 
+  57:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c **** //=========================== private =========================================
+  58:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c **** 
+  59:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c **** /**
+  60:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c **** \note timer fired, but we don't want to execute task in ISR mode instead, push
+  61:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c ****    task to scheduler with CoAP priority, and let scheduler take care of it.
+  62:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c **** */
+  63:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c **** void uinject_timer_cb(opentimer_id_t id){
+ 210              		.loc 1 63 0
+ 211              		.cfi_startproc
+ 212              		@ args = 0, pretend = 0, frame = 8
+ 213              		@ frame_needed = 1, uses_anonymous_args = 0
+ 214 0068 80B5     		push	{r7, lr}
+ 215              		.cfi_def_cfa_offset 8
+ 216              		.cfi_offset 7, -8
+ 217              		.cfi_offset 14, -4
+ 218 006a 82B0     		sub	sp, sp, #8
+ 219              		.cfi_def_cfa_offset 16
+ 220 006c 00AF     		add	r7, sp, #0
+ 221              		.cfi_def_cfa_register 7
+ 222 006e 0346     		mov	r3, r0
+ 223 0070 FB71     		strb	r3, [r7, #7]
+  64:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c ****    
+  65:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c ****    scheduler_push_task(uinject_task_cb,TASKPRIO_COAP);
+ 224              		.loc 1 65 0
+ 225 0072 0348     		ldr	r0, .L7
+ 226 0074 0621     		movs	r1, #6
+ 227 0076 FFF7FEFF 		bl	scheduler_push_task
+  66:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c **** }
+ 228              		.loc 1 66 0
+ 229 007a 0837     		adds	r7, r7, #8
+ 230              		.cfi_def_cfa_offset 8
+ 231 007c BD46     		mov	sp, r7
+ 232              		.cfi_def_cfa_register 13
+ 233              		@ sp needed
+ 234 007e 80BD     		pop	{r7, pc}
+ 235              	.L8:
+ 236              		.align	2
+ 237              	.L7:
+ 238 0080 00000000 		.word	uinject_task_cb
+ 239              		.cfi_endproc
+ 240              	.LFE3:
+ 242              		.align	2
+ 243              		.global	uinject_task_cb
+ 244              		.thumb
+ 245              		.thumb_func
+ 247              	uinject_task_cb:
+ 248              	.LFB4:
+  67:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c **** 
+  68:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c **** void uinject_task_cb() {
+ 249              		.loc 1 68 0
+ 250              		.cfi_startproc
+ 251              		@ args = 0, pretend = 0, frame = 8
+ 252              		@ frame_needed = 1, uses_anonymous_args = 0
+ 253 0084 B0B5     		push	{r4, r5, r7, lr}
+ 254              		.cfi_def_cfa_offset 16
+ 255              		.cfi_offset 4, -16
+ 256              		.cfi_offset 5, -12
+ 257              		.cfi_offset 7, -8
+ 258              		.cfi_offset 14, -4
+ 259 0086 82B0     		sub	sp, sp, #8
+ 260              		.cfi_def_cfa_offset 24
+ 261 0088 00AF     		add	r7, sp, #0
+ 262              		.cfi_def_cfa_register 7
+  69:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c ****    OpenQueueEntry_t*    pkt;
+  70:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c ****    
+  71:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c ****    // don't run if not synch
+  72:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c ****    if (ieee154e_isSynch() == FALSE) return;
+ 263              		.loc 1 72 0
+ 264 008a FFF7FEFF 		bl	ieee154e_isSynch
+ 265 008e 0346     		mov	r3, r0
+ 266 0090 83F00103 		eor	r3, r3, #1
+ 267 0094 DBB2     		uxtb	r3, r3
+ 268 0096 002B     		cmp	r3, #0
+ 269 0098 00D0     		beq	.L10
+ 270 009a 4CE0     		b	.L9
+ 271              	.L10:
+  73:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c ****    
+  74:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c ****    // don't run on dagroot
+  75:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c ****    if (idmanager_getIsDAGroot()) {
+ 272              		.loc 1 75 0
+ 273 009c FFF7FEFF 		bl	idmanager_getIsDAGroot
+ 274 00a0 0346     		mov	r3, r0
+ 275 00a2 002B     		cmp	r3, #0
+ 276 00a4 05D0     		beq	.L12
+  76:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c ****       opentimers_stop(uinject_vars.timerId);
+ 277              		.loc 1 76 0
+ 278 00a6 254B     		ldr	r3, .L14
+ 279 00a8 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 280 00aa 1846     		mov	r0, r3
+ 281 00ac FFF7FEFF 		bl	opentimers_stop
+  77:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c ****       return;
+ 282              		.loc 1 77 0
+ 283 00b0 41E0     		b	.L9
+ 284              	.L12:
+  78:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c ****    }
+  79:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c ****    
+  80:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c ****    // if you get here, send a packet
+  81:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c ****    
+  82:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c ****    // get a free packet buffer
+  83:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c ****    pkt = openqueue_getFreePacketBuffer(COMPONENT_UINJECT);
+ 285              		.loc 1 83 0
+ 286 00b2 2420     		movs	r0, #36
+ 287 00b4 FFF7FEFF 		bl	openqueue_getFreePacketBuffer
+ 288 00b8 7860     		str	r0, [r7, #4]
+  84:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c ****    if (pkt==NULL) {
+ 289              		.loc 1 84 0
+ 290 00ba 7B68     		ldr	r3, [r7, #4]
+ 291 00bc 002B     		cmp	r3, #0
+ 292 00be 06D1     		bne	.L13
+  85:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c ****       openserial_printError(
+ 293              		.loc 1 85 0
+ 294 00c0 2420     		movs	r0, #36
+ 295 00c2 2C21     		movs	r1, #44
+ 296 00c4 0022     		movs	r2, #0
+ 297 00c6 0023     		movs	r3, #0
+ 298 00c8 FFF7FEFF 		bl	openserial_printError
+  86:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c ****          COMPONENT_UINJECT,
+  87:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c ****          ERR_NO_FREE_PACKET_BUFFER,
+  88:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c ****          (errorparameter_t)0,
+  89:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c ****          (errorparameter_t)0
+  90:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c ****       );
+  91:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c ****       return;
+ 299              		.loc 1 91 0
+ 300 00cc 33E0     		b	.L9
+ 301              	.L13:
+  92:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c ****    }
+  93:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c ****    
+  94:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c ****    pkt->owner                         = COMPONENT_UINJECT;
+ 302              		.loc 1 94 0
+ 303 00ce 7B68     		ldr	r3, [r7, #4]
+ 304 00d0 2422     		movs	r2, #36
+ 305 00d2 5A70     		strb	r2, [r3, #1]
+  95:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c ****    pkt->creator                       = COMPONENT_UINJECT;
+ 306              		.loc 1 95 0
+ 307 00d4 7B68     		ldr	r3, [r7, #4]
+ 308 00d6 2422     		movs	r2, #36
+ 309 00d8 1A70     		strb	r2, [r3]
+  96:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c ****    pkt->l4_protocol                   = IANA_UDP;
+ 310              		.loc 1 96 0
+ 311 00da 7B68     		ldr	r3, [r7, #4]
+ 312 00dc 1122     		movs	r2, #17
+ 313 00de 5A72     		strb	r2, [r3, #9]
+  97:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c ****    pkt->l4_destination_port           = WKP_UDP_INJECT;
+ 314              		.loc 1 97 0
+ 315 00e0 7B68     		ldr	r3, [r7, #4]
+ 316 00e2 4FF4FA62 		mov	r2, #2000
+ 317 00e6 DA81     		strh	r2, [r3, #14]	@ movhi
+  98:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c ****    pkt->l4_sourcePortORicmpv6Type     = WKP_UDP_INJECT;
+ 318              		.loc 1 98 0
+ 319 00e8 7B68     		ldr	r3, [r7, #4]
+ 320 00ea 4FF4FA62 		mov	r2, #2000
+ 321 00ee 9A81     		strh	r2, [r3, #12]	@ movhi
+  99:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c ****    pkt->l3_destinationAdd.type        = ADDR_128B;
+ 322              		.loc 1 99 0
+ 323 00f0 7B68     		ldr	r3, [r7, #4]
+ 324 00f2 0322     		movs	r2, #3
+ 325 00f4 5A75     		strb	r2, [r3, #21]
+ 100:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c ****    memcpy(&pkt->l3_destinationAdd.addr_128b[0],uinject_dst_addr,16);
+ 326              		.loc 1 100 0
+ 327 00f6 7B68     		ldr	r3, [r7, #4]
+ 328 00f8 1633     		adds	r3, r3, #22
+ 329 00fa 114A     		ldr	r2, .L14+4
+ 330 00fc 1C46     		mov	r4, r3
+ 331 00fe 1546     		mov	r5, r2
+ 332 0100 0FCD     		ldmia	r5!, {r0, r1, r2, r3}
+ 333 0102 2060     		str	r0, [r4]	@ unaligned
+ 334 0104 6160     		str	r1, [r4, #4]	@ unaligned
+ 335 0106 A260     		str	r2, [r4, #8]	@ unaligned
+ 336 0108 E360     		str	r3, [r4, #12]	@ unaligned
+ 101:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c ****    
+ 102:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c ****    packetfunctions_reserveHeaderSize(pkt,sizeof(uint16_t));
+ 337              		.loc 1 102 0
+ 338 010a 7868     		ldr	r0, [r7, #4]
+ 339 010c 0221     		movs	r1, #2
+ 340 010e FFF7FEFF 		bl	packetfunctions_reserveHeaderSize
+ 103:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c ****    *((uint16_t*)&pkt->payload[0]) = uinject_vars.counter++;
+ 341              		.loc 1 103 0
+ 342 0112 7B68     		ldr	r3, [r7, #4]
+ 343 0114 5A68     		ldr	r2, [r3, #4]
+ 344 0116 094B     		ldr	r3, .L14
+ 345 0118 5B88     		ldrh	r3, [r3, #2]
+ 346 011a 591C     		adds	r1, r3, #1
+ 347 011c 88B2     		uxth	r0, r1
+ 348 011e 0749     		ldr	r1, .L14
+ 349 0120 4880     		strh	r0, [r1, #2]	@ movhi
+ 350 0122 1380     		strh	r3, [r2]	@ movhi
+ 104:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c ****    
+ 105:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c ****    if ((openudp_send(pkt))==E_FAIL) {
+ 351              		.loc 1 105 0
+ 352 0124 7868     		ldr	r0, [r7, #4]
+ 353 0126 FFF7FEFF 		bl	openudp_send
+ 354 012a 0346     		mov	r3, r0
+ 355 012c 012B     		cmp	r3, #1
+ 356 012e 02D1     		bne	.L9
+ 106:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c ****       openqueue_freePacketBuffer(pkt);
+ 357              		.loc 1 106 0
+ 358 0130 7868     		ldr	r0, [r7, #4]
+ 359 0132 FFF7FEFF 		bl	openqueue_freePacketBuffer
+ 360              	.L9:
+ 107:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c ****    }
+ 108:build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.c **** }...
+ 361              		.loc 1 108 0
+ 362 0136 0837     		adds	r7, r7, #8
+ 363              		.cfi_def_cfa_offset 16
+ 364 0138 BD46     		mov	sp, r7
+ 365              		.cfi_def_cfa_register 13
+ 366              		@ sp needed
+ 367 013a B0BD     		pop	{r4, r5, r7, pc}
+ 368              	.L15:
+ 369              		.align	2
+ 370              	.L14:
+ 371 013c 00000000 		.word	uinject_vars
+ 372 0140 40000000 		.word	uinject_dst_addr
+ 373              		.cfi_endproc
+ 374              	.LFE4:
+ 376              	.Letext0:
+ 377              		.file 2 "/usr/arm-none-eabi/include/machine/_default_types.h"
+ 378              		.file 3 "/usr/arm-none-eabi/include/sys/_stdint.h"
+ 379              		.file 4 "inc/opendefs.h"
+ 380              		.file 5 "drivers/common/opentimers.h"
+ 381              		.file 6 "build/OpenMote-CC2538_armgcc/openapps/uinject/uinject.h"
+ 382              		.file 7 "kernel/scheduler.h"
+ 383              		.file 8 "bsp/boards/OpenMote-CC2538/board_info.h"
+ 384              		.file 9 "openstack/02a-MAClow/IEEE802154E.h"
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 uinject.c
+     /tmp/ccMY40us.s:19     .rodata:0000000000000000 $d
+     /tmp/ccMY40us.s:22     .rodata:0000000000000000 rreg_uriquery
+     /tmp/ccMY40us.s:27     .rodata:0000000000000008 infoBoardname
+     /tmp/ccMY40us.s:32     .rodata:0000000000000010 infouCName
+     /tmp/ccMY40us.s:37     .rodata:0000000000000018 infoRadioName
+     /tmp/ccMY40us.s:42     .rodata:0000000000000024 infoStackName
+     /tmp/ccMY40us.s:47     .rodata:0000000000000030 chTemplate_default
+                            *COM*:0000000000000004 uinject_vars
+     /tmp/ccMY40us.s:68     .rodata:0000000000000040 uinject_dst_addr
+     /tmp/ccMY40us.s:86     .text:0000000000000000 $t
+     /tmp/ccMY40us.s:91     .text:0000000000000000 uinject_init
+     /tmp/ccMY40us.s:124    .text:0000000000000028 $d
+     /tmp/ccMY40us.s:208    .text:0000000000000068 uinject_timer_cb
+     /tmp/ccMY40us.s:129    .text:0000000000000030 $t
+     /tmp/ccMY40us.s:134    .text:0000000000000030 uinject_sendDone
+     /tmp/ccMY40us.s:169    .text:0000000000000048 uinject_receive
+     /tmp/ccMY40us.s:238    .text:0000000000000080 $d
+     /tmp/ccMY40us.s:247    .text:0000000000000084 uinject_task_cb
+     /tmp/ccMY40us.s:242    .text:0000000000000084 $t
+     /tmp/ccMY40us.s:371    .text:000000000000013c $d
+                     .debug_frame:0000000000000010 $d
+                           .group:0000000000000000 wm4.0.59116071098782a37a9183a8102fe91b
+                           .group:0000000000000000 wm4.features.h.22.2e382148a0560adabf236cddd4e880f4
+                           .group:0000000000000000 wm4._default_types.h.15.933e8edd27a65e0b69af4a865eb623d2
+                           .group:0000000000000000 wm4._intsup.h.10.35a45952db64d30146faa63a55c20c1c
+                           .group:0000000000000000 wm4._stdint.h.10.f76354baea1c7088202064e6f3d4f5e3
+                           .group:0000000000000000 wm4.stdint.h.23.373a9d32a9e4c2e88fd347156532d281
+                           .group:0000000000000000 wm4.toolchain_defs.h.2.e4ebbe6e0a48032a9b79077dc42e1ffd
+                           .group:0000000000000000 wm4.newlib.h.8.2702bca278809460f0af6fba1d84eb68
+                           .group:0000000000000000 wm4.config.h.220.a09b0b0de3c25be3f39d71990e617bff
+                           .group:0000000000000000 wm4._ansi.h.23.84af8eb8cd468d25cc5f45f5eb13ec51
+                           .group:0000000000000000 wm4.stddef.h.39.daafd3d79fe2f3a84d2d73d7d4e706f8
+                           .group:0000000000000000 wm4.lock.h.2.9bc98482741e5e2a9450b12934a684ea
+                           .group:0000000000000000 wm4._types.h.54.d3d34a3b7f3cc230cd159baf022b4b08
+                           .group:0000000000000000 wm4.stddef.h.158.61317cdbfb4026324507d123a50b0fd6
+                           .group:0000000000000000 wm4.reent.h.17.8bd9e4098e0428508c282cad794fae43
+                           .group:0000000000000000 wm4.cdefs.h.47.e6563c1c3863188ba4ac4eaa2c85b6f1
+                           .group:0000000000000000 wm4.string.h.15.dab3980bf35408a4c507182805e2de3a
+                           .group:0000000000000000 wm4.stddef.h.158.a7efb00f6cbc6f43213b50e183c9830c
+                           .group:0000000000000000 wm4.stdbool.h.29.1c9ee6859ce8145f7838a4f2549ccec2
+                           .group:0000000000000000 wm4.hw_types.h.67.b10589a0806dcc2d274d6fab6b736519
+                           .group:0000000000000000 wm4.interrupt.h.41.272fc4ec0e276feb439e7974d0f77eaf
+                           .group:0000000000000000 wm4.board_info.h.22.aeb00002354a4949fff54190040e37af
+                           .group:0000000000000000 wm4.opendefs.h.23.bdaf9c024be66ead04de21e3ce3dfaf2
+                           .group:0000000000000000 wm4.opentimers.h.8.044f2d040a134cdb0ddb58adfc2508be
+                           .group:0000000000000000 wm4.openserial.h.8.a9fe077ce3323e4f6730d3ecdff542cc
+                           .group:0000000000000000 wm4.scheduler.h.2.d8d85f436d0d4b3991926a15b8490cf4
+                           .group:0000000000000000 wm4.schedule.h.2.80d40225a0ebadc3afa75a6755f49055
+                           .group:0000000000000000 wm4.processIE.h.2.08a2f2ba75e9146930605c9ce967d701
+                           .group:0000000000000000 wm4.IEEE802154E.h.25.7e65f5c386a4972498bd1c3f001ddfd0
+                           .group:0000000000000000 wm4.idmanager.h.2.8c0e2159b32ef3125cbb1e984805cbfe
+
+UNDEFINED SYMBOLS
+memset
+opentimers_start
+openqueue_freePacketBuffer
+openserial_printError
+scheduler_push_task
+ieee154e_isSynch
+idmanager_getIsDAGroot
+opentimers_stop
+openqueue_getFreePacketBuffer
+packetfunctions_reserveHeaderSize
+openudp_send

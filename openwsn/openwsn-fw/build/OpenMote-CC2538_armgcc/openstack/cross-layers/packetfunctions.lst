@@ -1,0 +1,2785 @@
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 6
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.file	"packetfunctions.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.section	.rodata
+  19              		.align	2
+  22              	rreg_uriquery:
+  23 0000 683D7563 		.ascii	"h=ucb\000"
+  23      6200
+  24 0006 0000     		.align	2
+  27              	infoBoardname:
+  28 0008 43433235 		.ascii	"CC2538\000"
+  28      333800
+  29 000f 00       		.align	2
+  32              	infouCName:
+  33 0010 43433235 		.ascii	"CC2538\000"
+  33      333800
+  34 0017 00       		.align	2
+  37              	infoRadioName:
+  38 0018 43433235 		.ascii	"CC2538 SoC\000"
+  38      33382053 
+  38      6F4300
+  39 0023 00       		.align	2
+  42              	infoStackName:
+  43 0024 4F70656E 		.ascii	"OpenWSN \000"
+  43      57534E20 
+  43      00
+  44              		.text
+  45              		.align	2
+  46              		.global	packetfunctions_ip128bToMac64b
+  47              		.thumb
+  48              		.thumb_func
+  50              	packetfunctions_ip128bToMac64b:
+  51              	.LFB0:
+  52              		.file 1 "build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c"
+   1:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** #include "packetfunctions.h"
+   2:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** #include "openserial.h"
+   3:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** #include "idmanager.h"
+   4:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** 
+   5:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** //=========================== variables =======================================
+   6:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** 
+   7:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** //=========================== prototypes ======================================
+   8:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** 
+   9:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** void onesComplementSum(uint8_t* global_sum, uint8_t* ptr, int length);
+  10:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** 
+  11:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** //=========================== public ==========================================
+  12:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** 
+  13:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** //======= address translation
+  14:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** 
+  15:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** //assuming an ip128b is a concatenation of prefix64b followed by a mac64b
+  16:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** void packetfunctions_ip128bToMac64b(
+  17:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       open_addr_t* ip128b,
+  18:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       open_addr_t* prefix64btoWrite,
+  19:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       open_addr_t* mac64btoWrite) {
+  53              		.loc 1 19 0
+  54              		.cfi_startproc
+  55              		@ args = 0, pretend = 0, frame = 16
+  56              		@ frame_needed = 1, uses_anonymous_args = 0
+  57 0000 80B5     		push	{r7, lr}
+  58              		.cfi_def_cfa_offset 8
+  59              		.cfi_offset 7, -8
+  60              		.cfi_offset 14, -4
+  61 0002 84B0     		sub	sp, sp, #16
+  62              		.cfi_def_cfa_offset 24
+  63 0004 00AF     		add	r7, sp, #0
+  64              		.cfi_def_cfa_register 7
+  65 0006 F860     		str	r0, [r7, #12]
+  66 0008 B960     		str	r1, [r7, #8]
+  67 000a 7A60     		str	r2, [r7, #4]
+  20:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    if (ip128b->type!=ADDR_128B) {
+  68              		.loc 1 20 0
+  69 000c FB68     		ldr	r3, [r7, #12]
+  70 000e 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+  71 0010 032B     		cmp	r3, #3
+  72 0012 0CD0     		beq	.L2
+  21:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       openserial_printCritical(COMPONENT_PACKETFUNCTIONS,ERR_WRONG_ADDR_TYPE,
+  22:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****                             (errorparameter_t)ip128b->type,
+  73              		.loc 1 22 0
+  74 0014 FB68     		ldr	r3, [r7, #12]
+  75 0016 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+  21:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       openserial_printCritical(COMPONENT_PACKETFUNCTIONS,ERR_WRONG_ADDR_TYPE,
+  76              		.loc 1 21 0
+  77 0018 9BB2     		uxth	r3, r3
+  78 001a 0520     		movs	r0, #5
+  79 001c 3121     		movs	r1, #49
+  80 001e 1A46     		mov	r2, r3
+  81 0020 0023     		movs	r3, #0
+  82 0022 FFF7FEFF 		bl	openserial_printCritical
+  23:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****                             (errorparameter_t)0);
+  24:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       mac64btoWrite->type=ADDR_NONE;
+  83              		.loc 1 24 0
+  84 0026 7B68     		ldr	r3, [r7, #4]
+  85 0028 0022     		movs	r2, #0
+  86 002a 1A70     		strb	r2, [r3]
+  25:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       return;
+  87              		.loc 1 25 0
+  88 002c 17E0     		b	.L1
+  89              	.L2:
+  26:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    }
+  27:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    prefix64btoWrite->type=ADDR_PREFIX;
+  90              		.loc 1 27 0
+  91 002e BB68     		ldr	r3, [r7, #8]
+  92 0030 0522     		movs	r2, #5
+  93 0032 1A70     		strb	r2, [r3]
+  28:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    memcpy(prefix64btoWrite->prefix, &(ip128b->addr_128b[0]), 8);
+  94              		.loc 1 28 0
+  95 0034 BB68     		ldr	r3, [r7, #8]
+  96 0036 5A1C     		adds	r2, r3, #1
+  97 0038 FB68     		ldr	r3, [r7, #12]
+  98 003a 0133     		adds	r3, r3, #1
+  99 003c 1046     		mov	r0, r2
+ 100 003e 1946     		mov	r1, r3
+ 101 0040 0822     		movs	r2, #8
+ 102 0042 FFF7FEFF 		bl	memcpy
+  29:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    mac64btoWrite->type=ADDR_64B;
+ 103              		.loc 1 29 0
+ 104 0046 7B68     		ldr	r3, [r7, #4]
+ 105 0048 0222     		movs	r2, #2
+ 106 004a 1A70     		strb	r2, [r3]
+  30:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    memcpy(mac64btoWrite->addr_64b , &(ip128b->addr_128b[8]), 8);
+ 107              		.loc 1 30 0
+ 108 004c 7B68     		ldr	r3, [r7, #4]
+ 109 004e 5A1C     		adds	r2, r3, #1
+ 110 0050 FB68     		ldr	r3, [r7, #12]
+ 111 0052 0933     		adds	r3, r3, #9
+ 112 0054 1046     		mov	r0, r2
+ 113 0056 1946     		mov	r1, r3
+ 114 0058 0822     		movs	r2, #8
+ 115 005a FFF7FEFF 		bl	memcpy
+ 116              	.L1:
+  31:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** }
+ 117              		.loc 1 31 0
+ 118 005e 1037     		adds	r7, r7, #16
+ 119              		.cfi_def_cfa_offset 8
+ 120 0060 BD46     		mov	sp, r7
+ 121              		.cfi_def_cfa_register 13
+ 122              		@ sp needed
+ 123 0062 80BD     		pop	{r7, pc}
+ 124              		.cfi_endproc
+ 125              	.LFE0:
+ 127              		.align	2
+ 128              		.global	packetfunctions_mac64bToIp128b
+ 129              		.thumb
+ 130              		.thumb_func
+ 132              	packetfunctions_mac64bToIp128b:
+ 133              	.LFB1:
+  32:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** void packetfunctions_mac64bToIp128b(
+  33:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       open_addr_t* prefix64b,
+  34:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       open_addr_t* mac64b,
+  35:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       open_addr_t* ip128bToWrite) {
+ 134              		.loc 1 35 0
+ 135              		.cfi_startproc
+ 136              		@ args = 0, pretend = 0, frame = 16
+ 137              		@ frame_needed = 1, uses_anonymous_args = 0
+ 138 0064 80B5     		push	{r7, lr}
+ 139              		.cfi_def_cfa_offset 8
+ 140              		.cfi_offset 7, -8
+ 141              		.cfi_offset 14, -4
+ 142 0066 84B0     		sub	sp, sp, #16
+ 143              		.cfi_def_cfa_offset 24
+ 144 0068 00AF     		add	r7, sp, #0
+ 145              		.cfi_def_cfa_register 7
+ 146 006a F860     		str	r0, [r7, #12]
+ 147 006c B960     		str	r1, [r7, #8]
+ 148 006e 7A60     		str	r2, [r7, #4]
+  36:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    if (prefix64b->type!=ADDR_PREFIX || mac64b->type!=ADDR_64B) {
+ 149              		.loc 1 36 0
+ 150 0070 FB68     		ldr	r3, [r7, #12]
+ 151 0072 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 152 0074 052B     		cmp	r3, #5
+ 153 0076 03D1     		bne	.L5
+ 154              		.loc 1 36 0 is_stmt 0 discriminator 1
+ 155 0078 BB68     		ldr	r3, [r7, #8]
+ 156 007a 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 157 007c 022B     		cmp	r3, #2
+ 158 007e 0CD0     		beq	.L6
+ 159              	.L5:
+  37:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       openserial_printCritical(COMPONENT_PACKETFUNCTIONS,ERR_WRONG_ADDR_TYPE,
+  38:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****                             (errorparameter_t)prefix64b->type,
+ 160              		.loc 1 38 0 is_stmt 1
+ 161 0080 FB68     		ldr	r3, [r7, #12]
+ 162 0082 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+  37:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       openserial_printCritical(COMPONENT_PACKETFUNCTIONS,ERR_WRONG_ADDR_TYPE,
+ 163              		.loc 1 37 0
+ 164 0084 9BB2     		uxth	r3, r3
+ 165 0086 0520     		movs	r0, #5
+ 166 0088 3121     		movs	r1, #49
+ 167 008a 1A46     		mov	r2, r3
+ 168 008c 0123     		movs	r3, #1
+ 169 008e FFF7FEFF 		bl	openserial_printCritical
+  39:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****                             (errorparameter_t)1);
+  40:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       ip128bToWrite->type=ADDR_NONE;
+ 170              		.loc 1 40 0
+ 171 0092 7B68     		ldr	r3, [r7, #4]
+ 172 0094 0022     		movs	r2, #0
+ 173 0096 1A70     		strb	r2, [r3]
+  41:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       return;
+ 174              		.loc 1 41 0
+ 175 0098 15E0     		b	.L4
+ 176              	.L6:
+  42:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    }
+  43:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    ip128bToWrite->type=ADDR_128B;
+ 177              		.loc 1 43 0
+ 178 009a 7B68     		ldr	r3, [r7, #4]
+ 179 009c 0322     		movs	r2, #3
+ 180 009e 1A70     		strb	r2, [r3]
+  44:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    memcpy(&(ip128bToWrite->addr_128b[0]), &(prefix64b->prefix[0]), 8);
+ 181              		.loc 1 44 0
+ 182 00a0 7B68     		ldr	r3, [r7, #4]
+ 183 00a2 5A1C     		adds	r2, r3, #1
+ 184 00a4 FB68     		ldr	r3, [r7, #12]
+ 185 00a6 0133     		adds	r3, r3, #1
+ 186 00a8 1046     		mov	r0, r2
+ 187 00aa 1946     		mov	r1, r3
+ 188 00ac 0822     		movs	r2, #8
+ 189 00ae FFF7FEFF 		bl	memcpy
+  45:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    memcpy(&(ip128bToWrite->addr_128b[8]), &(mac64b->addr_64b[0]),  8);
+ 190              		.loc 1 45 0
+ 191 00b2 7B68     		ldr	r3, [r7, #4]
+ 192 00b4 03F10902 		add	r2, r3, #9
+ 193 00b8 BB68     		ldr	r3, [r7, #8]
+ 194 00ba 0133     		adds	r3, r3, #1
+ 195 00bc 1046     		mov	r0, r2
+ 196 00be 1946     		mov	r1, r3
+ 197 00c0 0822     		movs	r2, #8
+ 198 00c2 FFF7FEFF 		bl	memcpy
+ 199              	.L4:
+  46:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** }
+ 200              		.loc 1 46 0
+ 201 00c6 1037     		adds	r7, r7, #16
+ 202              		.cfi_def_cfa_offset 8
+ 203 00c8 BD46     		mov	sp, r7
+ 204              		.cfi_def_cfa_register 13
+ 205              		@ sp needed
+ 206 00ca 80BD     		pop	{r7, pc}
+ 207              		.cfi_endproc
+ 208              	.LFE1:
+ 210              		.align	2
+ 211              		.global	packetfunctions_mac64bToMac16b
+ 212              		.thumb
+ 213              		.thumb_func
+ 215              	packetfunctions_mac64bToMac16b:
+ 216              	.LFB2:
+  47:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** 
+  48:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** //assuming an mac16b is lower 2B of mac64b
+  49:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** void packetfunctions_mac64bToMac16b(open_addr_t* mac64b, open_addr_t* mac16btoWrite) {
+ 217              		.loc 1 49 0
+ 218              		.cfi_startproc
+ 219              		@ args = 0, pretend = 0, frame = 8
+ 220              		@ frame_needed = 1, uses_anonymous_args = 0
+ 221 00cc 80B5     		push	{r7, lr}
+ 222              		.cfi_def_cfa_offset 8
+ 223              		.cfi_offset 7, -8
+ 224              		.cfi_offset 14, -4
+ 225 00ce 82B0     		sub	sp, sp, #8
+ 226              		.cfi_def_cfa_offset 16
+ 227 00d0 00AF     		add	r7, sp, #0
+ 228              		.cfi_def_cfa_register 7
+ 229 00d2 7860     		str	r0, [r7, #4]
+ 230 00d4 3960     		str	r1, [r7]
+  50:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    if (mac64b->type!=ADDR_64B) {
+ 231              		.loc 1 50 0
+ 232 00d6 7B68     		ldr	r3, [r7, #4]
+ 233 00d8 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 234 00da 022B     		cmp	r3, #2
+ 235 00dc 0CD0     		beq	.L9
+  51:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       openserial_printCritical(COMPONENT_PACKETFUNCTIONS,ERR_WRONG_ADDR_TYPE,
+  52:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****                             (errorparameter_t)mac64b->type,
+ 236              		.loc 1 52 0
+ 237 00de 7B68     		ldr	r3, [r7, #4]
+ 238 00e0 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+  51:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       openserial_printCritical(COMPONENT_PACKETFUNCTIONS,ERR_WRONG_ADDR_TYPE,
+ 239              		.loc 1 51 0
+ 240 00e2 9BB2     		uxth	r3, r3
+ 241 00e4 0520     		movs	r0, #5
+ 242 00e6 3121     		movs	r1, #49
+ 243 00e8 1A46     		mov	r2, r3
+ 244 00ea 0223     		movs	r3, #2
+ 245 00ec FFF7FEFF 		bl	openserial_printCritical
+  53:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****                             (errorparameter_t)2);
+  54:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       mac16btoWrite->type=ADDR_NONE;
+ 246              		.loc 1 54 0
+ 247 00f0 3B68     		ldr	r3, [r7]
+ 248 00f2 0022     		movs	r2, #0
+ 249 00f4 1A70     		strb	r2, [r3]
+  55:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       return;
+ 250              		.loc 1 55 0
+ 251 00f6 0AE0     		b	.L8
+ 252              	.L9:
+  56:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    }
+  57:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    mac16btoWrite->type = ADDR_16B;
+ 253              		.loc 1 57 0
+ 254 00f8 3B68     		ldr	r3, [r7]
+ 255 00fa 0122     		movs	r2, #1
+ 256 00fc 1A70     		strb	r2, [r3]
+  58:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    mac16btoWrite->addr_16b[0] = mac64b->addr_64b[6];
+ 257              		.loc 1 58 0
+ 258 00fe 7B68     		ldr	r3, [r7, #4]
+ 259 0100 DA79     		ldrb	r2, [r3, #7]	@ zero_extendqisi2
+ 260 0102 3B68     		ldr	r3, [r7]
+ 261 0104 5A70     		strb	r2, [r3, #1]
+  59:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    mac16btoWrite->addr_16b[1] = mac64b->addr_64b[7];
+ 262              		.loc 1 59 0
+ 263 0106 7B68     		ldr	r3, [r7, #4]
+ 264 0108 1A7A     		ldrb	r2, [r3, #8]	@ zero_extendqisi2
+ 265 010a 3B68     		ldr	r3, [r7]
+ 266 010c 9A70     		strb	r2, [r3, #2]
+ 267              	.L8:
+  60:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** }
+ 268              		.loc 1 60 0
+ 269 010e 0837     		adds	r7, r7, #8
+ 270              		.cfi_def_cfa_offset 8
+ 271 0110 BD46     		mov	sp, r7
+ 272              		.cfi_def_cfa_register 13
+ 273              		@ sp needed
+ 274 0112 80BD     		pop	{r7, pc}
+ 275              		.cfi_endproc
+ 276              	.LFE2:
+ 278              		.align	2
+ 279              		.global	packetfunctions_mac16bToMac64b
+ 280              		.thumb
+ 281              		.thumb_func
+ 283              	packetfunctions_mac16bToMac64b:
+ 284              	.LFB3:
+  61:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** void packetfunctions_mac16bToMac64b(open_addr_t* mac16b, open_addr_t* mac64btoWrite) {
+ 285              		.loc 1 61 0
+ 286              		.cfi_startproc
+ 287              		@ args = 0, pretend = 0, frame = 8
+ 288              		@ frame_needed = 1, uses_anonymous_args = 0
+ 289 0114 80B5     		push	{r7, lr}
+ 290              		.cfi_def_cfa_offset 8
+ 291              		.cfi_offset 7, -8
+ 292              		.cfi_offset 14, -4
+ 293 0116 82B0     		sub	sp, sp, #8
+ 294              		.cfi_def_cfa_offset 16
+ 295 0118 00AF     		add	r7, sp, #0
+ 296              		.cfi_def_cfa_register 7
+ 297 011a 7860     		str	r0, [r7, #4]
+ 298 011c 3960     		str	r1, [r7]
+  62:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    if (mac16b->type!=ADDR_16B) {
+ 299              		.loc 1 62 0
+ 300 011e 7B68     		ldr	r3, [r7, #4]
+ 301 0120 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 302 0122 012B     		cmp	r3, #1
+ 303 0124 0CD0     		beq	.L12
+  63:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       openserial_printCritical(COMPONENT_PACKETFUNCTIONS,ERR_WRONG_ADDR_TYPE,
+  64:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****                             (errorparameter_t)mac16b->type,
+ 304              		.loc 1 64 0
+ 305 0126 7B68     		ldr	r3, [r7, #4]
+ 306 0128 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+  63:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       openserial_printCritical(COMPONENT_PACKETFUNCTIONS,ERR_WRONG_ADDR_TYPE,
+ 307              		.loc 1 63 0
+ 308 012a 9BB2     		uxth	r3, r3
+ 309 012c 0520     		movs	r0, #5
+ 310 012e 3121     		movs	r1, #49
+ 311 0130 1A46     		mov	r2, r3
+ 312 0132 0323     		movs	r3, #3
+ 313 0134 FFF7FEFF 		bl	openserial_printCritical
+  65:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****                             (errorparameter_t)3);
+  66:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       mac64btoWrite->type=ADDR_NONE;
+ 314              		.loc 1 66 0
+ 315 0138 3B68     		ldr	r3, [r7]
+ 316 013a 0022     		movs	r2, #0
+ 317 013c 1A70     		strb	r2, [r3]
+  67:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       return;
+ 318              		.loc 1 67 0
+ 319 013e 1CE0     		b	.L11
+ 320              	.L12:
+  68:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    }
+  69:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    mac64btoWrite->type = ADDR_64B;
+ 321              		.loc 1 69 0
+ 322 0140 3B68     		ldr	r3, [r7]
+ 323 0142 0222     		movs	r2, #2
+ 324 0144 1A70     		strb	r2, [r3]
+  70:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    mac64btoWrite->addr_64b[0] = 0;
+ 325              		.loc 1 70 0
+ 326 0146 3B68     		ldr	r3, [r7]
+ 327 0148 0022     		movs	r2, #0
+ 328 014a 5A70     		strb	r2, [r3, #1]
+  71:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    mac64btoWrite->addr_64b[1] = 0;
+ 329              		.loc 1 71 0
+ 330 014c 3B68     		ldr	r3, [r7]
+ 331 014e 0022     		movs	r2, #0
+ 332 0150 9A70     		strb	r2, [r3, #2]
+  72:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    mac64btoWrite->addr_64b[2] = 0;
+ 333              		.loc 1 72 0
+ 334 0152 3B68     		ldr	r3, [r7]
+ 335 0154 0022     		movs	r2, #0
+ 336 0156 DA70     		strb	r2, [r3, #3]
+  73:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    mac64btoWrite->addr_64b[3] = 0;
+ 337              		.loc 1 73 0
+ 338 0158 3B68     		ldr	r3, [r7]
+ 339 015a 0022     		movs	r2, #0
+ 340 015c 1A71     		strb	r2, [r3, #4]
+  74:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    mac64btoWrite->addr_64b[4] = 0;
+ 341              		.loc 1 74 0
+ 342 015e 3B68     		ldr	r3, [r7]
+ 343 0160 0022     		movs	r2, #0
+ 344 0162 5A71     		strb	r2, [r3, #5]
+  75:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    mac64btoWrite->addr_64b[5] = 0;
+ 345              		.loc 1 75 0
+ 346 0164 3B68     		ldr	r3, [r7]
+ 347 0166 0022     		movs	r2, #0
+ 348 0168 9A71     		strb	r2, [r3, #6]
+  76:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    mac64btoWrite->addr_64b[6] = mac16b->addr_16b[0];
+ 349              		.loc 1 76 0
+ 350 016a 7B68     		ldr	r3, [r7, #4]
+ 351 016c 5A78     		ldrb	r2, [r3, #1]	@ zero_extendqisi2
+ 352 016e 3B68     		ldr	r3, [r7]
+ 353 0170 DA71     		strb	r2, [r3, #7]
+  77:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    mac64btoWrite->addr_64b[7] = mac16b->addr_16b[1];
+ 354              		.loc 1 77 0
+ 355 0172 7B68     		ldr	r3, [r7, #4]
+ 356 0174 9A78     		ldrb	r2, [r3, #2]	@ zero_extendqisi2
+ 357 0176 3B68     		ldr	r3, [r7]
+ 358 0178 1A72     		strb	r2, [r3, #8]
+ 359              	.L11:
+  78:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** }
+ 360              		.loc 1 78 0
+ 361 017a 0837     		adds	r7, r7, #8
+ 362              		.cfi_def_cfa_offset 8
+ 363 017c BD46     		mov	sp, r7
+ 364              		.cfi_def_cfa_register 13
+ 365              		@ sp needed
+ 366 017e 80BD     		pop	{r7, pc}
+ 367              		.cfi_endproc
+ 368              	.LFE3:
+ 370              		.align	2
+ 371              		.global	packetfunctions_isBroadcastMulticast
+ 372              		.thumb
+ 373              		.thumb_func
+ 375              	packetfunctions_isBroadcastMulticast:
+ 376              	.LFB4:
+  79:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** 
+  80:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** //======= address recognition
+  81:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** 
+  82:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** bool packetfunctions_isBroadcastMulticast(open_addr_t* address) {
+ 377              		.loc 1 82 0
+ 378              		.cfi_startproc
+ 379              		@ args = 0, pretend = 0, frame = 16
+ 380              		@ frame_needed = 1, uses_anonymous_args = 0
+ 381 0180 80B5     		push	{r7, lr}
+ 382              		.cfi_def_cfa_offset 8
+ 383              		.cfi_offset 7, -8
+ 384              		.cfi_offset 14, -4
+ 385 0182 84B0     		sub	sp, sp, #16
+ 386              		.cfi_def_cfa_offset 24
+ 387 0184 00AF     		add	r7, sp, #0
+ 388              		.cfi_def_cfa_register 7
+ 389 0186 7860     		str	r0, [r7, #4]
+  83:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    uint8_t i;
+  84:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    uint8_t address_length;
+  85:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    //IPv6 multicast
+  86:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    if (address->type==ADDR_128B) {
+ 390              		.loc 1 86 0
+ 391 0188 7B68     		ldr	r3, [r7, #4]
+ 392 018a 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 393 018c 032B     		cmp	r3, #3
+ 394 018e 07D1     		bne	.L15
+  87:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       if (address->addr_128b[0]==0xff) {
+ 395              		.loc 1 87 0
+ 396 0190 7B68     		ldr	r3, [r7, #4]
+ 397 0192 5B78     		ldrb	r3, [r3, #1]	@ zero_extendqisi2
+ 398 0194 FF2B     		cmp	r3, #255
+ 399 0196 01D1     		bne	.L16
+  88:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****          return TRUE;
+ 400              		.loc 1 88 0
+ 401 0198 0123     		movs	r3, #1
+ 402 019a 2CE0     		b	.L17
+ 403              	.L16:
+  89:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       } else {
+  90:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****          return FALSE;
+ 404              		.loc 1 90 0
+ 405 019c 0023     		movs	r3, #0
+ 406 019e 2AE0     		b	.L17
+ 407              	.L15:
+  91:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       }
+  92:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    }
+  93:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    //15.4 broadcast
+  94:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    switch (address->type) {
+ 408              		.loc 1 94 0
+ 409 01a0 7B68     		ldr	r3, [r7, #4]
+ 410 01a2 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 411 01a4 012B     		cmp	r3, #1
+ 412 01a6 02D0     		beq	.L19
+ 413 01a8 022B     		cmp	r3, #2
+ 414 01aa 03D0     		beq	.L20
+ 415 01ac 05E0     		b	.L25
+ 416              	.L19:
+  95:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       case ADDR_16B:
+  96:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****          address_length = 2;
+ 417              		.loc 1 96 0
+ 418 01ae 0223     		movs	r3, #2
+ 419 01b0 BB73     		strb	r3, [r7, #14]
+  97:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****          break;
+ 420              		.loc 1 97 0
+ 421 01b2 0DE0     		b	.L21
+ 422              	.L20:
+  98:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       case ADDR_64B:
+  99:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****          address_length = 8;
+ 423              		.loc 1 99 0
+ 424 01b4 0823     		movs	r3, #8
+ 425 01b6 BB73     		strb	r3, [r7, #14]
+ 100:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****          break;
+ 426              		.loc 1 100 0
+ 427 01b8 0AE0     		b	.L21
+ 428              	.L25:
+ 101:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       default:
+ 102:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****          openserial_printCritical(COMPONENT_PACKETFUNCTIONS,ERR_WRONG_ADDR_TYPE,
+ 103:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****                                (errorparameter_t)address->type,
+ 429              		.loc 1 103 0
+ 430 01ba 7B68     		ldr	r3, [r7, #4]
+ 431 01bc 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 102:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****                                (errorparameter_t)address->type,
+ 432              		.loc 1 102 0
+ 433 01be 9BB2     		uxth	r3, r3
+ 434 01c0 0520     		movs	r0, #5
+ 435 01c2 3121     		movs	r1, #49
+ 436 01c4 1A46     		mov	r2, r3
+ 437 01c6 0423     		movs	r3, #4
+ 438 01c8 FFF7FEFF 		bl	openserial_printCritical
+ 104:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****                                (errorparameter_t)4);
+ 105:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****          return FALSE;
+ 439              		.loc 1 105 0
+ 440 01cc 0023     		movs	r3, #0
+ 441 01ce 12E0     		b	.L17
+ 442              	.L21:
+ 106:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    }
+ 107:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    for (i=0;i<address_length;i++) {
+ 443              		.loc 1 107 0
+ 444 01d0 0023     		movs	r3, #0
+ 445 01d2 FB73     		strb	r3, [r7, #15]
+ 446 01d4 0AE0     		b	.L22
+ 447              	.L24:
+ 108:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       if (address->addr_128b[i]!=0xFF) {
+ 448              		.loc 1 108 0
+ 449 01d6 FB7B     		ldrb	r3, [r7, #15]	@ zero_extendqisi2
+ 450 01d8 7A68     		ldr	r2, [r7, #4]
+ 451 01da 1344     		add	r3, r3, r2
+ 452 01dc 5B78     		ldrb	r3, [r3, #1]	@ zero_extendqisi2
+ 453 01de FF2B     		cmp	r3, #255
+ 454 01e0 01D0     		beq	.L23
+ 109:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****          return FALSE;
+ 455              		.loc 1 109 0
+ 456 01e2 0023     		movs	r3, #0
+ 457 01e4 07E0     		b	.L17
+ 458              	.L23:
+ 107:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       if (address->addr_128b[i]!=0xFF) {
+ 459              		.loc 1 107 0 discriminator 2
+ 460 01e6 FB7B     		ldrb	r3, [r7, #15]	@ zero_extendqisi2
+ 461 01e8 0133     		adds	r3, r3, #1
+ 462 01ea FB73     		strb	r3, [r7, #15]
+ 463              	.L22:
+ 107:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       if (address->addr_128b[i]!=0xFF) {
+ 464              		.loc 1 107 0 is_stmt 0 discriminator 1
+ 465 01ec FA7B     		ldrb	r2, [r7, #15]	@ zero_extendqisi2
+ 466 01ee BB7B     		ldrb	r3, [r7, #14]	@ zero_extendqisi2
+ 467 01f0 9A42     		cmp	r2, r3
+ 468 01f2 F0D3     		bcc	.L24
+ 110:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       }
+ 111:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    }
+ 112:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    return TRUE;
+ 469              		.loc 1 112 0 is_stmt 1
+ 470 01f4 0123     		movs	r3, #1
+ 471              	.L17:
+ 113:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** }
+ 472              		.loc 1 113 0
+ 473 01f6 1846     		mov	r0, r3
+ 474 01f8 1037     		adds	r7, r7, #16
+ 475              		.cfi_def_cfa_offset 8
+ 476 01fa BD46     		mov	sp, r7
+ 477              		.cfi_def_cfa_register 13
+ 478              		@ sp needed
+ 479 01fc 80BD     		pop	{r7, pc}
+ 480              		.cfi_endproc
+ 481              	.LFE4:
+ 483 01fe 00BF     		.align	2
+ 484              		.global	packetfunctions_isAllRoutersMulticast
+ 485              		.thumb
+ 486              		.thumb_func
+ 488              	packetfunctions_isAllRoutersMulticast:
+ 489              	.LFB5:
+ 114:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** 
+ 115:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** bool packetfunctions_isAllRoutersMulticast(open_addr_t* address) {
+ 490              		.loc 1 115 0
+ 491              		.cfi_startproc
+ 492              		@ args = 0, pretend = 0, frame = 8
+ 493              		@ frame_needed = 1, uses_anonymous_args = 0
+ 494              		@ link register save eliminated.
+ 495 0200 80B4     		push	{r7}
+ 496              		.cfi_def_cfa_offset 4
+ 497              		.cfi_offset 7, -4
+ 498 0202 83B0     		sub	sp, sp, #12
+ 499              		.cfi_def_cfa_offset 16
+ 500 0204 00AF     		add	r7, sp, #0
+ 501              		.cfi_def_cfa_register 7
+ 502 0206 7860     		str	r0, [r7, #4]
+ 116:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    if (
+ 117:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       address->type          == ADDR_128B &&
+ 503              		.loc 1 117 0
+ 504 0208 7B68     		ldr	r3, [r7, #4]
+ 505 020a 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 116:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    if (
+ 506              		.loc 1 116 0
+ 507 020c 032B     		cmp	r3, #3
+ 508 020e 41D1     		bne	.L27
+ 118:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       address->addr_128b[0]  == 0xff &&
+ 509              		.loc 1 118 0
+ 510 0210 7B68     		ldr	r3, [r7, #4]
+ 511 0212 5B78     		ldrb	r3, [r3, #1]	@ zero_extendqisi2
+ 117:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       address->addr_128b[0]  == 0xff &&
+ 512              		.loc 1 117 0
+ 513 0214 FF2B     		cmp	r3, #255
+ 514 0216 3DD1     		bne	.L27
+ 119:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       address->addr_128b[1]  == 0x02 &&
+ 515              		.loc 1 119 0
+ 516 0218 7B68     		ldr	r3, [r7, #4]
+ 517 021a 9B78     		ldrb	r3, [r3, #2]	@ zero_extendqisi2
+ 118:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       address->addr_128b[0]  == 0xff &&
+ 518              		.loc 1 118 0
+ 519 021c 022B     		cmp	r3, #2
+ 520 021e 39D1     		bne	.L27
+ 120:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       address->addr_128b[2]  == 0x00 &&
+ 521              		.loc 1 120 0
+ 522 0220 7B68     		ldr	r3, [r7, #4]
+ 523 0222 DB78     		ldrb	r3, [r3, #3]	@ zero_extendqisi2
+ 119:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       address->addr_128b[1]  == 0x02 &&
+ 524              		.loc 1 119 0
+ 525 0224 002B     		cmp	r3, #0
+ 526 0226 35D1     		bne	.L27
+ 121:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       address->addr_128b[3]  == 0x00 &&
+ 527              		.loc 1 121 0
+ 528 0228 7B68     		ldr	r3, [r7, #4]
+ 529 022a 1B79     		ldrb	r3, [r3, #4]	@ zero_extendqisi2
+ 120:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       address->addr_128b[2]  == 0x00 &&
+ 530              		.loc 1 120 0
+ 531 022c 002B     		cmp	r3, #0
+ 532 022e 31D1     		bne	.L27
+ 122:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       address->addr_128b[4]  == 0x00 &&
+ 533              		.loc 1 122 0
+ 534 0230 7B68     		ldr	r3, [r7, #4]
+ 535 0232 5B79     		ldrb	r3, [r3, #5]	@ zero_extendqisi2
+ 121:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       address->addr_128b[3]  == 0x00 &&
+ 536              		.loc 1 121 0
+ 537 0234 002B     		cmp	r3, #0
+ 538 0236 2DD1     		bne	.L27
+ 123:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       address->addr_128b[5]  == 0x00 &&
+ 539              		.loc 1 123 0
+ 540 0238 7B68     		ldr	r3, [r7, #4]
+ 541 023a 9B79     		ldrb	r3, [r3, #6]	@ zero_extendqisi2
+ 122:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       address->addr_128b[4]  == 0x00 &&
+ 542              		.loc 1 122 0
+ 543 023c 002B     		cmp	r3, #0
+ 544 023e 29D1     		bne	.L27
+ 124:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       address->addr_128b[6]  == 0x00 &&
+ 545              		.loc 1 124 0
+ 546 0240 7B68     		ldr	r3, [r7, #4]
+ 547 0242 DB79     		ldrb	r3, [r3, #7]	@ zero_extendqisi2
+ 123:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       address->addr_128b[5]  == 0x00 &&
+ 548              		.loc 1 123 0
+ 549 0244 002B     		cmp	r3, #0
+ 550 0246 25D1     		bne	.L27
+ 125:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       address->addr_128b[7]  == 0x00 &&
+ 551              		.loc 1 125 0
+ 552 0248 7B68     		ldr	r3, [r7, #4]
+ 553 024a 1B7A     		ldrb	r3, [r3, #8]	@ zero_extendqisi2
+ 124:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       address->addr_128b[6]  == 0x00 &&
+ 554              		.loc 1 124 0
+ 555 024c 002B     		cmp	r3, #0
+ 556 024e 21D1     		bne	.L27
+ 126:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       address->addr_128b[8]  == 0x00 &&
+ 557              		.loc 1 126 0
+ 558 0250 7B68     		ldr	r3, [r7, #4]
+ 559 0252 5B7A     		ldrb	r3, [r3, #9]	@ zero_extendqisi2
+ 125:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       address->addr_128b[7]  == 0x00 &&
+ 560              		.loc 1 125 0
+ 561 0254 002B     		cmp	r3, #0
+ 562 0256 1DD1     		bne	.L27
+ 127:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       address->addr_128b[9]  == 0x00 &&
+ 563              		.loc 1 127 0
+ 564 0258 7B68     		ldr	r3, [r7, #4]
+ 565 025a 9B7A     		ldrb	r3, [r3, #10]	@ zero_extendqisi2
+ 126:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       address->addr_128b[8]  == 0x00 &&
+ 566              		.loc 1 126 0
+ 567 025c 002B     		cmp	r3, #0
+ 568 025e 19D1     		bne	.L27
+ 128:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       address->addr_128b[10] == 0x00 &&
+ 569              		.loc 1 128 0
+ 570 0260 7B68     		ldr	r3, [r7, #4]
+ 571 0262 DB7A     		ldrb	r3, [r3, #11]	@ zero_extendqisi2
+ 127:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       address->addr_128b[9]  == 0x00 &&
+ 572              		.loc 1 127 0
+ 573 0264 002B     		cmp	r3, #0
+ 574 0266 15D1     		bne	.L27
+ 129:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       address->addr_128b[11] == 0x00 &&
+ 575              		.loc 1 129 0
+ 576 0268 7B68     		ldr	r3, [r7, #4]
+ 577 026a 1B7B     		ldrb	r3, [r3, #12]	@ zero_extendqisi2
+ 128:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       address->addr_128b[10] == 0x00 &&
+ 578              		.loc 1 128 0
+ 579 026c 002B     		cmp	r3, #0
+ 580 026e 11D1     		bne	.L27
+ 130:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       address->addr_128b[12] == 0x00 &&
+ 581              		.loc 1 130 0
+ 582 0270 7B68     		ldr	r3, [r7, #4]
+ 583 0272 5B7B     		ldrb	r3, [r3, #13]	@ zero_extendqisi2
+ 129:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       address->addr_128b[11] == 0x00 &&
+ 584              		.loc 1 129 0
+ 585 0274 002B     		cmp	r3, #0
+ 586 0276 0DD1     		bne	.L27
+ 131:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       address->addr_128b[13] == 0x00 &&
+ 587              		.loc 1 131 0
+ 588 0278 7B68     		ldr	r3, [r7, #4]
+ 589 027a 9B7B     		ldrb	r3, [r3, #14]	@ zero_extendqisi2
+ 130:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       address->addr_128b[12] == 0x00 &&
+ 590              		.loc 1 130 0
+ 591 027c 002B     		cmp	r3, #0
+ 592 027e 09D1     		bne	.L27
+ 132:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       address->addr_128b[14] == 0x00 &&
+ 593              		.loc 1 132 0
+ 594 0280 7B68     		ldr	r3, [r7, #4]
+ 595 0282 DB7B     		ldrb	r3, [r3, #15]	@ zero_extendqisi2
+ 131:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       address->addr_128b[13] == 0x00 &&
+ 596              		.loc 1 131 0
+ 597 0284 002B     		cmp	r3, #0
+ 598 0286 05D1     		bne	.L27
+ 133:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       address->addr_128b[15] == 0x1a
+ 599              		.loc 1 133 0
+ 600 0288 7B68     		ldr	r3, [r7, #4]
+ 601 028a 1B7C     		ldrb	r3, [r3, #16]	@ zero_extendqisi2
+ 132:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       address->addr_128b[14] == 0x00 &&
+ 602              		.loc 1 132 0
+ 603 028c 1A2B     		cmp	r3, #26
+ 604 028e 01D1     		bne	.L27
+ 134:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    ) {
+ 135:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       return TRUE;
+ 605              		.loc 1 135 0
+ 606 0290 0123     		movs	r3, #1
+ 607 0292 00E0     		b	.L28
+ 608              	.L27:
+ 136:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    }
+ 137:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    return FALSE;
+ 609              		.loc 1 137 0
+ 610 0294 0023     		movs	r3, #0
+ 611              	.L28:
+ 138:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** }
+ 612              		.loc 1 138 0
+ 613 0296 1846     		mov	r0, r3
+ 614 0298 0C37     		adds	r7, r7, #12
+ 615              		.cfi_def_cfa_offset 4
+ 616 029a BD46     		mov	sp, r7
+ 617              		.cfi_def_cfa_register 13
+ 618              		@ sp needed
+ 619 029c 5DF8047B 		ldr	r7, [sp], #4
+ 620              		.cfi_restore 7
+ 621              		.cfi_def_cfa_offset 0
+ 622 02a0 7047     		bx	lr
+ 623              		.cfi_endproc
+ 624              	.LFE5:
+ 626 02a2 00BF     		.align	2
+ 627              		.global	packetfunctions_isAllHostsMulticast
+ 628              		.thumb
+ 629              		.thumb_func
+ 631              	packetfunctions_isAllHostsMulticast:
+ 632              	.LFB6:
+ 139:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** 
+ 140:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** bool packetfunctions_isAllHostsMulticast(open_addr_t* address) {
+ 633              		.loc 1 140 0
+ 634              		.cfi_startproc
+ 635              		@ args = 0, pretend = 0, frame = 8
+ 636              		@ frame_needed = 1, uses_anonymous_args = 0
+ 637              		@ link register save eliminated.
+ 638 02a4 80B4     		push	{r7}
+ 639              		.cfi_def_cfa_offset 4
+ 640              		.cfi_offset 7, -4
+ 641 02a6 83B0     		sub	sp, sp, #12
+ 642              		.cfi_def_cfa_offset 16
+ 643 02a8 00AF     		add	r7, sp, #0
+ 644              		.cfi_def_cfa_register 7
+ 645 02aa 7860     		str	r0, [r7, #4]
+ 141:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    if (
+ 142:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       address->type          == ADDR_128B &&
+ 646              		.loc 1 142 0
+ 647 02ac 7B68     		ldr	r3, [r7, #4]
+ 648 02ae 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 141:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    if (
+ 649              		.loc 1 141 0
+ 650 02b0 032B     		cmp	r3, #3
+ 651 02b2 41D1     		bne	.L30
+ 143:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       address->addr_128b[0]  == 0xff &&
+ 652              		.loc 1 143 0
+ 653 02b4 7B68     		ldr	r3, [r7, #4]
+ 654 02b6 5B78     		ldrb	r3, [r3, #1]	@ zero_extendqisi2
+ 142:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       address->addr_128b[0]  == 0xff &&
+ 655              		.loc 1 142 0
+ 656 02b8 FF2B     		cmp	r3, #255
+ 657 02ba 3DD1     		bne	.L30
+ 144:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       address->addr_128b[1]  == 0x02 &&
+ 658              		.loc 1 144 0
+ 659 02bc 7B68     		ldr	r3, [r7, #4]
+ 660 02be 9B78     		ldrb	r3, [r3, #2]	@ zero_extendqisi2
+ 143:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       address->addr_128b[0]  == 0xff &&
+ 661              		.loc 1 143 0
+ 662 02c0 022B     		cmp	r3, #2
+ 663 02c2 39D1     		bne	.L30
+ 145:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       address->addr_128b[2]  == 0x00 &&
+ 664              		.loc 1 145 0
+ 665 02c4 7B68     		ldr	r3, [r7, #4]
+ 666 02c6 DB78     		ldrb	r3, [r3, #3]	@ zero_extendqisi2
+ 144:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       address->addr_128b[1]  == 0x02 &&
+ 667              		.loc 1 144 0
+ 668 02c8 002B     		cmp	r3, #0
+ 669 02ca 35D1     		bne	.L30
+ 146:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       address->addr_128b[3]  == 0x00 &&
+ 670              		.loc 1 146 0
+ 671 02cc 7B68     		ldr	r3, [r7, #4]
+ 672 02ce 1B79     		ldrb	r3, [r3, #4]	@ zero_extendqisi2
+ 145:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       address->addr_128b[2]  == 0x00 &&
+ 673              		.loc 1 145 0
+ 674 02d0 002B     		cmp	r3, #0
+ 675 02d2 31D1     		bne	.L30
+ 147:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       address->addr_128b[4]  == 0x00 &&
+ 676              		.loc 1 147 0
+ 677 02d4 7B68     		ldr	r3, [r7, #4]
+ 678 02d6 5B79     		ldrb	r3, [r3, #5]	@ zero_extendqisi2
+ 146:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       address->addr_128b[3]  == 0x00 &&
+ 679              		.loc 1 146 0
+ 680 02d8 002B     		cmp	r3, #0
+ 681 02da 2DD1     		bne	.L30
+ 148:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       address->addr_128b[5]  == 0x00 &&
+ 682              		.loc 1 148 0
+ 683 02dc 7B68     		ldr	r3, [r7, #4]
+ 684 02de 9B79     		ldrb	r3, [r3, #6]	@ zero_extendqisi2
+ 147:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       address->addr_128b[4]  == 0x00 &&
+ 685              		.loc 1 147 0
+ 686 02e0 002B     		cmp	r3, #0
+ 687 02e2 29D1     		bne	.L30
+ 149:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       address->addr_128b[6]  == 0x00 &&
+ 688              		.loc 1 149 0
+ 689 02e4 7B68     		ldr	r3, [r7, #4]
+ 690 02e6 DB79     		ldrb	r3, [r3, #7]	@ zero_extendqisi2
+ 148:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       address->addr_128b[5]  == 0x00 &&
+ 691              		.loc 1 148 0
+ 692 02e8 002B     		cmp	r3, #0
+ 693 02ea 25D1     		bne	.L30
+ 150:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       address->addr_128b[7]  == 0x00 &&
+ 694              		.loc 1 150 0
+ 695 02ec 7B68     		ldr	r3, [r7, #4]
+ 696 02ee 1B7A     		ldrb	r3, [r3, #8]	@ zero_extendqisi2
+ 149:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       address->addr_128b[6]  == 0x00 &&
+ 697              		.loc 1 149 0
+ 698 02f0 002B     		cmp	r3, #0
+ 699 02f2 21D1     		bne	.L30
+ 151:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       address->addr_128b[8]  == 0x00 &&
+ 700              		.loc 1 151 0
+ 701 02f4 7B68     		ldr	r3, [r7, #4]
+ 702 02f6 5B7A     		ldrb	r3, [r3, #9]	@ zero_extendqisi2
+ 150:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       address->addr_128b[7]  == 0x00 &&
+ 703              		.loc 1 150 0
+ 704 02f8 002B     		cmp	r3, #0
+ 705 02fa 1DD1     		bne	.L30
+ 152:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       address->addr_128b[9]  == 0x00 &&
+ 706              		.loc 1 152 0
+ 707 02fc 7B68     		ldr	r3, [r7, #4]
+ 708 02fe 9B7A     		ldrb	r3, [r3, #10]	@ zero_extendqisi2
+ 151:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       address->addr_128b[8]  == 0x00 &&
+ 709              		.loc 1 151 0
+ 710 0300 002B     		cmp	r3, #0
+ 711 0302 19D1     		bne	.L30
+ 153:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       address->addr_128b[10] == 0x00 &&
+ 712              		.loc 1 153 0
+ 713 0304 7B68     		ldr	r3, [r7, #4]
+ 714 0306 DB7A     		ldrb	r3, [r3, #11]	@ zero_extendqisi2
+ 152:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       address->addr_128b[9]  == 0x00 &&
+ 715              		.loc 1 152 0
+ 716 0308 002B     		cmp	r3, #0
+ 717 030a 15D1     		bne	.L30
+ 154:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       address->addr_128b[11] == 0x00 &&
+ 718              		.loc 1 154 0
+ 719 030c 7B68     		ldr	r3, [r7, #4]
+ 720 030e 1B7B     		ldrb	r3, [r3, #12]	@ zero_extendqisi2
+ 153:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       address->addr_128b[10] == 0x00 &&
+ 721              		.loc 1 153 0
+ 722 0310 002B     		cmp	r3, #0
+ 723 0312 11D1     		bne	.L30
+ 155:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       address->addr_128b[12] == 0x00 &&
+ 724              		.loc 1 155 0
+ 725 0314 7B68     		ldr	r3, [r7, #4]
+ 726 0316 5B7B     		ldrb	r3, [r3, #13]	@ zero_extendqisi2
+ 154:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       address->addr_128b[11] == 0x00 &&
+ 727              		.loc 1 154 0
+ 728 0318 002B     		cmp	r3, #0
+ 729 031a 0DD1     		bne	.L30
+ 156:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       address->addr_128b[13] == 0x00 &&
+ 730              		.loc 1 156 0
+ 731 031c 7B68     		ldr	r3, [r7, #4]
+ 732 031e 9B7B     		ldrb	r3, [r3, #14]	@ zero_extendqisi2
+ 155:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       address->addr_128b[12] == 0x00 &&
+ 733              		.loc 1 155 0
+ 734 0320 002B     		cmp	r3, #0
+ 735 0322 09D1     		bne	.L30
+ 157:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       address->addr_128b[14] == 0x00 &&
+ 736              		.loc 1 157 0
+ 737 0324 7B68     		ldr	r3, [r7, #4]
+ 738 0326 DB7B     		ldrb	r3, [r3, #15]	@ zero_extendqisi2
+ 156:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       address->addr_128b[13] == 0x00 &&
+ 739              		.loc 1 156 0
+ 740 0328 002B     		cmp	r3, #0
+ 741 032a 05D1     		bne	.L30
+ 158:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       address->addr_128b[15] == 0x01
+ 742              		.loc 1 158 0
+ 743 032c 7B68     		ldr	r3, [r7, #4]
+ 744 032e 1B7C     		ldrb	r3, [r3, #16]	@ zero_extendqisi2
+ 157:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       address->addr_128b[14] == 0x00 &&
+ 745              		.loc 1 157 0
+ 746 0330 012B     		cmp	r3, #1
+ 747 0332 01D1     		bne	.L30
+ 159:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    ) {
+ 160:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       return TRUE;
+ 748              		.loc 1 160 0
+ 749 0334 0123     		movs	r3, #1
+ 750 0336 00E0     		b	.L31
+ 751              	.L30:
+ 161:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    }
+ 162:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    return FALSE;
+ 752              		.loc 1 162 0
+ 753 0338 0023     		movs	r3, #0
+ 754              	.L31:
+ 163:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** }
+ 755              		.loc 1 163 0
+ 756 033a 1846     		mov	r0, r3
+ 757 033c 0C37     		adds	r7, r7, #12
+ 758              		.cfi_def_cfa_offset 4
+ 759 033e BD46     		mov	sp, r7
+ 760              		.cfi_def_cfa_register 13
+ 761              		@ sp needed
+ 762 0340 5DF8047B 		ldr	r7, [sp], #4
+ 763              		.cfi_restore 7
+ 764              		.cfi_def_cfa_offset 0
+ 765 0344 7047     		bx	lr
+ 766              		.cfi_endproc
+ 767              	.LFE6:
+ 769 0346 00BF     		.align	2
+ 770              		.global	packetfunctions_sameAddress
+ 771              		.thumb
+ 772              		.thumb_func
+ 774              	packetfunctions_sameAddress:
+ 775              	.LFB7:
+ 164:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** 
+ 165:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** bool packetfunctions_sameAddress(open_addr_t* address_1, open_addr_t* address_2) {
+ 776              		.loc 1 165 0
+ 777              		.cfi_startproc
+ 778              		@ args = 0, pretend = 0, frame = 16
+ 779              		@ frame_needed = 1, uses_anonymous_args = 0
+ 780 0348 80B5     		push	{r7, lr}
+ 781              		.cfi_def_cfa_offset 8
+ 782              		.cfi_offset 7, -8
+ 783              		.cfi_offset 14, -4
+ 784 034a 84B0     		sub	sp, sp, #16
+ 785              		.cfi_def_cfa_offset 24
+ 786 034c 00AF     		add	r7, sp, #0
+ 787              		.cfi_def_cfa_register 7
+ 788 034e 7860     		str	r0, [r7, #4]
+ 789 0350 3960     		str	r1, [r7]
+ 166:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    uint8_t address_length;
+ 167:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    
+ 168:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    if (address_1->type!=address_2->type) {
+ 790              		.loc 1 168 0
+ 791 0352 7B68     		ldr	r3, [r7, #4]
+ 792 0354 1A78     		ldrb	r2, [r3]	@ zero_extendqisi2
+ 793 0356 3B68     		ldr	r3, [r7]
+ 794 0358 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 795 035a 9A42     		cmp	r2, r3
+ 796 035c 01D0     		beq	.L33
+ 169:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       return FALSE;
+ 797              		.loc 1 169 0
+ 798 035e 0023     		movs	r3, #0
+ 799 0360 38E0     		b	.L34
+ 800              	.L33:
+ 170:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    }
+ 171:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    switch (address_1->type) {
+ 801              		.loc 1 171 0
+ 802 0362 7B68     		ldr	r3, [r7, #4]
+ 803 0364 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 804 0366 013B     		subs	r3, r3, #1
+ 805 0368 052B     		cmp	r3, #5
+ 806 036a 18D8     		bhi	.L35
+ 807 036c 01A2     		adr	r2, .L37
+ 808 036e 52F823F0 		ldr	pc, [r2, r3, lsl #2]
+ 809 0372 00BF     		.p2align 2
+ 810              	.L37:
+ 811 0374 8D030000 		.word	.L36+1
+ 812 0378 93030000 		.word	.L38+1
+ 813 037c 99030000 		.word	.L39+1
+ 814 0380 8D030000 		.word	.L36+1
+ 815 0384 93030000 		.word	.L38+1
+ 816 0388 99030000 		.word	.L39+1
+ 817              		.p2align 1
+ 818              	.L36:
+ 172:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       case ADDR_16B:
+ 173:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       case ADDR_PANID:
+ 174:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****          address_length = 2;
+ 819              		.loc 1 174 0
+ 820 038c 0223     		movs	r3, #2
+ 821 038e FB73     		strb	r3, [r7, #15]
+ 175:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****          break;
+ 822              		.loc 1 175 0
+ 823 0390 10E0     		b	.L40
+ 824              	.L38:
+ 176:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       case ADDR_64B:
+ 177:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       case ADDR_PREFIX:
+ 178:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****          address_length = 8;
+ 825              		.loc 1 178 0
+ 826 0392 0823     		movs	r3, #8
+ 827 0394 FB73     		strb	r3, [r7, #15]
+ 179:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****          break;
+ 828              		.loc 1 179 0
+ 829 0396 0DE0     		b	.L40
+ 830              	.L39:
+ 180:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       case ADDR_128B:
+ 181:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       case ADDR_ANYCAST:
+ 182:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****          address_length = 16;
+ 831              		.loc 1 182 0
+ 832 0398 1023     		movs	r3, #16
+ 833 039a FB73     		strb	r3, [r7, #15]
+ 183:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****          break;
+ 834              		.loc 1 183 0
+ 835 039c 0AE0     		b	.L40
+ 836              	.L35:
+ 184:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****     
+ 185:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       default:
+ 186:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****          openserial_printCritical(COMPONENT_PACKETFUNCTIONS,ERR_WRONG_ADDR_TYPE,
+ 187:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****                                (errorparameter_t)address_1->type,
+ 837              		.loc 1 187 0
+ 838 039e 7B68     		ldr	r3, [r7, #4]
+ 839 03a0 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 186:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****                                (errorparameter_t)address_1->type,
+ 840              		.loc 1 186 0
+ 841 03a2 9BB2     		uxth	r3, r3
+ 842 03a4 0520     		movs	r0, #5
+ 843 03a6 3121     		movs	r1, #49
+ 844 03a8 1A46     		mov	r2, r3
+ 845 03aa 0523     		movs	r3, #5
+ 846 03ac FFF7FEFF 		bl	openserial_printCritical
+ 188:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****                                (errorparameter_t)5);
+ 189:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****          return FALSE;
+ 847              		.loc 1 189 0
+ 848 03b0 0023     		movs	r3, #0
+ 849 03b2 0FE0     		b	.L34
+ 850              	.L40:
+ 190:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    }
+ 191:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    if (memcmp((void*)address_1->addr_128b,(void*)address_2->addr_128b,address_length)==0) {
+ 851              		.loc 1 191 0
+ 852 03b4 7B68     		ldr	r3, [r7, #4]
+ 853 03b6 591C     		adds	r1, r3, #1
+ 854 03b8 3B68     		ldr	r3, [r7]
+ 855 03ba 5A1C     		adds	r2, r3, #1
+ 856 03bc FB7B     		ldrb	r3, [r7, #15]	@ zero_extendqisi2
+ 857 03be 0846     		mov	r0, r1
+ 858 03c0 1146     		mov	r1, r2
+ 859 03c2 1A46     		mov	r2, r3
+ 860 03c4 FFF7FEFF 		bl	memcmp
+ 861 03c8 0346     		mov	r3, r0
+ 862 03ca 002B     		cmp	r3, #0
+ 863 03cc 01D1     		bne	.L41
+ 192:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       return TRUE;
+ 864              		.loc 1 192 0
+ 865 03ce 0123     		movs	r3, #1
+ 866 03d0 00E0     		b	.L34
+ 867              	.L41:
+ 193:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    }
+ 194:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    return FALSE;
+ 868              		.loc 1 194 0
+ 869 03d2 0023     		movs	r3, #0
+ 870              	.L34:
+ 195:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** }
+ 871              		.loc 1 195 0
+ 872 03d4 1846     		mov	r0, r3
+ 873 03d6 1037     		adds	r7, r7, #16
+ 874              		.cfi_def_cfa_offset 8
+ 875 03d8 BD46     		mov	sp, r7
+ 876              		.cfi_def_cfa_register 13
+ 877              		@ sp needed
+ 878 03da 80BD     		pop	{r7, pc}
+ 879              		.cfi_endproc
+ 880              	.LFE7:
+ 882              		.align	2
+ 883              		.global	packetfunctions_readAddress
+ 884              		.thumb
+ 885              		.thumb_func
+ 887              	packetfunctions_readAddress:
+ 888              	.LFB8:
+ 196:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** 
+ 197:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** //======= address read/write
+ 198:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** 
+ 199:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** void packetfunctions_readAddress(uint8_t* payload, uint8_t type, open_addr_t* writeToAddress, bool 
+ 889              		.loc 1 199 0
+ 890              		.cfi_startproc
+ 891              		@ args = 0, pretend = 0, frame = 24
+ 892              		@ frame_needed = 1, uses_anonymous_args = 0
+ 893 03dc 80B5     		push	{r7, lr}
+ 894              		.cfi_def_cfa_offset 8
+ 895              		.cfi_offset 7, -8
+ 896              		.cfi_offset 14, -4
+ 897 03de 86B0     		sub	sp, sp, #24
+ 898              		.cfi_def_cfa_offset 32
+ 899 03e0 00AF     		add	r7, sp, #0
+ 900              		.cfi_def_cfa_register 7
+ 901 03e2 F860     		str	r0, [r7, #12]
+ 902 03e4 7A60     		str	r2, [r7, #4]
+ 903 03e6 1A46     		mov	r2, r3
+ 904 03e8 0B46     		mov	r3, r1
+ 905 03ea FB72     		strb	r3, [r7, #11]
+ 906 03ec 1346     		mov	r3, r2
+ 907 03ee BB72     		strb	r3, [r7, #10]
+ 200:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    uint8_t i;
+ 201:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    uint8_t address_length;
+ 202:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    
+ 203:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    writeToAddress->type = type;
+ 908              		.loc 1 203 0
+ 909 03f0 7B68     		ldr	r3, [r7, #4]
+ 910 03f2 FA7A     		ldrb	r2, [r7, #11]
+ 911 03f4 1A70     		strb	r2, [r3]
+ 204:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    switch (type) {
+ 912              		.loc 1 204 0
+ 913 03f6 FB7A     		ldrb	r3, [r7, #11]	@ zero_extendqisi2
+ 914 03f8 013B     		subs	r3, r3, #1
+ 915 03fa 042B     		cmp	r3, #4
+ 916 03fc 15D8     		bhi	.L43
+ 917 03fe 01A2     		adr	r2, .L45
+ 918 0400 52F823F0 		ldr	pc, [r2, r3, lsl #2]
+ 919              		.p2align 2
+ 920              	.L45:
+ 921 0404 19040000 		.word	.L44+1
+ 922 0408 1F040000 		.word	.L46+1
+ 923 040c 25040000 		.word	.L47+1
+ 924 0410 19040000 		.word	.L44+1
+ 925 0414 1F040000 		.word	.L46+1
+ 926              		.p2align 1
+ 927              	.L44:
+ 205:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       case ADDR_16B:
+ 206:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       case ADDR_PANID:
+ 207:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****          address_length = 2;
+ 928              		.loc 1 207 0
+ 929 0418 0223     		movs	r3, #2
+ 930 041a BB75     		strb	r3, [r7, #22]
+ 208:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****          break;
+ 931              		.loc 1 208 0
+ 932 041c 0EE0     		b	.L48
+ 933              	.L46:
+ 209:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       case ADDR_64B:
+ 210:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       case ADDR_PREFIX:
+ 211:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****          address_length = 8;
+ 934              		.loc 1 211 0
+ 935 041e 0823     		movs	r3, #8
+ 936 0420 BB75     		strb	r3, [r7, #22]
+ 212:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****          break;
+ 937              		.loc 1 212 0
+ 938 0422 0BE0     		b	.L48
+ 939              	.L47:
+ 213:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       case ADDR_128B:
+ 214:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****          address_length = 16;
+ 940              		.loc 1 214 0
+ 941 0424 1023     		movs	r3, #16
+ 942 0426 BB75     		strb	r3, [r7, #22]
+ 215:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****          break;
+ 943              		.loc 1 215 0
+ 944 0428 08E0     		b	.L48
+ 945              	.L43:
+ 216:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       default:
+ 217:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****          openserial_printCritical(COMPONENT_PACKETFUNCTIONS,ERR_WRONG_ADDR_TYPE,
+ 946              		.loc 1 217 0
+ 947 042a FB7A     		ldrb	r3, [r7, #11]	@ zero_extendqisi2
+ 948 042c 9BB2     		uxth	r3, r3
+ 949 042e 0520     		movs	r0, #5
+ 950 0430 3121     		movs	r1, #49
+ 951 0432 1A46     		mov	r2, r3
+ 952 0434 0623     		movs	r3, #6
+ 953 0436 FFF7FEFF 		bl	openserial_printCritical
+ 218:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****                                (errorparameter_t)type,
+ 219:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****                                (errorparameter_t)6);
+ 220:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****          return;
+ 954              		.loc 1 220 0
+ 955 043a 22E0     		b	.L42
+ 956              	.L48:
+ 221:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    }
+ 222:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    
+ 223:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    for (i=0;i<address_length;i++) {
+ 957              		.loc 1 223 0
+ 958 043c 0023     		movs	r3, #0
+ 959 043e FB75     		strb	r3, [r7, #23]
+ 960 0440 1BE0     		b	.L50
+ 961              	.L53:
+ 224:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       if (littleEndian) {
+ 962              		.loc 1 224 0
+ 963 0442 BB7A     		ldrb	r3, [r7, #10]	@ zero_extendqisi2
+ 964 0444 002B     		cmp	r3, #0
+ 965 0446 0CD0     		beq	.L51
+ 225:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****          writeToAddress->addr_128b[address_length-1-i] = *(payload+i);
+ 966              		.loc 1 225 0
+ 967 0448 BB7D     		ldrb	r3, [r7, #22]	@ zero_extendqisi2
+ 968 044a 5A1E     		subs	r2, r3, #1
+ 969 044c FB7D     		ldrb	r3, [r7, #23]	@ zero_extendqisi2
+ 970 044e D31A     		subs	r3, r2, r3
+ 971 0450 FA7D     		ldrb	r2, [r7, #23]	@ zero_extendqisi2
+ 972 0452 F968     		ldr	r1, [r7, #12]
+ 973 0454 0A44     		add	r2, r2, r1
+ 974 0456 1178     		ldrb	r1, [r2]	@ zero_extendqisi2
+ 975 0458 7A68     		ldr	r2, [r7, #4]
+ 976 045a 1344     		add	r3, r3, r2
+ 977 045c 0A46     		mov	r2, r1
+ 978 045e 5A70     		strb	r2, [r3, #1]
+ 979 0460 08E0     		b	.L52
+ 980              	.L51:
+ 226:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       } else {
+ 227:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****          writeToAddress->addr_128b[i]   = *(payload+i);
+ 981              		.loc 1 227 0
+ 982 0462 FB7D     		ldrb	r3, [r7, #23]	@ zero_extendqisi2
+ 983 0464 FA7D     		ldrb	r2, [r7, #23]	@ zero_extendqisi2
+ 984 0466 F968     		ldr	r1, [r7, #12]
+ 985 0468 0A44     		add	r2, r2, r1
+ 986 046a 1178     		ldrb	r1, [r2]	@ zero_extendqisi2
+ 987 046c 7A68     		ldr	r2, [r7, #4]
+ 988 046e 1344     		add	r3, r3, r2
+ 989 0470 0A46     		mov	r2, r1
+ 990 0472 5A70     		strb	r2, [r3, #1]
+ 991              	.L52:
+ 223:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       if (littleEndian) {
+ 992              		.loc 1 223 0 discriminator 2
+ 993 0474 FB7D     		ldrb	r3, [r7, #23]	@ zero_extendqisi2
+ 994 0476 0133     		adds	r3, r3, #1
+ 995 0478 FB75     		strb	r3, [r7, #23]
+ 996              	.L50:
+ 223:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       if (littleEndian) {
+ 997              		.loc 1 223 0 is_stmt 0 discriminator 1
+ 998 047a FA7D     		ldrb	r2, [r7, #23]	@ zero_extendqisi2
+ 999 047c BB7D     		ldrb	r3, [r7, #22]	@ zero_extendqisi2
+ 1000 047e 9A42     		cmp	r2, r3
+ 1001 0480 DFD3     		bcc	.L53
+ 1002              	.L42:
+ 228:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       }
+ 229:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    }
+ 230:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** }
+ 1003              		.loc 1 230 0 is_stmt 1
+ 1004 0482 1837     		adds	r7, r7, #24
+ 1005              		.cfi_def_cfa_offset 8
+ 1006 0484 BD46     		mov	sp, r7
+ 1007              		.cfi_def_cfa_register 13
+ 1008              		@ sp needed
+ 1009 0486 80BD     		pop	{r7, pc}
+ 1010              		.cfi_endproc
+ 1011              	.LFE8:
+ 1013              		.align	2
+ 1014              		.global	packetfunctions_writeAddress
+ 1015              		.thumb
+ 1016              		.thumb_func
+ 1018              	packetfunctions_writeAddress:
+ 1019              	.LFB9:
+ 231:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** 
+ 232:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** void packetfunctions_writeAddress(OpenQueueEntry_t* msg, open_addr_t* address, bool littleEndian) {
+ 1020              		.loc 1 232 0
+ 1021              		.cfi_startproc
+ 1022              		@ args = 0, pretend = 0, frame = 24
+ 1023              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1024 0488 80B5     		push	{r7, lr}
+ 1025              		.cfi_def_cfa_offset 8
+ 1026              		.cfi_offset 7, -8
+ 1027              		.cfi_offset 14, -4
+ 1028 048a 86B0     		sub	sp, sp, #24
+ 1029              		.cfi_def_cfa_offset 32
+ 1030 048c 00AF     		add	r7, sp, #0
+ 1031              		.cfi_def_cfa_register 7
+ 1032 048e F860     		str	r0, [r7, #12]
+ 1033 0490 B960     		str	r1, [r7, #8]
+ 1034 0492 1346     		mov	r3, r2
+ 1035 0494 FB71     		strb	r3, [r7, #7]
+ 233:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    uint8_t i;
+ 234:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    uint8_t address_length;
+ 235:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    
+ 236:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    switch (address->type) {
+ 1036              		.loc 1 236 0
+ 1037 0496 BB68     		ldr	r3, [r7, #8]
+ 1038 0498 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 1039 049a 013B     		subs	r3, r3, #1
+ 1040 049c 042B     		cmp	r3, #4
+ 1041 049e 16D8     		bhi	.L55
+ 1042 04a0 01A2     		adr	r2, .L57
+ 1043 04a2 52F823F0 		ldr	pc, [r2, r3, lsl #2]
+ 1044 04a6 00BF     		.p2align 2
+ 1045              	.L57:
+ 1046 04a8 BD040000 		.word	.L56+1
+ 1047 04ac C3040000 		.word	.L58+1
+ 1048 04b0 C9040000 		.word	.L59+1
+ 1049 04b4 BD040000 		.word	.L56+1
+ 1050 04b8 C3040000 		.word	.L58+1
+ 1051              		.p2align 1
+ 1052              	.L56:
+ 237:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       case ADDR_16B:
+ 238:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       case ADDR_PANID:
+ 239:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****          address_length = 2;
+ 1053              		.loc 1 239 0
+ 1054 04bc 0223     		movs	r3, #2
+ 1055 04be BB75     		strb	r3, [r7, #22]
+ 240:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****          break;
+ 1056              		.loc 1 240 0
+ 1057 04c0 0FE0     		b	.L60
+ 1058              	.L58:
+ 241:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       case ADDR_64B:
+ 242:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       case ADDR_PREFIX:
+ 243:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****          address_length = 8;
+ 1059              		.loc 1 243 0
+ 1060 04c2 0823     		movs	r3, #8
+ 1061 04c4 BB75     		strb	r3, [r7, #22]
+ 244:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****          break;
+ 1062              		.loc 1 244 0
+ 1063 04c6 0CE0     		b	.L60
+ 1064              	.L59:
+ 245:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       case ADDR_128B:
+ 246:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****          address_length = 16;
+ 1065              		.loc 1 246 0
+ 1066 04c8 1023     		movs	r3, #16
+ 1067 04ca BB75     		strb	r3, [r7, #22]
+ 247:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****          break;
+ 1068              		.loc 1 247 0
+ 1069 04cc 09E0     		b	.L60
+ 1070              	.L55:
+ 248:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       default:
+ 249:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****          openserial_printCritical(COMPONENT_PACKETFUNCTIONS,ERR_WRONG_ADDR_TYPE,
+ 250:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****                                (errorparameter_t)address->type,
+ 1071              		.loc 1 250 0
+ 1072 04ce BB68     		ldr	r3, [r7, #8]
+ 1073 04d0 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 249:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****                                (errorparameter_t)address->type,
+ 1074              		.loc 1 249 0
+ 1075 04d2 9BB2     		uxth	r3, r3
+ 1076 04d4 0520     		movs	r0, #5
+ 1077 04d6 3121     		movs	r1, #49
+ 1078 04d8 1A46     		mov	r2, r3
+ 1079 04da 0723     		movs	r3, #7
+ 1080 04dc FFF7FEFF 		bl	openserial_printCritical
+ 251:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****                                (errorparameter_t)7);
+ 252:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****          return;
+ 1081              		.loc 1 252 0
+ 1082 04e0 29E0     		b	.L54
+ 1083              	.L60:
+ 253:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    }
+ 254:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    
+ 255:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    for (i=0;i<address_length;i++) {
+ 1084              		.loc 1 255 0
+ 1085 04e2 0023     		movs	r3, #0
+ 1086 04e4 FB75     		strb	r3, [r7, #23]
+ 1087 04e6 22E0     		b	.L62
+ 1088              	.L65:
+ 256:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       msg->payload      -= sizeof(uint8_t);
+ 1089              		.loc 1 256 0
+ 1090 04e8 FB68     		ldr	r3, [r7, #12]
+ 1091 04ea 5B68     		ldr	r3, [r3, #4]
+ 1092 04ec 5A1E     		subs	r2, r3, #1
+ 1093 04ee FB68     		ldr	r3, [r7, #12]
+ 1094 04f0 5A60     		str	r2, [r3, #4]
+ 257:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       msg->length       += sizeof(uint8_t);
+ 1095              		.loc 1 257 0
+ 1096 04f2 FB68     		ldr	r3, [r7, #12]
+ 1097 04f4 1B7A     		ldrb	r3, [r3, #8]	@ zero_extendqisi2
+ 1098 04f6 0133     		adds	r3, r3, #1
+ 1099 04f8 DAB2     		uxtb	r2, r3
+ 1100 04fa FB68     		ldr	r3, [r7, #12]
+ 1101 04fc 1A72     		strb	r2, [r3, #8]
+ 258:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       if (littleEndian) {
+ 1102              		.loc 1 258 0
+ 1103 04fe FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 1104 0500 002B     		cmp	r3, #0
+ 1105 0502 07D0     		beq	.L63
+ 259:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****          *((uint8_t*)(msg->payload)) = address->addr_128b[i];
+ 1106              		.loc 1 259 0
+ 1107 0504 FB68     		ldr	r3, [r7, #12]
+ 1108 0506 5B68     		ldr	r3, [r3, #4]
+ 1109 0508 FA7D     		ldrb	r2, [r7, #23]	@ zero_extendqisi2
+ 1110 050a B968     		ldr	r1, [r7, #8]
+ 1111 050c 0A44     		add	r2, r2, r1
+ 1112 050e 5278     		ldrb	r2, [r2, #1]	@ zero_extendqisi2
+ 1113 0510 1A70     		strb	r2, [r3]
+ 1114 0512 09E0     		b	.L64
+ 1115              	.L63:
+ 260:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       } else {
+ 261:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****          *((uint8_t*)(msg->payload)) = address->addr_128b[address_length-1-i];
+ 1116              		.loc 1 261 0
+ 1117 0514 FB68     		ldr	r3, [r7, #12]
+ 1118 0516 5B68     		ldr	r3, [r3, #4]
+ 1119 0518 BA7D     		ldrb	r2, [r7, #22]	@ zero_extendqisi2
+ 1120 051a 511E     		subs	r1, r2, #1
+ 1121 051c FA7D     		ldrb	r2, [r7, #23]	@ zero_extendqisi2
+ 1122 051e 8A1A     		subs	r2, r1, r2
+ 1123 0520 B968     		ldr	r1, [r7, #8]
+ 1124 0522 0A44     		add	r2, r2, r1
+ 1125 0524 5278     		ldrb	r2, [r2, #1]	@ zero_extendqisi2
+ 1126 0526 1A70     		strb	r2, [r3]
+ 1127              	.L64:
+ 255:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       msg->payload      -= sizeof(uint8_t);
+ 1128              		.loc 1 255 0 discriminator 2
+ 1129 0528 FB7D     		ldrb	r3, [r7, #23]	@ zero_extendqisi2
+ 1130 052a 0133     		adds	r3, r3, #1
+ 1131 052c FB75     		strb	r3, [r7, #23]
+ 1132              	.L62:
+ 255:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       msg->payload      -= sizeof(uint8_t);
+ 1133              		.loc 1 255 0 is_stmt 0 discriminator 1
+ 1134 052e FA7D     		ldrb	r2, [r7, #23]	@ zero_extendqisi2
+ 1135 0530 BB7D     		ldrb	r3, [r7, #22]	@ zero_extendqisi2
+ 1136 0532 9A42     		cmp	r2, r3
+ 1137 0534 D8D3     		bcc	.L65
+ 1138              	.L54:
+ 262:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       }
+ 263:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    }
+ 264:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** }
+ 1139              		.loc 1 264 0 is_stmt 1
+ 1140 0536 1837     		adds	r7, r7, #24
+ 1141              		.cfi_def_cfa_offset 8
+ 1142 0538 BD46     		mov	sp, r7
+ 1143              		.cfi_def_cfa_register 13
+ 1144              		@ sp needed
+ 1145 053a 80BD     		pop	{r7, pc}
+ 1146              		.cfi_endproc
+ 1147              	.LFE9:
+ 1149              		.align	2
+ 1150              		.global	packetfunctions_reserveHeaderSize
+ 1151              		.thumb
+ 1152              		.thumb_func
+ 1154              	packetfunctions_reserveHeaderSize:
+ 1155              	.LFB10:
+ 265:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** 
+ 266:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** //======= reserving/tossing headers
+ 267:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** 
+ 268:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** void packetfunctions_reserveHeaderSize(OpenQueueEntry_t* pkt, uint8_t header_length) {
+ 1156              		.loc 1 268 0
+ 1157              		.cfi_startproc
+ 1158              		@ args = 0, pretend = 0, frame = 8
+ 1159              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1160 053c 80B5     		push	{r7, lr}
+ 1161              		.cfi_def_cfa_offset 8
+ 1162              		.cfi_offset 7, -8
+ 1163              		.cfi_offset 14, -4
+ 1164 053e 82B0     		sub	sp, sp, #8
+ 1165              		.cfi_def_cfa_offset 16
+ 1166 0540 00AF     		add	r7, sp, #0
+ 1167              		.cfi_def_cfa_register 7
+ 1168 0542 7860     		str	r0, [r7, #4]
+ 1169 0544 0B46     		mov	r3, r1
+ 1170 0546 FB70     		strb	r3, [r7, #3]
+ 269:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    pkt->payload -= header_length;
+ 1171              		.loc 1 269 0
+ 1172 0548 7B68     		ldr	r3, [r7, #4]
+ 1173 054a 5A68     		ldr	r2, [r3, #4]
+ 1174 054c FB78     		ldrb	r3, [r7, #3]	@ zero_extendqisi2
+ 1175 054e 5B42     		negs	r3, r3
+ 1176 0550 1A44     		add	r2, r2, r3
+ 1177 0552 7B68     		ldr	r3, [r7, #4]
+ 1178 0554 5A60     		str	r2, [r3, #4]
+ 270:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    pkt->length  += header_length;
+ 1179              		.loc 1 270 0
+ 1180 0556 7B68     		ldr	r3, [r7, #4]
+ 1181 0558 1A7A     		ldrb	r2, [r3, #8]	@ zero_extendqisi2
+ 1182 055a FB78     		ldrb	r3, [r7, #3]
+ 1183 055c 1344     		add	r3, r3, r2
+ 1184 055e DAB2     		uxtb	r2, r3
+ 1185 0560 7B68     		ldr	r3, [r7, #4]
+ 1186 0562 1A72     		strb	r2, [r3, #8]
+ 271:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    if ( (uint8_t*)(pkt->payload) < (uint8_t*)(pkt->packet) ) {
+ 1187              		.loc 1 271 0
+ 1188 0564 7B68     		ldr	r3, [r7, #4]
+ 1189 0566 5A68     		ldr	r2, [r3, #4]
+ 1190 0568 7B68     		ldr	r3, [r7, #4]
+ 1191 056a 8833     		adds	r3, r3, #136
+ 1192 056c 9A42     		cmp	r2, r3
+ 1193 056e 07D2     		bcs	.L66
+ 272:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       openserial_printCritical(COMPONENT_PACKETFUNCTIONS,ERR_HEADER_TOO_LONG,
+ 273:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****                             (errorparameter_t)0,
+ 274:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****                             (errorparameter_t)pkt->length);
+ 1194              		.loc 1 274 0
+ 1195 0570 7B68     		ldr	r3, [r7, #4]
+ 1196 0572 1B7A     		ldrb	r3, [r3, #8]	@ zero_extendqisi2
+ 272:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       openserial_printCritical(COMPONENT_PACKETFUNCTIONS,ERR_HEADER_TOO_LONG,
+ 1197              		.loc 1 272 0
+ 1198 0574 9BB2     		uxth	r3, r3
+ 1199 0576 0520     		movs	r0, #5
+ 1200 0578 3321     		movs	r1, #51
+ 1201 057a 0022     		movs	r2, #0
+ 1202 057c FFF7FEFF 		bl	openserial_printCritical
+ 1203              	.L66:
+ 275:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    }
+ 276:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** }
+ 1204              		.loc 1 276 0
+ 1205 0580 0837     		adds	r7, r7, #8
+ 1206              		.cfi_def_cfa_offset 8
+ 1207 0582 BD46     		mov	sp, r7
+ 1208              		.cfi_def_cfa_register 13
+ 1209              		@ sp needed
+ 1210 0584 80BD     		pop	{r7, pc}
+ 1211              		.cfi_endproc
+ 1212              	.LFE10:
+ 1214 0586 00BF     		.align	2
+ 1215              		.global	packetfunctions_tossHeader
+ 1216              		.thumb
+ 1217              		.thumb_func
+ 1219              	packetfunctions_tossHeader:
+ 1220              	.LFB11:
+ 277:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** 
+ 278:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** void packetfunctions_tossHeader(OpenQueueEntry_t* pkt, uint8_t header_length) {
+ 1221              		.loc 1 278 0
+ 1222              		.cfi_startproc
+ 1223              		@ args = 0, pretend = 0, frame = 8
+ 1224              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1225 0588 80B5     		push	{r7, lr}
+ 1226              		.cfi_def_cfa_offset 8
+ 1227              		.cfi_offset 7, -8
+ 1228              		.cfi_offset 14, -4
+ 1229 058a 82B0     		sub	sp, sp, #8
+ 1230              		.cfi_def_cfa_offset 16
+ 1231 058c 00AF     		add	r7, sp, #0
+ 1232              		.cfi_def_cfa_register 7
+ 1233 058e 7860     		str	r0, [r7, #4]
+ 1234 0590 0B46     		mov	r3, r1
+ 1235 0592 FB70     		strb	r3, [r7, #3]
+ 279:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    pkt->payload += header_length;
+ 1236              		.loc 1 279 0
+ 1237 0594 7B68     		ldr	r3, [r7, #4]
+ 1238 0596 5A68     		ldr	r2, [r3, #4]
+ 1239 0598 FB78     		ldrb	r3, [r7, #3]	@ zero_extendqisi2
+ 1240 059a 1A44     		add	r2, r2, r3
+ 1241 059c 7B68     		ldr	r3, [r7, #4]
+ 1242 059e 5A60     		str	r2, [r3, #4]
+ 280:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    pkt->length  -= header_length;
+ 1243              		.loc 1 280 0
+ 1244 05a0 7B68     		ldr	r3, [r7, #4]
+ 1245 05a2 1A7A     		ldrb	r2, [r3, #8]	@ zero_extendqisi2
+ 1246 05a4 FB78     		ldrb	r3, [r7, #3]
+ 1247 05a6 D31A     		subs	r3, r2, r3
+ 1248 05a8 DAB2     		uxtb	r2, r3
+ 1249 05aa 7B68     		ldr	r3, [r7, #4]
+ 1250 05ac 1A72     		strb	r2, [r3, #8]
+ 281:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    if ( (uint8_t*)(pkt->payload) > (uint8_t*)(pkt->packet+126) ) {
+ 1251              		.loc 1 281 0
+ 1252 05ae 7B68     		ldr	r3, [r7, #4]
+ 1253 05b0 5A68     		ldr	r2, [r3, #4]
+ 1254 05b2 7B68     		ldr	r3, [r7, #4]
+ 1255 05b4 03F58373 		add	r3, r3, #262
+ 1256 05b8 9A42     		cmp	r2, r3
+ 1257 05ba 07D9     		bls	.L68
+ 282:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       openserial_printError(COMPONENT_PACKETFUNCTIONS,ERR_HEADER_TOO_LONG,
+ 283:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****                             (errorparameter_t)1,
+ 284:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****                             (errorparameter_t)pkt->length);
+ 1258              		.loc 1 284 0
+ 1259 05bc 7B68     		ldr	r3, [r7, #4]
+ 1260 05be 1B7A     		ldrb	r3, [r3, #8]	@ zero_extendqisi2
+ 282:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       openserial_printError(COMPONENT_PACKETFUNCTIONS,ERR_HEADER_TOO_LONG,
+ 1261              		.loc 1 282 0
+ 1262 05c0 9BB2     		uxth	r3, r3
+ 1263 05c2 0520     		movs	r0, #5
+ 1264 05c4 3321     		movs	r1, #51
+ 1265 05c6 0122     		movs	r2, #1
+ 1266 05c8 FFF7FEFF 		bl	openserial_printError
+ 1267              	.L68:
+ 285:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    }
+ 286:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** }
+ 1268              		.loc 1 286 0
+ 1269 05cc 0837     		adds	r7, r7, #8
+ 1270              		.cfi_def_cfa_offset 8
+ 1271 05ce BD46     		mov	sp, r7
+ 1272              		.cfi_def_cfa_register 13
+ 1273              		@ sp needed
+ 1274 05d0 80BD     		pop	{r7, pc}
+ 1275              		.cfi_endproc
+ 1276              	.LFE11:
+ 1278 05d2 00BF     		.align	2
+ 1279              		.global	packetfunctions_reserveFooterSize
+ 1280              		.thumb
+ 1281              		.thumb_func
+ 1283              	packetfunctions_reserveFooterSize:
+ 1284              	.LFB12:
+ 287:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** 
+ 288:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** void packetfunctions_reserveFooterSize(OpenQueueEntry_t* pkt, uint8_t header_length) {
+ 1285              		.loc 1 288 0
+ 1286              		.cfi_startproc
+ 1287              		@ args = 0, pretend = 0, frame = 8
+ 1288              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1289 05d4 80B5     		push	{r7, lr}
+ 1290              		.cfi_def_cfa_offset 8
+ 1291              		.cfi_offset 7, -8
+ 1292              		.cfi_offset 14, -4
+ 1293 05d6 82B0     		sub	sp, sp, #8
+ 1294              		.cfi_def_cfa_offset 16
+ 1295 05d8 00AF     		add	r7, sp, #0
+ 1296              		.cfi_def_cfa_register 7
+ 1297 05da 7860     		str	r0, [r7, #4]
+ 1298 05dc 0B46     		mov	r3, r1
+ 1299 05de FB70     		strb	r3, [r7, #3]
+ 289:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    pkt->length  += header_length;
+ 1300              		.loc 1 289 0
+ 1301 05e0 7B68     		ldr	r3, [r7, #4]
+ 1302 05e2 1A7A     		ldrb	r2, [r3, #8]	@ zero_extendqisi2
+ 1303 05e4 FB78     		ldrb	r3, [r7, #3]
+ 1304 05e6 1344     		add	r3, r3, r2
+ 1305 05e8 DAB2     		uxtb	r2, r3
+ 1306 05ea 7B68     		ldr	r3, [r7, #4]
+ 1307 05ec 1A72     		strb	r2, [r3, #8]
+ 290:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    if (pkt->length>127) {
+ 1308              		.loc 1 290 0
+ 1309 05ee 7B68     		ldr	r3, [r7, #4]
+ 1310 05f0 1B7A     		ldrb	r3, [r3, #8]	@ zero_extendqisi2
+ 1311 05f2 DBB2     		uxtb	r3, r3
+ 1312 05f4 5BB2     		sxtb	r3, r3
+ 1313 05f6 002B     		cmp	r3, #0
+ 1314 05f8 07DA     		bge	.L70
+ 291:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       openserial_printError(COMPONENT_PACKETFUNCTIONS,ERR_HEADER_TOO_LONG,
+ 292:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****                             (errorparameter_t)2,
+ 293:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****                             (errorparameter_t)pkt->length);
+ 1315              		.loc 1 293 0
+ 1316 05fa 7B68     		ldr	r3, [r7, #4]
+ 1317 05fc 1B7A     		ldrb	r3, [r3, #8]	@ zero_extendqisi2
+ 291:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       openserial_printError(COMPONENT_PACKETFUNCTIONS,ERR_HEADER_TOO_LONG,
+ 1318              		.loc 1 291 0
+ 1319 05fe 9BB2     		uxth	r3, r3
+ 1320 0600 0520     		movs	r0, #5
+ 1321 0602 3321     		movs	r1, #51
+ 1322 0604 0222     		movs	r2, #2
+ 1323 0606 FFF7FEFF 		bl	openserial_printError
+ 1324              	.L70:
+ 294:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    }
+ 295:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** }
+ 1325              		.loc 1 295 0
+ 1326 060a 0837     		adds	r7, r7, #8
+ 1327              		.cfi_def_cfa_offset 8
+ 1328 060c BD46     		mov	sp, r7
+ 1329              		.cfi_def_cfa_register 13
+ 1330              		@ sp needed
+ 1331 060e 80BD     		pop	{r7, pc}
+ 1332              		.cfi_endproc
+ 1333              	.LFE12:
+ 1335              		.align	2
+ 1336              		.global	packetfunctions_tossFooter
+ 1337              		.thumb
+ 1338              		.thumb_func
+ 1340              	packetfunctions_tossFooter:
+ 1341              	.LFB13:
+ 296:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** 
+ 297:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** void packetfunctions_tossFooter(OpenQueueEntry_t* pkt, uint8_t header_length) {
+ 1342              		.loc 1 297 0
+ 1343              		.cfi_startproc
+ 1344              		@ args = 0, pretend = 0, frame = 8
+ 1345              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1346 0610 80B5     		push	{r7, lr}
+ 1347              		.cfi_def_cfa_offset 8
+ 1348              		.cfi_offset 7, -8
+ 1349              		.cfi_offset 14, -4
+ 1350 0612 82B0     		sub	sp, sp, #8
+ 1351              		.cfi_def_cfa_offset 16
+ 1352 0614 00AF     		add	r7, sp, #0
+ 1353              		.cfi_def_cfa_register 7
+ 1354 0616 7860     		str	r0, [r7, #4]
+ 1355 0618 0B46     		mov	r3, r1
+ 1356 061a FB70     		strb	r3, [r7, #3]
+ 298:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    pkt->length  -= header_length;
+ 1357              		.loc 1 298 0
+ 1358 061c 7B68     		ldr	r3, [r7, #4]
+ 1359 061e 1A7A     		ldrb	r2, [r3, #8]	@ zero_extendqisi2
+ 1360 0620 FB78     		ldrb	r3, [r7, #3]
+ 1361 0622 D31A     		subs	r3, r2, r3
+ 1362 0624 DAB2     		uxtb	r2, r3
+ 1363 0626 7B68     		ldr	r3, [r7, #4]
+ 1364 0628 1A72     		strb	r2, [r3, #8]
+ 299:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    if (pkt->length>128) {//wraps around, so a negative value will be >128
+ 1365              		.loc 1 299 0
+ 1366 062a 7B68     		ldr	r3, [r7, #4]
+ 1367 062c 1B7A     		ldrb	r3, [r3, #8]	@ zero_extendqisi2
+ 1368 062e 802B     		cmp	r3, #128
+ 1369 0630 07D9     		bls	.L72
+ 300:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       openserial_printError(COMPONENT_PACKETFUNCTIONS,ERR_HEADER_TOO_LONG,
+ 301:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****                             (errorparameter_t)3,
+ 302:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****                             (errorparameter_t)pkt->length);
+ 1370              		.loc 1 302 0
+ 1371 0632 7B68     		ldr	r3, [r7, #4]
+ 1372 0634 1B7A     		ldrb	r3, [r3, #8]	@ zero_extendqisi2
+ 300:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       openserial_printError(COMPONENT_PACKETFUNCTIONS,ERR_HEADER_TOO_LONG,
+ 1373              		.loc 1 300 0
+ 1374 0636 9BB2     		uxth	r3, r3
+ 1375 0638 0520     		movs	r0, #5
+ 1376 063a 3321     		movs	r1, #51
+ 1377 063c 0322     		movs	r2, #3
+ 1378 063e FFF7FEFF 		bl	openserial_printError
+ 1379              	.L72:
+ 303:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    }
+ 304:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** }
+ 1380              		.loc 1 304 0
+ 1381 0642 0837     		adds	r7, r7, #8
+ 1382              		.cfi_def_cfa_offset 8
+ 1383 0644 BD46     		mov	sp, r7
+ 1384              		.cfi_def_cfa_register 13
+ 1385              		@ sp needed
+ 1386 0646 80BD     		pop	{r7, pc}
+ 1387              		.cfi_endproc
+ 1388              	.LFE13:
+ 1390              		.align	2
+ 1391              		.global	packetfunctions_duplicatePacket
+ 1392              		.thumb
+ 1393              		.thumb_func
+ 1395              	packetfunctions_duplicatePacket:
+ 1396              	.LFB14:
+ 305:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** 
+ 306:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** //======= packet duplication
+ 307:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** // function duplicates a frame from one OpenQueueEntry structure to the other,
+ 308:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** // updating pointers to the new memory location. Used to make a local copy of
+ 309:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** // the frame before transmission (where it can possibly be encrypted). 
+ 310:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** void packetfunctions_duplicatePacket(OpenQueueEntry_t* dst, OpenQueueEntry_t* src) {
+ 1397              		.loc 1 310 0
+ 1398              		.cfi_startproc
+ 1399              		@ args = 0, pretend = 0, frame = 8
+ 1400              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1401 0648 80B5     		push	{r7, lr}
+ 1402              		.cfi_def_cfa_offset 8
+ 1403              		.cfi_offset 7, -8
+ 1404              		.cfi_offset 14, -4
+ 1405 064a 82B0     		sub	sp, sp, #8
+ 1406              		.cfi_def_cfa_offset 16
+ 1407 064c 00AF     		add	r7, sp, #0
+ 1408              		.cfi_def_cfa_register 7
+ 1409 064e 7860     		str	r0, [r7, #4]
+ 1410 0650 3960     		str	r1, [r7]
+ 311:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    // make a copy of the frame
+ 312:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    memcpy(dst, src, sizeof(OpenQueueEntry_t));
+ 1411              		.loc 1 312 0
+ 1412 0652 7868     		ldr	r0, [r7, #4]
+ 1413 0654 3968     		ldr	r1, [r7]
+ 1414 0656 4FF48672 		mov	r2, #268
+ 1415 065a FFF7FEFF 		bl	memcpy
+ 313:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** 
+ 314:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    // Calculate where payload starts in the buffer
+ 315:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    dst->payload = &dst->packet[src->payload - src->packet]; // update pointers
+ 1416              		.loc 1 315 0
+ 1417 065e 3B68     		ldr	r3, [r7]
+ 1418 0660 5B68     		ldr	r3, [r3, #4]
+ 1419 0662 1A46     		mov	r2, r3
+ 1420 0664 3B68     		ldr	r3, [r7]
+ 1421 0666 8833     		adds	r3, r3, #136
+ 1422 0668 D31A     		subs	r3, r2, r3
+ 1423 066a 8833     		adds	r3, r3, #136
+ 1424 066c 7A68     		ldr	r2, [r7, #4]
+ 1425 066e 1A44     		add	r2, r2, r3
+ 1426 0670 7B68     		ldr	r3, [r7, #4]
+ 1427 0672 5A60     		str	r2, [r3, #4]
+ 316:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** 
+ 317:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    // update l2_FrameCounter pointer
+ 318:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    dst->l2_FrameCounter = dst->payload + (src->l2_FrameCounter - src->payload);
+ 1428              		.loc 1 318 0
+ 1429 0674 7B68     		ldr	r3, [r7, #4]
+ 1430 0676 5B68     		ldr	r3, [r3, #4]
+ 1431 0678 3A68     		ldr	r2, [r7]
+ 1432 067a D2F88020 		ldr	r2, [r2, #128]
+ 1433 067e 1146     		mov	r1, r2
+ 1434 0680 3A68     		ldr	r2, [r7]
+ 1435 0682 5268     		ldr	r2, [r2, #4]
+ 1436 0684 8A1A     		subs	r2, r1, r2
+ 1437 0686 1A44     		add	r2, r2, r3
+ 1438 0688 7B68     		ldr	r3, [r7, #4]
+ 1439 068a C3F88020 		str	r2, [r3, #128]
+ 319:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** 
+ 320:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    // update l2_ASNpayload pointer
+ 321:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    dst->l2_ASNpayload = dst->payload + (src->l2_ASNpayload - src->payload);
+ 1440              		.loc 1 321 0
+ 1441 068e 7B68     		ldr	r3, [r7, #4]
+ 1442 0690 5B68     		ldr	r3, [r3, #4]
+ 1443 0692 3A68     		ldr	r2, [r7]
+ 1444 0694 126E     		ldr	r2, [r2, #96]
+ 1445 0696 1146     		mov	r1, r2
+ 1446 0698 3A68     		ldr	r2, [r7]
+ 1447 069a 5268     		ldr	r2, [r2, #4]
+ 1448 069c 8A1A     		subs	r2, r1, r2
+ 1449 069e 1A44     		add	r2, r2, r3
+ 1450 06a0 7B68     		ldr	r3, [r7, #4]
+ 1451 06a2 1A66     		str	r2, [r3, #96]
+ 322:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** 
+ 323:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    // update l2_scheduleIE_cellObjects pointer
+ 324:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    dst->l2_sixtop_cellObjects = dst->payload + (src->l2_sixtop_cellObjects - src->payload);
+ 1452              		.loc 1 324 0
+ 1453 06a4 7B68     		ldr	r3, [r7, #4]
+ 1454 06a6 5B68     		ldr	r3, [r3, #4]
+ 1455 06a8 3A68     		ldr	r2, [r7]
+ 1456 06aa 926D     		ldr	r2, [r2, #88]
+ 1457 06ac 1146     		mov	r1, r2
+ 1458 06ae 3A68     		ldr	r2, [r7]
+ 1459 06b0 5268     		ldr	r2, [r2, #4]
+ 1460 06b2 8A1A     		subs	r2, r1, r2
+ 1461 06b4 1A44     		add	r2, r2, r3
+ 1462 06b6 7B68     		ldr	r3, [r7, #4]
+ 1463 06b8 9A65     		str	r2, [r3, #88]
+ 325:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** 
+ 326:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    // update l2_payload pointer
+ 327:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    dst->l2_payload = dst->payload + (src->l2_payload - src->payload);
+ 1464              		.loc 1 327 0
+ 1465 06ba 7B68     		ldr	r3, [r7, #4]
+ 1466 06bc 5B68     		ldr	r3, [r3, #4]
+ 1467 06be 3A68     		ldr	r2, [r7]
+ 1468 06c0 526D     		ldr	r2, [r2, #84]
+ 1469 06c2 1146     		mov	r1, r2
+ 1470 06c4 3A68     		ldr	r2, [r7]
+ 1471 06c6 5268     		ldr	r2, [r2, #4]
+ 1472 06c8 8A1A     		subs	r2, r1, r2
+ 1473 06ca 1A44     		add	r2, r2, r3
+ 1474 06cc 7B68     		ldr	r3, [r7, #4]
+ 1475 06ce 5A65     		str	r2, [r3, #84]
+ 328:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** 
+ 329:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    // update l4_payload pointer
+ 330:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    dst->l4_payload = dst->payload + (src->l4_payload - src->payload);
+ 1476              		.loc 1 330 0
+ 1477 06d0 7B68     		ldr	r3, [r7, #4]
+ 1478 06d2 5B68     		ldr	r3, [r3, #4]
+ 1479 06d4 3A68     		ldr	r2, [r7]
+ 1480 06d6 1269     		ldr	r2, [r2, #16]
+ 1481 06d8 1146     		mov	r1, r2
+ 1482 06da 3A68     		ldr	r2, [r7]
+ 1483 06dc 5268     		ldr	r2, [r2, #4]
+ 1484 06de 8A1A     		subs	r2, r1, r2
+ 1485 06e0 1A44     		add	r2, r2, r3
+ 1486 06e2 7B68     		ldr	r3, [r7, #4]
+ 1487 06e4 1A61     		str	r2, [r3, #16]
+ 331:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** }
+ 1488              		.loc 1 331 0
+ 1489 06e6 0837     		adds	r7, r7, #8
+ 1490              		.cfi_def_cfa_offset 8
+ 1491 06e8 BD46     		mov	sp, r7
+ 1492              		.cfi_def_cfa_register 13
+ 1493              		@ sp needed
+ 1494 06ea 80BD     		pop	{r7, pc}
+ 1495              		.cfi_endproc
+ 1496              	.LFE14:
+ 1498              		.align	2
+ 1499              		.global	packetfunctions_calculateCRC
+ 1500              		.thumb
+ 1501              		.thumb_func
+ 1503              	packetfunctions_calculateCRC:
+ 1504              	.LFB15:
+ 332:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** 
+ 333:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** //======= CRC calculation
+ 334:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** 
+ 335:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** void packetfunctions_calculateCRC(OpenQueueEntry_t* msg) {
+ 1505              		.loc 1 335 0
+ 1506              		.cfi_startproc
+ 1507              		@ args = 0, pretend = 0, frame = 16
+ 1508              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1509              		@ link register save eliminated.
+ 1510 06ec 80B4     		push	{r7}
+ 1511              		.cfi_def_cfa_offset 4
+ 1512              		.cfi_offset 7, -4
+ 1513 06ee 85B0     		sub	sp, sp, #20
+ 1514              		.cfi_def_cfa_offset 24
+ 1515 06f0 00AF     		add	r7, sp, #0
+ 1516              		.cfi_def_cfa_register 7
+ 1517 06f2 7860     		str	r0, [r7, #4]
+ 336:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    uint16_t crc;
+ 337:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    uint8_t  i;
+ 338:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    uint8_t  count;
+ 339:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    crc = 0;
+ 1518              		.loc 1 339 0
+ 1519 06f4 0023     		movs	r3, #0
+ 1520 06f6 FB81     		strh	r3, [r7, #14]	@ movhi
+ 340:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    for (count=1;count<msg->length-2;count++) {
+ 1521              		.loc 1 340 0
+ 1522 06f8 0123     		movs	r3, #1
+ 1523 06fa 3B73     		strb	r3, [r7, #12]
+ 1524 06fc 23E0     		b	.L76
+ 1525              	.L81:
+ 341:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       crc = crc ^ (uint8_t)*(msg->payload+count);
+ 1526              		.loc 1 341 0
+ 1527 06fe 7B68     		ldr	r3, [r7, #4]
+ 1528 0700 5A68     		ldr	r2, [r3, #4]
+ 1529 0702 3B7B     		ldrb	r3, [r7, #12]	@ zero_extendqisi2
+ 1530 0704 1344     		add	r3, r3, r2
+ 1531 0706 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 1532 0708 9AB2     		uxth	r2, r3
+ 1533 070a FB89     		ldrh	r3, [r7, #14]	@ movhi
+ 1534 070c 5340     		eors	r3, r3, r2
+ 1535 070e FB81     		strh	r3, [r7, #14]	@ movhi
+ 342:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       //crc = crc ^ (uint16_t)*ptr++ << 8;
+ 343:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       for (i=0;i<8;i++) {
+ 1536              		.loc 1 343 0
+ 1537 0710 0023     		movs	r3, #0
+ 1538 0712 7B73     		strb	r3, [r7, #13]
+ 1539 0714 11E0     		b	.L77
+ 1540              	.L80:
+ 344:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****          if (crc & 0x1) {
+ 1541              		.loc 1 344 0
+ 1542 0716 FB89     		ldrh	r3, [r7, #14]
+ 1543 0718 03F00103 		and	r3, r3, #1
+ 1544 071c 002B     		cmp	r3, #0
+ 1545 071e 06D0     		beq	.L78
+ 345:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****             crc = crc >> 1 ^ 0x8408;
+ 1546              		.loc 1 345 0
+ 1547 0720 FB89     		ldrh	r3, [r7, #14]
+ 1548 0722 5B08     		lsrs	r3, r3, #1
+ 1549 0724 9AB2     		uxth	r2, r3
+ 1550 0726 174B     		ldr	r3, .L82
+ 1551 0728 5340     		eors	r3, r3, r2
+ 1552 072a FB81     		strh	r3, [r7, #14]	@ movhi
+ 1553 072c 02E0     		b	.L79
+ 1554              	.L78:
+ 346:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****          } else {
+ 347:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****             crc = crc >> 1;
+ 1555              		.loc 1 347 0
+ 1556 072e FB89     		ldrh	r3, [r7, #14]
+ 1557 0730 5B08     		lsrs	r3, r3, #1
+ 1558 0732 FB81     		strh	r3, [r7, #14]	@ movhi
+ 1559              	.L79:
+ 343:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****          if (crc & 0x1) {
+ 1560              		.loc 1 343 0 discriminator 2
+ 1561 0734 7B7B     		ldrb	r3, [r7, #13]	@ zero_extendqisi2
+ 1562 0736 0133     		adds	r3, r3, #1
+ 1563 0738 7B73     		strb	r3, [r7, #13]
+ 1564              	.L77:
+ 343:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****          if (crc & 0x1) {
+ 1565              		.loc 1 343 0 is_stmt 0 discriminator 1
+ 1566 073a 7B7B     		ldrb	r3, [r7, #13]	@ zero_extendqisi2
+ 1567 073c 072B     		cmp	r3, #7
+ 1568 073e EAD9     		bls	.L80
+ 340:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       crc = crc ^ (uint8_t)*(msg->payload+count);
+ 1569              		.loc 1 340 0 is_stmt 1 discriminator 2
+ 1570 0740 3B7B     		ldrb	r3, [r7, #12]	@ zero_extendqisi2
+ 1571 0742 0133     		adds	r3, r3, #1
+ 1572 0744 3B73     		strb	r3, [r7, #12]
+ 1573              	.L76:
+ 340:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       crc = crc ^ (uint8_t)*(msg->payload+count);
+ 1574              		.loc 1 340 0 is_stmt 0 discriminator 1
+ 1575 0746 3A7B     		ldrb	r2, [r7, #12]	@ zero_extendqisi2
+ 1576 0748 7B68     		ldr	r3, [r7, #4]
+ 1577 074a 1B7A     		ldrb	r3, [r3, #8]	@ zero_extendqisi2
+ 1578 074c 023B     		subs	r3, r3, #2
+ 1579 074e 9A42     		cmp	r2, r3
+ 1580 0750 D5DB     		blt	.L81
+ 348:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****          }
+ 349:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       }
+ 350:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    }
+ 351:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    *(msg->payload+(msg->length-2)) = crc%256;
+ 1581              		.loc 1 351 0 is_stmt 1
+ 1582 0752 7B68     		ldr	r3, [r7, #4]
+ 1583 0754 5A68     		ldr	r2, [r3, #4]
+ 1584 0756 7B68     		ldr	r3, [r7, #4]
+ 1585 0758 1B7A     		ldrb	r3, [r3, #8]	@ zero_extendqisi2
+ 1586 075a 023B     		subs	r3, r3, #2
+ 1587 075c 1344     		add	r3, r3, r2
+ 1588 075e FA89     		ldrh	r2, [r7, #14]	@ movhi
+ 1589 0760 D2B2     		uxtb	r2, r2
+ 1590 0762 1A70     		strb	r2, [r3]
+ 352:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    *(msg->payload+(msg->length-1)) = crc/256;
+ 1591              		.loc 1 352 0
+ 1592 0764 7B68     		ldr	r3, [r7, #4]
+ 1593 0766 5A68     		ldr	r2, [r3, #4]
+ 1594 0768 7B68     		ldr	r3, [r7, #4]
+ 1595 076a 1B7A     		ldrb	r3, [r3, #8]	@ zero_extendqisi2
+ 1596 076c 013B     		subs	r3, r3, #1
+ 1597 076e 1344     		add	r3, r3, r2
+ 1598 0770 FA89     		ldrh	r2, [r7, #14]
+ 1599 0772 120A     		lsrs	r2, r2, #8
+ 1600 0774 92B2     		uxth	r2, r2
+ 1601 0776 D2B2     		uxtb	r2, r2
+ 1602 0778 1A70     		strb	r2, [r3]
+ 353:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** }
+ 1603              		.loc 1 353 0
+ 1604 077a 1437     		adds	r7, r7, #20
+ 1605              		.cfi_def_cfa_offset 4
+ 1606 077c BD46     		mov	sp, r7
+ 1607              		.cfi_def_cfa_register 13
+ 1608              		@ sp needed
+ 1609 077e 5DF8047B 		ldr	r7, [sp], #4
+ 1610              		.cfi_restore 7
+ 1611              		.cfi_def_cfa_offset 0
+ 1612 0782 7047     		bx	lr
+ 1613              	.L83:
+ 1614              		.align	2
+ 1615              	.L82:
+ 1616 0784 0884FFFF 		.word	-31736
+ 1617              		.cfi_endproc
+ 1618              	.LFE15:
+ 1620              		.align	2
+ 1621              		.global	packetfunctions_checkCRC
+ 1622              		.thumb
+ 1623              		.thumb_func
+ 1625              	packetfunctions_checkCRC:
+ 1626              	.LFB16:
+ 354:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** 
+ 355:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** bool packetfunctions_checkCRC(OpenQueueEntry_t* msg) {
+ 1627              		.loc 1 355 0
+ 1628              		.cfi_startproc
+ 1629              		@ args = 0, pretend = 0, frame = 16
+ 1630              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1631              		@ link register save eliminated.
+ 1632 0788 80B4     		push	{r7}
+ 1633              		.cfi_def_cfa_offset 4
+ 1634              		.cfi_offset 7, -4
+ 1635 078a 85B0     		sub	sp, sp, #20
+ 1636              		.cfi_def_cfa_offset 24
+ 1637 078c 00AF     		add	r7, sp, #0
+ 1638              		.cfi_def_cfa_register 7
+ 1639 078e 7860     		str	r0, [r7, #4]
+ 356:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    uint16_t crc;
+ 357:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    uint8_t  i;
+ 358:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    uint8_t  count;
+ 359:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    crc = 0;
+ 1640              		.loc 1 359 0
+ 1641 0790 0023     		movs	r3, #0
+ 1642 0792 FB81     		strh	r3, [r7, #14]	@ movhi
+ 360:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    for (count=0;count<msg->length-2;count++) {
+ 1643              		.loc 1 360 0
+ 1644 0794 0023     		movs	r3, #0
+ 1645 0796 3B73     		strb	r3, [r7, #12]
+ 1646 0798 23E0     		b	.L85
+ 1647              	.L90:
+ 361:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       crc = crc ^ (uint8_t)*(msg->payload+count);
+ 1648              		.loc 1 361 0
+ 1649 079a 7B68     		ldr	r3, [r7, #4]
+ 1650 079c 5A68     		ldr	r2, [r3, #4]
+ 1651 079e 3B7B     		ldrb	r3, [r7, #12]	@ zero_extendqisi2
+ 1652 07a0 1344     		add	r3, r3, r2
+ 1653 07a2 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 1654 07a4 9AB2     		uxth	r2, r3
+ 1655 07a6 FB89     		ldrh	r3, [r7, #14]	@ movhi
+ 1656 07a8 5340     		eors	r3, r3, r2
+ 1657 07aa FB81     		strh	r3, [r7, #14]	@ movhi
+ 362:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       //crc = crc ^ (uint16_t)*ptr++ << 8;
+ 363:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       for (i=0;i<8;i++) {
+ 1658              		.loc 1 363 0
+ 1659 07ac 0023     		movs	r3, #0
+ 1660 07ae 7B73     		strb	r3, [r7, #13]
+ 1661 07b0 11E0     		b	.L86
+ 1662              	.L89:
+ 364:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****          if (crc & 0x1) {
+ 1663              		.loc 1 364 0
+ 1664 07b2 FB89     		ldrh	r3, [r7, #14]
+ 1665 07b4 03F00103 		and	r3, r3, #1
+ 1666 07b8 002B     		cmp	r3, #0
+ 1667 07ba 06D0     		beq	.L87
+ 365:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****             crc = crc >> 1 ^ 0x8408;
+ 1668              		.loc 1 365 0
+ 1669 07bc FB89     		ldrh	r3, [r7, #14]
+ 1670 07be 5B08     		lsrs	r3, r3, #1
+ 1671 07c0 9AB2     		uxth	r2, r3
+ 1672 07c2 1C4B     		ldr	r3, .L93
+ 1673 07c4 5340     		eors	r3, r3, r2
+ 1674 07c6 FB81     		strh	r3, [r7, #14]	@ movhi
+ 1675 07c8 02E0     		b	.L88
+ 1676              	.L87:
+ 366:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****          } else {
+ 367:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****             crc = crc >> 1;
+ 1677              		.loc 1 367 0
+ 1678 07ca FB89     		ldrh	r3, [r7, #14]
+ 1679 07cc 5B08     		lsrs	r3, r3, #1
+ 1680 07ce FB81     		strh	r3, [r7, #14]	@ movhi
+ 1681              	.L88:
+ 363:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****          if (crc & 0x1) {
+ 1682              		.loc 1 363 0 discriminator 2
+ 1683 07d0 7B7B     		ldrb	r3, [r7, #13]	@ zero_extendqisi2
+ 1684 07d2 0133     		adds	r3, r3, #1
+ 1685 07d4 7B73     		strb	r3, [r7, #13]
+ 1686              	.L86:
+ 363:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****          if (crc & 0x1) {
+ 1687              		.loc 1 363 0 is_stmt 0 discriminator 1
+ 1688 07d6 7B7B     		ldrb	r3, [r7, #13]	@ zero_extendqisi2
+ 1689 07d8 072B     		cmp	r3, #7
+ 1690 07da EAD9     		bls	.L89
+ 360:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       crc = crc ^ (uint8_t)*(msg->payload+count);
+ 1691              		.loc 1 360 0 is_stmt 1 discriminator 2
+ 1692 07dc 3B7B     		ldrb	r3, [r7, #12]	@ zero_extendqisi2
+ 1693 07de 0133     		adds	r3, r3, #1
+ 1694 07e0 3B73     		strb	r3, [r7, #12]
+ 1695              	.L85:
+ 360:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       crc = crc ^ (uint8_t)*(msg->payload+count);
+ 1696              		.loc 1 360 0 is_stmt 0 discriminator 1
+ 1697 07e2 3A7B     		ldrb	r2, [r7, #12]	@ zero_extendqisi2
+ 1698 07e4 7B68     		ldr	r3, [r7, #4]
+ 1699 07e6 1B7A     		ldrb	r3, [r3, #8]	@ zero_extendqisi2
+ 1700 07e8 023B     		subs	r3, r3, #2
+ 1701 07ea 9A42     		cmp	r2, r3
+ 1702 07ec D5DB     		blt	.L90
+ 368:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****          }
+ 369:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       }
+ 370:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    }
+ 371:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    if (*(msg->payload+(msg->length-2))==crc%256 &&
+ 1703              		.loc 1 371 0 is_stmt 1
+ 1704 07ee 7B68     		ldr	r3, [r7, #4]
+ 1705 07f0 5A68     		ldr	r2, [r3, #4]
+ 1706 07f2 7B68     		ldr	r3, [r7, #4]
+ 1707 07f4 1B7A     		ldrb	r3, [r3, #8]	@ zero_extendqisi2
+ 1708 07f6 023B     		subs	r3, r3, #2
+ 1709 07f8 1344     		add	r3, r3, r2
+ 1710 07fa 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 1711 07fc 9AB2     		uxth	r2, r3
+ 1712 07fe FB89     		ldrh	r3, [r7, #14]	@ movhi
+ 1713 0800 DBB2     		uxtb	r3, r3
+ 1714 0802 9BB2     		uxth	r3, r3
+ 1715 0804 9A42     		cmp	r2, r3
+ 1716 0806 0ED1     		bne	.L91
+ 372:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****        *(msg->payload+(msg->length-1))==crc/256) {
+ 1717              		.loc 1 372 0 discriminator 1
+ 1718 0808 7B68     		ldr	r3, [r7, #4]
+ 1719 080a 5A68     		ldr	r2, [r3, #4]
+ 1720 080c 7B68     		ldr	r3, [r7, #4]
+ 1721 080e 1B7A     		ldrb	r3, [r3, #8]	@ zero_extendqisi2
+ 1722 0810 013B     		subs	r3, r3, #1
+ 1723 0812 1344     		add	r3, r3, r2
+ 1724 0814 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 1725 0816 9AB2     		uxth	r2, r3
+ 1726 0818 FB89     		ldrh	r3, [r7, #14]
+ 1727 081a 1B0A     		lsrs	r3, r3, #8
+ 1728 081c 9BB2     		uxth	r3, r3
+ 371:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****        *(msg->payload+(msg->length-1))==crc/256) {
+ 1729              		.loc 1 371 0 discriminator 1
+ 1730 081e 9A42     		cmp	r2, r3
+ 1731 0820 01D1     		bne	.L91
+ 373:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****           return TRUE;
+ 1732              		.loc 1 373 0
+ 1733 0822 0123     		movs	r3, #1
+ 1734 0824 00E0     		b	.L92
+ 1735              	.L91:
+ 374:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****        } else {
+ 375:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****           return FALSE;
+ 1736              		.loc 1 375 0
+ 1737 0826 0023     		movs	r3, #0
+ 1738              	.L92:
+ 376:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****        }
+ 377:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** }
+ 1739              		.loc 1 377 0
+ 1740 0828 1846     		mov	r0, r3
+ 1741 082a 1437     		adds	r7, r7, #20
+ 1742              		.cfi_def_cfa_offset 4
+ 1743 082c BD46     		mov	sp, r7
+ 1744              		.cfi_def_cfa_register 13
+ 1745              		@ sp needed
+ 1746 082e 5DF8047B 		ldr	r7, [sp], #4
+ 1747              		.cfi_restore 7
+ 1748              		.cfi_def_cfa_offset 0
+ 1749 0832 7047     		bx	lr
+ 1750              	.L94:
+ 1751              		.align	2
+ 1752              	.L93:
+ 1753 0834 0884FFFF 		.word	-31736
+ 1754              		.cfi_endproc
+ 1755              	.LFE16:
+ 1757              		.align	2
+ 1758              		.global	packetfunctions_calculateChecksum
+ 1759              		.thumb
+ 1760              		.thumb_func
+ 1762              	packetfunctions_calculateChecksum:
+ 1763              	.LFB17:
+ 378:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** 
+ 379:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** //======= checksum calculation
+ 380:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** 
+ 381:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** //see http://www-net.cs.umass.edu/kurose/transport/UDP.html, or http://tools.ietf.org/html/rfc1071
+ 382:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** //see http://en.wikipedia.org/wiki/User_Datagram_Protocol#IPv6_PSEUDO-HEADER
+ 383:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** void packetfunctions_calculateChecksum(OpenQueueEntry_t* msg, uint8_t* checksum_ptr) {
+ 1764              		.loc 1 383 0
+ 1765              		.cfi_startproc
+ 1766              		@ args = 0, pretend = 0, frame = 16
+ 1767              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1768 0838 90B5     		push	{r4, r7, lr}
+ 1769              		.cfi_def_cfa_offset 12
+ 1770              		.cfi_offset 4, -12
+ 1771              		.cfi_offset 7, -8
+ 1772              		.cfi_offset 14, -4
+ 1773 083a 85B0     		sub	sp, sp, #20
+ 1774              		.cfi_def_cfa_offset 32
+ 1775 083c 00AF     		add	r7, sp, #0
+ 1776              		.cfi_def_cfa_register 7
+ 1777 083e 7860     		str	r0, [r7, #4]
+ 1778 0840 3960     		str	r1, [r7]
+ 384:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    uint8_t temp_checksum[2];
+ 385:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    uint8_t little_helper[2];
+ 386:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    
+ 387:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    // initialize running checksum
+ 388:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    temp_checksum[0]  = 0;
+ 1779              		.loc 1 388 0
+ 1780 0842 0023     		movs	r3, #0
+ 1781 0844 3B73     		strb	r3, [r7, #12]
+ 389:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    temp_checksum[1]  = 0;
+ 1782              		.loc 1 389 0
+ 1783 0846 0023     		movs	r3, #0
+ 1784 0848 7B73     		strb	r3, [r7, #13]
+ 390:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    
+ 391:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    //===== IPv6 pseudo header
+ 392:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    
+ 393:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    // source address (prefix and EUI64)
+ 394:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    onesComplementSum(temp_checksum,(idmanager_getMyID(ADDR_PREFIX))->prefix,8);
+ 1785              		.loc 1 394 0
+ 1786 084a 0520     		movs	r0, #5
+ 1787 084c FFF7FEFF 		bl	idmanager_getMyID
+ 1788 0850 0346     		mov	r3, r0
+ 1789 0852 0133     		adds	r3, r3, #1
+ 1790 0854 07F10C02 		add	r2, r7, #12
+ 1791 0858 1046     		mov	r0, r2
+ 1792 085a 1946     		mov	r1, r3
+ 1793 085c 0822     		movs	r2, #8
+ 1794 085e FFF7FEFF 		bl	onesComplementSum
+ 395:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    onesComplementSum(temp_checksum,(idmanager_getMyID(ADDR_64B))->addr_64b,8);
+ 1795              		.loc 1 395 0
+ 1796 0862 0220     		movs	r0, #2
+ 1797 0864 FFF7FEFF 		bl	idmanager_getMyID
+ 1798 0868 0346     		mov	r3, r0
+ 1799 086a 0133     		adds	r3, r3, #1
+ 1800 086c 07F10C02 		add	r2, r7, #12
+ 1801 0870 1046     		mov	r0, r2
+ 1802 0872 1946     		mov	r1, r3
+ 1803 0874 0822     		movs	r2, #8
+ 1804 0876 FFF7FEFF 		bl	onesComplementSum
+ 396:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    
+ 397:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    // destination address
+ 398:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    onesComplementSum(temp_checksum,msg->l3_destinationAdd.addr_128b,16);
+ 1805              		.loc 1 398 0
+ 1806 087a 7B68     		ldr	r3, [r7, #4]
+ 1807 087c 1633     		adds	r3, r3, #22
+ 1808 087e 07F10C02 		add	r2, r7, #12
+ 1809 0882 1046     		mov	r0, r2
+ 1810 0884 1946     		mov	r1, r3
+ 1811 0886 1022     		movs	r2, #16
+ 1812 0888 FFF7FEFF 		bl	onesComplementSum
+ 399:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    
+ 400:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    // length
+ 401:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    little_helper[0] = 0;
+ 1813              		.loc 1 401 0
+ 1814 088c 0023     		movs	r3, #0
+ 1815 088e 3B72     		strb	r3, [r7, #8]
+ 402:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    little_helper[1] = msg->length;
+ 1816              		.loc 1 402 0
+ 1817 0890 7B68     		ldr	r3, [r7, #4]
+ 1818 0892 1B7A     		ldrb	r3, [r3, #8]	@ zero_extendqisi2
+ 1819 0894 7B72     		strb	r3, [r7, #9]
+ 403:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    onesComplementSum(temp_checksum,little_helper,2);
+ 1820              		.loc 1 403 0
+ 1821 0896 07F10C02 		add	r2, r7, #12
+ 1822 089a 07F10803 		add	r3, r7, #8
+ 1823 089e 1046     		mov	r0, r2
+ 1824 08a0 1946     		mov	r1, r3
+ 1825 08a2 0222     		movs	r2, #2
+ 1826 08a4 FFF7FEFF 		bl	onesComplementSum
+ 404:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    
+ 405:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    // next header
+ 406:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    little_helper[0] = 0;
+ 1827              		.loc 1 406 0
+ 1828 08a8 0023     		movs	r3, #0
+ 1829 08aa 3B72     		strb	r3, [r7, #8]
+ 407:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    little_helper[1] = msg->l4_protocol;
+ 1830              		.loc 1 407 0
+ 1831 08ac 7B68     		ldr	r3, [r7, #4]
+ 1832 08ae 5B7A     		ldrb	r3, [r3, #9]	@ zero_extendqisi2
+ 1833 08b0 7B72     		strb	r3, [r7, #9]
+ 408:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    onesComplementSum(temp_checksum,little_helper,2);
+ 1834              		.loc 1 408 0
+ 1835 08b2 07F10C02 		add	r2, r7, #12
+ 1836 08b6 07F10803 		add	r3, r7, #8
+ 1837 08ba 1046     		mov	r0, r2
+ 1838 08bc 1946     		mov	r1, r3
+ 1839 08be 0222     		movs	r2, #2
+ 1840 08c0 FFF7FEFF 		bl	onesComplementSum
+ 409:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    
+ 410:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    //===== payload
+ 411:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    
+ 412:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    // reset the checksum currently in the payload
+ 413:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    *checksum_ptr     = 0;
+ 1841              		.loc 1 413 0
+ 1842 08c4 3B68     		ldr	r3, [r7]
+ 1843 08c6 0022     		movs	r2, #0
+ 1844 08c8 1A70     		strb	r2, [r3]
+ 414:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    *(checksum_ptr+1) = 0;
+ 1845              		.loc 1 414 0
+ 1846 08ca 3B68     		ldr	r3, [r7]
+ 1847 08cc 0133     		adds	r3, r3, #1
+ 1848 08ce 0022     		movs	r2, #0
+ 1849 08d0 1A70     		strb	r2, [r3]
+ 415:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    
+ 416:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    onesComplementSum(temp_checksum,msg->payload,msg->length);
+ 1850              		.loc 1 416 0
+ 1851 08d2 7B68     		ldr	r3, [r7, #4]
+ 1852 08d4 5A68     		ldr	r2, [r3, #4]
+ 1853 08d6 7B68     		ldr	r3, [r7, #4]
+ 1854 08d8 1B7A     		ldrb	r3, [r3, #8]	@ zero_extendqisi2
+ 1855 08da 1C46     		mov	r4, r3
+ 1856 08dc 07F10C03 		add	r3, r7, #12
+ 1857 08e0 1846     		mov	r0, r3
+ 1858 08e2 1146     		mov	r1, r2
+ 1859 08e4 2246     		mov	r2, r4
+ 1860 08e6 FFF7FEFF 		bl	onesComplementSum
+ 417:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    temp_checksum[0] ^= 0xFF;
+ 1861              		.loc 1 417 0
+ 1862 08ea 3B7B     		ldrb	r3, [r7, #12]	@ zero_extendqisi2
+ 1863 08ec DB43     		mvns	r3, r3
+ 1864 08ee DBB2     		uxtb	r3, r3
+ 1865 08f0 3B73     		strb	r3, [r7, #12]
+ 418:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    temp_checksum[1] ^= 0xFF;
+ 1866              		.loc 1 418 0
+ 1867 08f2 7B7B     		ldrb	r3, [r7, #13]	@ zero_extendqisi2
+ 1868 08f4 DB43     		mvns	r3, r3
+ 1869 08f6 DBB2     		uxtb	r3, r3
+ 1870 08f8 7B73     		strb	r3, [r7, #13]
+ 419:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    
+ 420:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    //write in packet
+ 421:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    *checksum_ptr     = temp_checksum[0];
+ 1871              		.loc 1 421 0
+ 1872 08fa 3A7B     		ldrb	r2, [r7, #12]	@ zero_extendqisi2
+ 1873 08fc 3B68     		ldr	r3, [r7]
+ 1874 08fe 1A70     		strb	r2, [r3]
+ 422:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    *(checksum_ptr+1) = temp_checksum[1];
+ 1875              		.loc 1 422 0
+ 1876 0900 3B68     		ldr	r3, [r7]
+ 1877 0902 0133     		adds	r3, r3, #1
+ 1878 0904 7A7B     		ldrb	r2, [r7, #13]	@ zero_extendqisi2
+ 1879 0906 1A70     		strb	r2, [r3]
+ 423:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** }
+ 1880              		.loc 1 423 0
+ 1881 0908 1437     		adds	r7, r7, #20
+ 1882              		.cfi_def_cfa_offset 12
+ 1883 090a BD46     		mov	sp, r7
+ 1884              		.cfi_def_cfa_register 13
+ 1885              		@ sp needed
+ 1886 090c 90BD     		pop	{r4, r7, pc}
+ 1887              		.cfi_endproc
+ 1888              	.LFE17:
+ 1890 090e 00BF     		.align	2
+ 1891              		.global	onesComplementSum
+ 1892              		.thumb
+ 1893              		.thumb_func
+ 1895              	onesComplementSum:
+ 1896              	.LFB18:
+ 424:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** 
+ 425:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** 
+ 426:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** void onesComplementSum(uint8_t* global_sum, uint8_t* ptr, int length) {
+ 1897              		.loc 1 426 0
+ 1898              		.cfi_startproc
+ 1899              		@ args = 0, pretend = 0, frame = 24
+ 1900              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1901              		@ link register save eliminated.
+ 1902 0910 80B4     		push	{r7}
+ 1903              		.cfi_def_cfa_offset 4
+ 1904              		.cfi_offset 7, -4
+ 1905 0912 87B0     		sub	sp, sp, #28
+ 1906              		.cfi_def_cfa_offset 32
+ 1907 0914 00AF     		add	r7, sp, #0
+ 1908              		.cfi_def_cfa_register 7
+ 1909 0916 F860     		str	r0, [r7, #12]
+ 1910 0918 B960     		str	r1, [r7, #8]
+ 1911 091a 7A60     		str	r2, [r7, #4]
+ 427:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    uint32_t sum = 0xFFFF & (global_sum[0]<<8 | global_sum[1]);
+ 1912              		.loc 1 427 0
+ 1913 091c FB68     		ldr	r3, [r7, #12]
+ 1914 091e 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 1915 0920 1B02     		lsls	r3, r3, #8
+ 1916 0922 FA68     		ldr	r2, [r7, #12]
+ 1917 0924 0132     		adds	r2, r2, #1
+ 1918 0926 1278     		ldrb	r2, [r2]	@ zero_extendqisi2
+ 1919 0928 1343     		orrs	r3, r3, r2
+ 1920 092a 9BB2     		uxth	r3, r3
+ 1921 092c 7B61     		str	r3, [r7, #20]
+ 428:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    while (length>1) {
+ 1922              		.loc 1 428 0
+ 1923 092e 10E0     		b	.L97
+ 1924              	.L98:
+ 429:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       sum     += 0xFFFF & (*ptr<<8 | *(ptr+1));
+ 1925              		.loc 1 429 0
+ 1926 0930 BB68     		ldr	r3, [r7, #8]
+ 1927 0932 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 1928 0934 1B02     		lsls	r3, r3, #8
+ 1929 0936 BA68     		ldr	r2, [r7, #8]
+ 1930 0938 0132     		adds	r2, r2, #1
+ 1931 093a 1278     		ldrb	r2, [r2]	@ zero_extendqisi2
+ 1932 093c 1343     		orrs	r3, r3, r2
+ 1933 093e 9BB2     		uxth	r3, r3
+ 1934 0940 7A69     		ldr	r2, [r7, #20]
+ 1935 0942 1344     		add	r3, r3, r2
+ 1936 0944 7B61     		str	r3, [r7, #20]
+ 430:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       ptr     += 2;
+ 1937              		.loc 1 430 0
+ 1938 0946 BB68     		ldr	r3, [r7, #8]
+ 1939 0948 0233     		adds	r3, r3, #2
+ 1940 094a BB60     		str	r3, [r7, #8]
+ 431:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       length  -= 2;
+ 1941              		.loc 1 431 0
+ 1942 094c 7B68     		ldr	r3, [r7, #4]
+ 1943 094e 023B     		subs	r3, r3, #2
+ 1944 0950 7B60     		str	r3, [r7, #4]
+ 1945              	.L97:
+ 428:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       sum     += 0xFFFF & (*ptr<<8 | *(ptr+1));
+ 1946              		.loc 1 428 0
+ 1947 0952 7B68     		ldr	r3, [r7, #4]
+ 1948 0954 012B     		cmp	r3, #1
+ 1949 0956 EBDC     		bgt	.L98
+ 432:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    }
+ 433:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    if (length) {
+ 1950              		.loc 1 433 0
+ 1951 0958 7B68     		ldr	r3, [r7, #4]
+ 1952 095a 002B     		cmp	r3, #0
+ 1953 095c 06D0     		beq	.L99
+ 434:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       sum     += (0xFF & *ptr)<<8;
+ 1954              		.loc 1 434 0
+ 1955 095e BB68     		ldr	r3, [r7, #8]
+ 1956 0960 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 1957 0962 1B02     		lsls	r3, r3, #8
+ 1958 0964 1A46     		mov	r2, r3
+ 1959 0966 7B69     		ldr	r3, [r7, #20]
+ 1960 0968 1344     		add	r3, r3, r2
+ 1961 096a 7B61     		str	r3, [r7, #20]
+ 1962              	.L99:
+ 435:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    }
+ 436:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    while (sum>>16) {
+ 1963              		.loc 1 436 0
+ 1964 096c 05E0     		b	.L100
+ 1965              	.L101:
+ 437:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       sum      = (sum & 0xFFFF)+(sum >> 16);
+ 1966              		.loc 1 437 0
+ 1967 096e 7B69     		ldr	r3, [r7, #20]
+ 1968 0970 9AB2     		uxth	r2, r3
+ 1969 0972 7B69     		ldr	r3, [r7, #20]
+ 1970 0974 1B0C     		lsrs	r3, r3, #16
+ 1971 0976 1344     		add	r3, r3, r2
+ 1972 0978 7B61     		str	r3, [r7, #20]
+ 1973              	.L100:
+ 436:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       sum      = (sum & 0xFFFF)+(sum >> 16);
+ 1974              		.loc 1 436 0
+ 1975 097a 7B69     		ldr	r3, [r7, #20]
+ 1976 097c 1B0C     		lsrs	r3, r3, #16
+ 1977 097e 002B     		cmp	r3, #0
+ 1978 0980 F5D1     		bne	.L101
+ 438:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    }
+ 439:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    global_sum[0] = (sum>>8) & 0xFF;
+ 1979              		.loc 1 439 0
+ 1980 0982 7B69     		ldr	r3, [r7, #20]
+ 1981 0984 1B0A     		lsrs	r3, r3, #8
+ 1982 0986 DAB2     		uxtb	r2, r3
+ 1983 0988 FB68     		ldr	r3, [r7, #12]
+ 1984 098a 1A70     		strb	r2, [r3]
+ 440:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    global_sum[1] = sum & 0xFF;
+ 1985              		.loc 1 440 0
+ 1986 098c FB68     		ldr	r3, [r7, #12]
+ 1987 098e 0133     		adds	r3, r3, #1
+ 1988 0990 7A69     		ldr	r2, [r7, #20]
+ 1989 0992 D2B2     		uxtb	r2, r2
+ 1990 0994 1A70     		strb	r2, [r3]
+ 441:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** }
+ 1991              		.loc 1 441 0
+ 1992 0996 1C37     		adds	r7, r7, #28
+ 1993              		.cfi_def_cfa_offset 4
+ 1994 0998 BD46     		mov	sp, r7
+ 1995              		.cfi_def_cfa_register 13
+ 1996              		@ sp needed
+ 1997 099a 5DF8047B 		ldr	r7, [sp], #4
+ 1998              		.cfi_restore 7
+ 1999              		.cfi_def_cfa_offset 0
+ 2000 099e 7047     		bx	lr
+ 2001              		.cfi_endproc
+ 2002              	.LFE18:
+ 2004              		.align	2
+ 2005              		.global	packetfunctions_htons
+ 2006              		.thumb
+ 2007              		.thumb_func
+ 2009              	packetfunctions_htons:
+ 2010              	.LFB19:
+ 442:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** 
+ 443:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** //======= endianness
+ 444:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** 
+ 445:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** void packetfunctions_htons( uint16_t val, uint8_t* dest ) {
+ 2011              		.loc 1 445 0
+ 2012              		.cfi_startproc
+ 2013              		@ args = 0, pretend = 0, frame = 8
+ 2014              		@ frame_needed = 1, uses_anonymous_args = 0
+ 2015              		@ link register save eliminated.
+ 2016 09a0 80B4     		push	{r7}
+ 2017              		.cfi_def_cfa_offset 4
+ 2018              		.cfi_offset 7, -4
+ 2019 09a2 83B0     		sub	sp, sp, #12
+ 2020              		.cfi_def_cfa_offset 16
+ 2021 09a4 00AF     		add	r7, sp, #0
+ 2022              		.cfi_def_cfa_register 7
+ 2023 09a6 0346     		mov	r3, r0
+ 2024 09a8 3960     		str	r1, [r7]
+ 2025 09aa FB80     		strh	r3, [r7, #6]	@ movhi
+ 446:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    dest[0] = (val & 0xff00) >> 8;
+ 2026              		.loc 1 446 0
+ 2027 09ac FB88     		ldrh	r3, [r7, #6]
+ 2028 09ae 1B0A     		lsrs	r3, r3, #8
+ 2029 09b0 9BB2     		uxth	r3, r3
+ 2030 09b2 DAB2     		uxtb	r2, r3
+ 2031 09b4 3B68     		ldr	r3, [r7]
+ 2032 09b6 1A70     		strb	r2, [r3]
+ 447:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    dest[1] = (val & 0x00ff);
+ 2033              		.loc 1 447 0
+ 2034 09b8 3B68     		ldr	r3, [r7]
+ 2035 09ba 0133     		adds	r3, r3, #1
+ 2036 09bc FA88     		ldrh	r2, [r7, #6]	@ movhi
+ 2037 09be D2B2     		uxtb	r2, r2
+ 2038 09c0 1A70     		strb	r2, [r3]
+ 448:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** }
+ 2039              		.loc 1 448 0
+ 2040 09c2 0C37     		adds	r7, r7, #12
+ 2041              		.cfi_def_cfa_offset 4
+ 2042 09c4 BD46     		mov	sp, r7
+ 2043              		.cfi_def_cfa_register 13
+ 2044              		@ sp needed
+ 2045 09c6 5DF8047B 		ldr	r7, [sp], #4
+ 2046              		.cfi_restore 7
+ 2047              		.cfi_def_cfa_offset 0
+ 2048 09ca 7047     		bx	lr
+ 2049              		.cfi_endproc
+ 2050              	.LFE19:
+ 2052              		.align	2
+ 2053              		.global	packetfunctions_ntohs
+ 2054              		.thumb
+ 2055              		.thumb_func
+ 2057              	packetfunctions_ntohs:
+ 2058              	.LFB20:
+ 449:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** 
+ 450:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** uint16_t packetfunctions_ntohs( uint8_t* src ) {
+ 2059              		.loc 1 450 0
+ 2060              		.cfi_startproc
+ 2061              		@ args = 0, pretend = 0, frame = 8
+ 2062              		@ frame_needed = 1, uses_anonymous_args = 0
+ 2063              		@ link register save eliminated.
+ 2064 09cc 80B4     		push	{r7}
+ 2065              		.cfi_def_cfa_offset 4
+ 2066              		.cfi_offset 7, -4
+ 2067 09ce 83B0     		sub	sp, sp, #12
+ 2068              		.cfi_def_cfa_offset 16
+ 2069 09d0 00AF     		add	r7, sp, #0
+ 2070              		.cfi_def_cfa_register 7
+ 2071 09d2 7860     		str	r0, [r7, #4]
+ 451:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    return (((uint16_t) src[0]) << 8) |
+ 2072              		.loc 1 451 0
+ 2073 09d4 7B68     		ldr	r3, [r7, #4]
+ 2074 09d6 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 2075 09d8 1B02     		lsls	r3, r3, #8
+ 2076 09da 9AB2     		uxth	r2, r3
+ 452:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       (((uint16_t) src[1])
+ 2077              		.loc 1 452 0
+ 2078 09dc 7B68     		ldr	r3, [r7, #4]
+ 2079 09de 0133     		adds	r3, r3, #1
+ 2080 09e0 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 451:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    return (((uint16_t) src[0]) << 8) |
+ 2081              		.loc 1 451 0
+ 2082 09e2 9BB2     		uxth	r3, r3
+ 2083 09e4 1343     		orrs	r3, r3, r2
+ 2084 09e6 9BB2     		uxth	r3, r3
+ 2085 09e8 9BB2     		uxth	r3, r3
+ 453:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       );
+ 454:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** }
+ 2086              		.loc 1 454 0
+ 2087 09ea 1846     		mov	r0, r3
+ 2088 09ec 0C37     		adds	r7, r7, #12
+ 2089              		.cfi_def_cfa_offset 4
+ 2090 09ee BD46     		mov	sp, r7
+ 2091              		.cfi_def_cfa_register 13
+ 2092              		@ sp needed
+ 2093 09f0 5DF8047B 		ldr	r7, [sp], #4
+ 2094              		.cfi_restore 7
+ 2095              		.cfi_def_cfa_offset 0
+ 2096 09f4 7047     		bx	lr
+ 2097              		.cfi_endproc
+ 2098              	.LFE20:
+ 2100 09f6 00BF     		.align	2
+ 2101              		.global	packetfunctions_htonl
+ 2102              		.thumb
+ 2103              		.thumb_func
+ 2105              	packetfunctions_htonl:
+ 2106              	.LFB21:
+ 455:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** 
+ 456:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** void packetfunctions_htonl( uint32_t val, uint8_t* dest ) {
+ 2107              		.loc 1 456 0
+ 2108              		.cfi_startproc
+ 2109              		@ args = 0, pretend = 0, frame = 8
+ 2110              		@ frame_needed = 1, uses_anonymous_args = 0
+ 2111              		@ link register save eliminated.
+ 2112 09f8 80B4     		push	{r7}
+ 2113              		.cfi_def_cfa_offset 4
+ 2114              		.cfi_offset 7, -4
+ 2115 09fa 83B0     		sub	sp, sp, #12
+ 2116              		.cfi_def_cfa_offset 16
+ 2117 09fc 00AF     		add	r7, sp, #0
+ 2118              		.cfi_def_cfa_register 7
+ 2119 09fe 7860     		str	r0, [r7, #4]
+ 2120 0a00 3960     		str	r1, [r7]
+ 457:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    dest[0] = (val & 0xff000000) >> 24;
+ 2121              		.loc 1 457 0
+ 2122 0a02 7B68     		ldr	r3, [r7, #4]
+ 2123 0a04 1B0E     		lsrs	r3, r3, #24
+ 2124 0a06 DAB2     		uxtb	r2, r3
+ 2125 0a08 3B68     		ldr	r3, [r7]
+ 2126 0a0a 1A70     		strb	r2, [r3]
+ 458:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    dest[1] = (val & 0x00ff0000) >> 16;
+ 2127              		.loc 1 458 0
+ 2128 0a0c 3B68     		ldr	r3, [r7]
+ 2129 0a0e 0133     		adds	r3, r3, #1
+ 2130 0a10 7A68     		ldr	r2, [r7, #4]
+ 2131 0a12 02F47F02 		and	r2, r2, #16711680
+ 2132 0a16 120C     		lsrs	r2, r2, #16
+ 2133 0a18 D2B2     		uxtb	r2, r2
+ 2134 0a1a 1A70     		strb	r2, [r3]
+ 459:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    dest[2] = (val & 0x0000ff00) >> 8;
+ 2135              		.loc 1 459 0
+ 2136 0a1c 3B68     		ldr	r3, [r7]
+ 2137 0a1e 0233     		adds	r3, r3, #2
+ 2138 0a20 7A68     		ldr	r2, [r7, #4]
+ 2139 0a22 02F47F42 		and	r2, r2, #65280
+ 2140 0a26 120A     		lsrs	r2, r2, #8
+ 2141 0a28 D2B2     		uxtb	r2, r2
+ 2142 0a2a 1A70     		strb	r2, [r3]
+ 460:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    dest[3] = (val & 0x000000ff);
+ 2143              		.loc 1 460 0
+ 2144 0a2c 3B68     		ldr	r3, [r7]
+ 2145 0a2e 0333     		adds	r3, r3, #3
+ 2146 0a30 7A68     		ldr	r2, [r7, #4]
+ 2147 0a32 D2B2     		uxtb	r2, r2
+ 2148 0a34 1A70     		strb	r2, [r3]
+ 461:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** }
+ 2149              		.loc 1 461 0
+ 2150 0a36 0C37     		adds	r7, r7, #12
+ 2151              		.cfi_def_cfa_offset 4
+ 2152 0a38 BD46     		mov	sp, r7
+ 2153              		.cfi_def_cfa_register 13
+ 2154              		@ sp needed
+ 2155 0a3a 5DF8047B 		ldr	r7, [sp], #4
+ 2156              		.cfi_restore 7
+ 2157              		.cfi_def_cfa_offset 0
+ 2158 0a3e 7047     		bx	lr
+ 2159              		.cfi_endproc
+ 2160              	.LFE21:
+ 2162              		.align	2
+ 2163              		.global	packetfunctions_ntohl
+ 2164              		.thumb
+ 2165              		.thumb_func
+ 2167              	packetfunctions_ntohl:
+ 2168              	.LFB22:
+ 462:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** 
+ 463:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** uint32_t packetfunctions_ntohl( uint8_t* src ) {
+ 2169              		.loc 1 463 0
+ 2170              		.cfi_startproc
+ 2171              		@ args = 0, pretend = 0, frame = 8
+ 2172              		@ frame_needed = 1, uses_anonymous_args = 0
+ 2173              		@ link register save eliminated.
+ 2174 0a40 80B4     		push	{r7}
+ 2175              		.cfi_def_cfa_offset 4
+ 2176              		.cfi_offset 7, -4
+ 2177 0a42 83B0     		sub	sp, sp, #12
+ 2178              		.cfi_def_cfa_offset 16
+ 2179 0a44 00AF     		add	r7, sp, #0
+ 2180              		.cfi_def_cfa_register 7
+ 2181 0a46 7860     		str	r0, [r7, #4]
+ 464:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    return (((uint32_t) src[0]) << 24) |
+ 2182              		.loc 1 464 0
+ 2183 0a48 7B68     		ldr	r3, [r7, #4]
+ 2184 0a4a 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 2185 0a4c 1A06     		lsls	r2, r3, #24
+ 465:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       (((uint32_t) src[1]) << 16)     |
+ 2186              		.loc 1 465 0
+ 2187 0a4e 7B68     		ldr	r3, [r7, #4]
+ 2188 0a50 0133     		adds	r3, r3, #1
+ 2189 0a52 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 2190 0a54 1B04     		lsls	r3, r3, #16
+ 464:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****    return (((uint32_t) src[0]) << 24) |
+ 2191              		.loc 1 464 0
+ 2192 0a56 1A43     		orrs	r2, r2, r3
+ 466:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       (((uint32_t) src[2]) << 8)      |
+ 2193              		.loc 1 466 0
+ 2194 0a58 7B68     		ldr	r3, [r7, #4]
+ 2195 0a5a 0233     		adds	r3, r3, #2
+ 2196 0a5c 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 2197 0a5e 1B02     		lsls	r3, r3, #8
+ 465:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       (((uint32_t) src[1]) << 16)     |
+ 2198              		.loc 1 465 0
+ 2199 0a60 1343     		orrs	r3, r3, r2
+ 467:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       (((uint32_t) src[3])
+ 2200              		.loc 1 467 0
+ 2201 0a62 7A68     		ldr	r2, [r7, #4]
+ 2202 0a64 0332     		adds	r2, r2, #3
+ 2203 0a66 1278     		ldrb	r2, [r2]	@ zero_extendqisi2
+ 464:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       (((uint32_t) src[1]) << 16)     |
+ 2204              		.loc 1 464 0
+ 2205 0a68 1343     		orrs	r3, r3, r2
+ 468:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c ****       );
+ 469:build/OpenMote-CC2538_armgcc/openstack/cross-layers/packetfunctions.c **** }
+ 2206              		.loc 1 469 0
+ 2207 0a6a 1846     		mov	r0, r3
+ 2208 0a6c 0C37     		adds	r7, r7, #12
+ 2209              		.cfi_def_cfa_offset 4
+ 2210 0a6e BD46     		mov	sp, r7
+ 2211              		.cfi_def_cfa_register 13
+ 2212              		@ sp needed
+ 2213 0a70 5DF8047B 		ldr	r7, [sp], #4
+ 2214              		.cfi_restore 7
+ 2215              		.cfi_def_cfa_offset 0
+ 2216 0a74 7047     		bx	lr
+ 2217              		.cfi_endproc
+ 2218              	.LFE22:
+ 2220              	.Letext0:
+ 2221              		.file 2 "/usr/arm-none-eabi/include/machine/_default_types.h"
+ 2222              		.file 3 "/usr/arm-none-eabi/include/sys/_stdint.h"
+ 2223              		.file 4 "inc/opendefs.h"
+ 2224              		.file 5 "bsp/boards/OpenMote-CC2538/board_info.h"
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 packetfunctions.c
+     /tmp/cc4y4wEz.s:19     .rodata:0000000000000000 $d
+     /tmp/cc4y4wEz.s:22     .rodata:0000000000000000 rreg_uriquery
+     /tmp/cc4y4wEz.s:27     .rodata:0000000000000008 infoBoardname
+     /tmp/cc4y4wEz.s:32     .rodata:0000000000000010 infouCName
+     /tmp/cc4y4wEz.s:37     .rodata:0000000000000018 infoRadioName
+     /tmp/cc4y4wEz.s:42     .rodata:0000000000000024 infoStackName
+     /tmp/cc4y4wEz.s:45     .text:0000000000000000 $t
+     /tmp/cc4y4wEz.s:50     .text:0000000000000000 packetfunctions_ip128bToMac64b
+     /tmp/cc4y4wEz.s:132    .text:0000000000000064 packetfunctions_mac64bToIp128b
+     /tmp/cc4y4wEz.s:215    .text:00000000000000cc packetfunctions_mac64bToMac16b
+     /tmp/cc4y4wEz.s:283    .text:0000000000000114 packetfunctions_mac16bToMac64b
+     /tmp/cc4y4wEz.s:375    .text:0000000000000180 packetfunctions_isBroadcastMulticast
+     /tmp/cc4y4wEz.s:488    .text:0000000000000200 packetfunctions_isAllRoutersMulticast
+     /tmp/cc4y4wEz.s:631    .text:00000000000002a4 packetfunctions_isAllHostsMulticast
+     /tmp/cc4y4wEz.s:774    .text:0000000000000348 packetfunctions_sameAddress
+     /tmp/cc4y4wEz.s:811    .text:0000000000000374 $d
+     /tmp/cc4y4wEz.s:817    .text:000000000000038c $t
+     /tmp/cc4y4wEz.s:887    .text:00000000000003dc packetfunctions_readAddress
+     /tmp/cc4y4wEz.s:921    .text:0000000000000404 $d
+     /tmp/cc4y4wEz.s:926    .text:0000000000000418 $t
+     /tmp/cc4y4wEz.s:1018   .text:0000000000000488 packetfunctions_writeAddress
+     /tmp/cc4y4wEz.s:1046   .text:00000000000004a8 $d
+     /tmp/cc4y4wEz.s:1051   .text:00000000000004bc $t
+     /tmp/cc4y4wEz.s:1154   .text:000000000000053c packetfunctions_reserveHeaderSize
+     /tmp/cc4y4wEz.s:1219   .text:0000000000000588 packetfunctions_tossHeader
+     /tmp/cc4y4wEz.s:1283   .text:00000000000005d4 packetfunctions_reserveFooterSize
+     /tmp/cc4y4wEz.s:1340   .text:0000000000000610 packetfunctions_tossFooter
+     /tmp/cc4y4wEz.s:1395   .text:0000000000000648 packetfunctions_duplicatePacket
+     /tmp/cc4y4wEz.s:1503   .text:00000000000006ec packetfunctions_calculateCRC
+     /tmp/cc4y4wEz.s:1616   .text:0000000000000784 $d
+     /tmp/cc4y4wEz.s:1620   .text:0000000000000788 $t
+     /tmp/cc4y4wEz.s:1625   .text:0000000000000788 packetfunctions_checkCRC
+     /tmp/cc4y4wEz.s:1753   .text:0000000000000834 $d
+     /tmp/cc4y4wEz.s:1757   .text:0000000000000838 $t
+     /tmp/cc4y4wEz.s:1762   .text:0000000000000838 packetfunctions_calculateChecksum
+     /tmp/cc4y4wEz.s:1895   .text:0000000000000910 onesComplementSum
+     /tmp/cc4y4wEz.s:2009   .text:00000000000009a0 packetfunctions_htons
+     /tmp/cc4y4wEz.s:2057   .text:00000000000009cc packetfunctions_ntohs
+     /tmp/cc4y4wEz.s:2105   .text:00000000000009f8 packetfunctions_htonl
+     /tmp/cc4y4wEz.s:2167   .text:0000000000000a40 packetfunctions_ntohl
+                     .debug_frame:0000000000000010 $d
+                           .group:0000000000000000 wm4.0.59116071098782a37a9183a8102fe91b
+                           .group:0000000000000000 wm4.features.h.22.2e382148a0560adabf236cddd4e880f4
+                           .group:0000000000000000 wm4._default_types.h.15.933e8edd27a65e0b69af4a865eb623d2
+                           .group:0000000000000000 wm4._intsup.h.10.35a45952db64d30146faa63a55c20c1c
+                           .group:0000000000000000 wm4._stdint.h.10.f76354baea1c7088202064e6f3d4f5e3
+                           .group:0000000000000000 wm4.stdint.h.23.373a9d32a9e4c2e88fd347156532d281
+                           .group:0000000000000000 wm4.toolchain_defs.h.2.e4ebbe6e0a48032a9b79077dc42e1ffd
+                           .group:0000000000000000 wm4.newlib.h.8.2702bca278809460f0af6fba1d84eb68
+                           .group:0000000000000000 wm4.config.h.220.a09b0b0de3c25be3f39d71990e617bff
+                           .group:0000000000000000 wm4._ansi.h.23.84af8eb8cd468d25cc5f45f5eb13ec51
+                           .group:0000000000000000 wm4.stddef.h.39.daafd3d79fe2f3a84d2d73d7d4e706f8
+                           .group:0000000000000000 wm4.lock.h.2.9bc98482741e5e2a9450b12934a684ea
+                           .group:0000000000000000 wm4._types.h.54.d3d34a3b7f3cc230cd159baf022b4b08
+                           .group:0000000000000000 wm4.stddef.h.158.61317cdbfb4026324507d123a50b0fd6
+                           .group:0000000000000000 wm4.reent.h.17.8bd9e4098e0428508c282cad794fae43
+                           .group:0000000000000000 wm4.cdefs.h.47.e6563c1c3863188ba4ac4eaa2c85b6f1
+                           .group:0000000000000000 wm4.string.h.15.dab3980bf35408a4c507182805e2de3a
+                           .group:0000000000000000 wm4.stddef.h.158.a7efb00f6cbc6f43213b50e183c9830c
+                           .group:0000000000000000 wm4.stdbool.h.29.1c9ee6859ce8145f7838a4f2549ccec2
+                           .group:0000000000000000 wm4.hw_types.h.67.b10589a0806dcc2d274d6fab6b736519
+                           .group:0000000000000000 wm4.interrupt.h.41.272fc4ec0e276feb439e7974d0f77eaf
+                           .group:0000000000000000 wm4.board_info.h.22.aeb00002354a4949fff54190040e37af
+                           .group:0000000000000000 wm4.opendefs.h.23.bdaf9c024be66ead04de21e3ce3dfaf2
+                           .group:0000000000000000 wm4.openserial.h.8.a9fe077ce3323e4f6730d3ecdff542cc
+                           .group:0000000000000000 wm4.idmanager.h.2.8c0e2159b32ef3125cbb1e984805cbfe
+
+UNDEFINED SYMBOLS
+openserial_printCritical
+memcpy
+memcmp
+openserial_printError
+idmanager_getMyID

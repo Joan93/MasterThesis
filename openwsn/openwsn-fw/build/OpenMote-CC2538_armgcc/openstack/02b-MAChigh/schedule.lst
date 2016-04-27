@@ -1,0 +1,3276 @@
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 6
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.file	"schedule.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.section	.rodata
+  19              		.align	2
+  22              	rreg_uriquery:
+  23 0000 683D7563 		.ascii	"h=ucb\000"
+  23      6200
+  24 0006 0000     		.align	2
+  27              	infoBoardname:
+  28 0008 43433235 		.ascii	"CC2538\000"
+  28      333800
+  29 000f 00       		.align	2
+  32              	infouCName:
+  33 0010 43433235 		.ascii	"CC2538\000"
+  33      333800
+  34 0017 00       		.align	2
+  37              	infoRadioName:
+  38 0018 43433235 		.ascii	"CC2538 SoC\000"
+  38      33382053 
+  38      6F4300
+  39 0023 00       		.align	2
+  42              	infoStackName:
+  43 0024 4F70656E 		.ascii	"OpenWSN \000"
+  43      57534E20 
+  43      00
+  44              		.comm	schedule_vars,268,4
+  45              		.text
+  46              		.align	2
+  47              		.global	schedule_init
+  48              		.thumb
+  49              		.thumb_func
+  51              	schedule_init:
+  52              	.LFB0:
+  53              		.file 1 "build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c"
+   1:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** #include "opendefs.h"
+   2:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** #include "schedule.h"
+   3:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** #include "openserial.h"
+   4:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** #include "openrandom.h"
+   5:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** #include "packetfunctions.h"
+   6:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** #include "sixtop.h"
+   7:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** #include "idmanager.h"
+   8:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** 
+   9:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** //=========================== variables =======================================
+  10:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** 
+  11:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** schedule_vars_t schedule_vars;
+  12:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** 
+  13:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** //=========================== prototypes ======================================
+  14:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** 
+  15:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** void schedule_resetEntry(scheduleEntry_t* pScheduleEntry);
+  16:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** 
+  17:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** //=========================== public ==========================================
+  18:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** 
+  19:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** //=== admin
+  20:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** 
+  21:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** /**
+  22:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** \brief Initialize this module.
+  23:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** 
+  24:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** \post Call this function before calling any other function in this module.
+  25:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** */
+  26:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** void schedule_init() {
+  54              		.loc 1 26 0
+  55              		.cfi_startproc
+  56              		@ args = 0, pretend = 0, frame = 24
+  57              		@ frame_needed = 1, uses_anonymous_args = 0
+  58 0000 80B5     		push	{r7, lr}
+  59              		.cfi_def_cfa_offset 8
+  60              		.cfi_offset 7, -8
+  61              		.cfi_offset 14, -4
+  62 0002 88B0     		sub	sp, sp, #32
+  63              		.cfi_def_cfa_offset 40
+  64 0004 02AF     		add	r7, sp, #8
+  65              		.cfi_def_cfa 7, 32
+  27:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    slotOffset_t    start_slotOffset;
+  28:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    slotOffset_t    running_slotOffset;
+  29:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    open_addr_t     temp_neighbor;
+  30:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** 
+  31:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    // reset local variables
+  32:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    memset(&schedule_vars,0,sizeof(schedule_vars_t));
+  66              		.loc 1 32 0
+  67 0006 2548     		ldr	r0, .L7
+  68 0008 0021     		movs	r1, #0
+  69 000a 4FF48672 		mov	r2, #268
+  70 000e FFF7FEFF 		bl	memset
+  33:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    for (running_slotOffset=0;running_slotOffset<MAXACTIVESLOTS;running_slotOffset++) {
+  71              		.loc 1 33 0
+  72 0012 0023     		movs	r3, #0
+  73 0014 FB82     		strh	r3, [r7, #22]	@ movhi
+  74 0016 0CE0     		b	.L2
+  75              	.L3:
+  34:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       schedule_resetEntry(&schedule_vars.scheduleBuf[running_slotOffset]);
+  76              		.loc 1 34 0 discriminator 3
+  77 0018 FA8A     		ldrh	r2, [r7, #22]
+  78 001a 1346     		mov	r3, r2
+  79 001c DB00     		lsls	r3, r3, #3
+  80 001e 1344     		add	r3, r3, r2
+  81 0020 9B00     		lsls	r3, r3, #2
+  82 0022 1E4A     		ldr	r2, .L7
+  83 0024 1344     		add	r3, r3, r2
+  84 0026 1846     		mov	r0, r3
+  85 0028 FFF7FEFF 		bl	schedule_resetEntry
+  33:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    for (running_slotOffset=0;running_slotOffset<MAXACTIVESLOTS;running_slotOffset++) {
+  86              		.loc 1 33 0 discriminator 3
+  87 002c FB8A     		ldrh	r3, [r7, #22]
+  88 002e 0133     		adds	r3, r3, #1
+  89 0030 FB82     		strh	r3, [r7, #22]	@ movhi
+  90              	.L2:
+  33:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    for (running_slotOffset=0;running_slotOffset<MAXACTIVESLOTS;running_slotOffset++) {
+  91              		.loc 1 33 0 is_stmt 0 discriminator 1
+  92 0032 FB8A     		ldrh	r3, [r7, #22]
+  93 0034 062B     		cmp	r3, #6
+  94 0036 EFD9     		bls	.L3
+  35:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    }
+  36:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    schedule_vars.backoffExponent = MINBE-1;
+  95              		.loc 1 36 0 is_stmt 1
+  96 0038 184B     		ldr	r3, .L7
+  97 003a 0122     		movs	r2, #1
+  98 003c 83F80621 		strb	r2, [r3, #262]
+  37:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    schedule_vars.maxActiveSlots = MAXACTIVESLOTS;
+  99              		.loc 1 37 0
+ 100 0040 164B     		ldr	r3, .L7
+ 101 0042 0722     		movs	r2, #7
+ 102 0044 A3F80221 		strh	r2, [r3, #258]	@ movhi
+  38:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+  39:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    start_slotOffset = SCHEDULE_MINIMAL_6TISCH_SLOTOFFSET;
+ 103              		.loc 1 39 0
+ 104 0048 0023     		movs	r3, #0
+ 105 004a BB82     		strh	r3, [r7, #20]	@ movhi
+  40:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    if (idmanager_getIsDAGroot()==TRUE) {
+ 106              		.loc 1 40 0
+ 107 004c FFF7FEFF 		bl	idmanager_getIsDAGroot
+ 108 0050 0346     		mov	r3, r0
+ 109 0052 002B     		cmp	r3, #0
+ 110 0054 01D0     		beq	.L4
+  41:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       schedule_startDAGroot();
+ 111              		.loc 1 41 0
+ 112 0056 FFF7FEFF 		bl	schedule_startDAGroot
+ 113              	.L4:
+  42:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    }
+  43:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+  44:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    // serial RX slot(s)
+  45:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    start_slotOffset += SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS;
+ 114              		.loc 1 45 0
+ 115 005a BB8A     		ldrh	r3, [r7, #20]	@ movhi
+ 116 005c 0133     		adds	r3, r3, #1
+ 117 005e BB82     		strh	r3, [r7, #20]	@ movhi
+  46:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    memset(&temp_neighbor,0,sizeof(temp_neighbor));
+ 118              		.loc 1 46 0
+ 119 0060 3B46     		mov	r3, r7
+ 120 0062 1846     		mov	r0, r3
+ 121 0064 0021     		movs	r1, #0
+ 122 0066 1122     		movs	r2, #17
+ 123 0068 FFF7FEFF 		bl	memset
+  47:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    for (running_slotOffset=start_slotOffset;running_slotOffset<start_slotOffset+NUMSERIALRX;running
+ 124              		.loc 1 47 0
+ 125 006c BB8A     		ldrh	r3, [r7, #20]	@ movhi
+ 126 006e FB82     		strh	r3, [r7, #22]	@ movhi
+ 127 0070 0BE0     		b	.L5
+ 128              	.L6:
+  48:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       schedule_addActiveSlot(
+ 129              		.loc 1 48 0 discriminator 3
+ 130 0072 FA8A     		ldrh	r2, [r7, #22]
+ 131 0074 3B46     		mov	r3, r7
+ 132 0076 0093     		str	r3, [sp]
+ 133 0078 1046     		mov	r0, r2
+ 134 007a 0421     		movs	r1, #4
+ 135 007c 0022     		movs	r2, #0
+ 136 007e 0023     		movs	r3, #0
+ 137 0080 FFF7FEFF 		bl	schedule_addActiveSlot
+  47:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    for (running_slotOffset=start_slotOffset;running_slotOffset<start_slotOffset+NUMSERIALRX;running
+ 138              		.loc 1 47 0 discriminator 3
+ 139 0084 FB8A     		ldrh	r3, [r7, #22]
+ 140 0086 0133     		adds	r3, r3, #1
+ 141 0088 FB82     		strh	r3, [r7, #22]	@ movhi
+ 142              	.L5:
+  47:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    for (running_slotOffset=start_slotOffset;running_slotOffset<start_slotOffset+NUMSERIALRX;running
+ 143              		.loc 1 47 0 is_stmt 0 discriminator 1
+ 144 008a FA8A     		ldrh	r2, [r7, #22]
+ 145 008c BB8A     		ldrh	r3, [r7, #20]
+ 146 008e 0333     		adds	r3, r3, #3
+ 147 0090 9A42     		cmp	r2, r3
+ 148 0092 EEDB     		blt	.L6
+  49:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****          running_slotOffset,                    // slot offset
+  50:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****          CELLTYPE_SERIALRX,                     // type of slot
+  51:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****          FALSE,                                 // shared?
+  52:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****          0,                                     // channel offset
+  53:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****          &temp_neighbor                         // neighbor
+  54:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       );
+  55:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    }
+  56:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** }
+ 149              		.loc 1 56 0 is_stmt 1
+ 150 0094 1837     		adds	r7, r7, #24
+ 151              		.cfi_def_cfa_offset 8
+ 152 0096 BD46     		mov	sp, r7
+ 153              		.cfi_def_cfa_register 13
+ 154              		@ sp needed
+ 155 0098 80BD     		pop	{r7, pc}
+ 156              	.L8:
+ 157 009a 00BF     		.align	2
+ 158              	.L7:
+ 159 009c 00000000 		.word	schedule_vars
+ 160              		.cfi_endproc
+ 161              	.LFE0:
+ 163              		.align	2
+ 164              		.global	schedule_startDAGroot
+ 165              		.thumb
+ 166              		.thumb_func
+ 168              	schedule_startDAGroot:
+ 169              	.LFB1:
+  57:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** 
+  58:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** /**
+  59:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** \brief Starting the DAGroot schedule propagation.
+  60:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** */
+  61:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** void schedule_startDAGroot() {
+ 170              		.loc 1 61 0
+ 171              		.cfi_startproc
+ 172              		@ args = 0, pretend = 0, frame = 24
+ 173              		@ frame_needed = 1, uses_anonymous_args = 0
+ 174 00a0 80B5     		push	{r7, lr}
+ 175              		.cfi_def_cfa_offset 8
+ 176              		.cfi_offset 7, -8
+ 177              		.cfi_offset 14, -4
+ 178 00a2 88B0     		sub	sp, sp, #32
+ 179              		.cfi_def_cfa_offset 40
+ 180 00a4 02AF     		add	r7, sp, #8
+ 181              		.cfi_def_cfa 7, 32
+  62:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    slotOffset_t    start_slotOffset;
+  63:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    slotOffset_t    running_slotOffset;
+  64:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    open_addr_t     temp_neighbor;
+  65:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+  66:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    start_slotOffset = SCHEDULE_MINIMAL_6TISCH_SLOTOFFSET;
+ 182              		.loc 1 66 0
+ 183 00a6 0023     		movs	r3, #0
+ 184 00a8 BB82     		strh	r3, [r7, #20]	@ movhi
+  67:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    // set frame length, handle and number (default 1 by now)
+  68:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    if (schedule_vars.frameLength == 0) {
+ 185              		.loc 1 68 0
+ 186 00aa 164B     		ldr	r3, .L13
+ 187 00ac B3F80031 		ldrh	r3, [r3, #256]
+ 188 00b0 002B     		cmp	r3, #0
+ 189 00b2 02D1     		bne	.L10
+  69:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****        // slotframe length is not set, set it to default length
+  70:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****        schedule_setFrameLength(SLOTFRAME_LENGTH);
+ 190              		.loc 1 70 0
+ 191 00b4 0B20     		movs	r0, #11
+ 192 00b6 FFF7FEFF 		bl	schedule_setFrameLength
+ 193              	.L10:
+  71:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    } else {
+  72:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****        // slotframe elgnth is set, nothing to do here
+  73:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    }
+  74:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    schedule_setFrameHandle(SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE);
+ 194              		.loc 1 74 0
+ 195 00ba 0120     		movs	r0, #1
+ 196 00bc FFF7FEFF 		bl	schedule_setFrameHandle
+  75:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    schedule_setFrameNumber(SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_NUMBER);
+ 197              		.loc 1 75 0
+ 198 00c0 0120     		movs	r0, #1
+ 199 00c2 FFF7FEFF 		bl	schedule_setFrameNumber
+  76:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** 
+  77:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    // shared TXRX anycast slot(s)
+  78:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    memset(&temp_neighbor,0,sizeof(temp_neighbor));
+ 200              		.loc 1 78 0
+ 201 00c6 3B46     		mov	r3, r7
+ 202 00c8 1846     		mov	r0, r3
+ 203 00ca 0021     		movs	r1, #0
+ 204 00cc 1122     		movs	r2, #17
+ 205 00ce FFF7FEFF 		bl	memset
+  79:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    temp_neighbor.type             = ADDR_ANYCAST;
+ 206              		.loc 1 79 0
+ 207 00d2 0623     		movs	r3, #6
+ 208 00d4 3B70     		strb	r3, [r7]
+  80:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    for (running_slotOffset=start_slotOffset;running_slotOffset<start_slotOffset+SCHEDULE_MINIMAL_6T
+ 209              		.loc 1 80 0
+ 210 00d6 BB8A     		ldrh	r3, [r7, #20]	@ movhi
+ 211 00d8 FB82     		strh	r3, [r7, #22]	@ movhi
+ 212 00da 0BE0     		b	.L11
+ 213              	.L12:
+  81:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       schedule_addActiveSlot(
+ 214              		.loc 1 81 0 discriminator 3
+ 215 00dc FA8A     		ldrh	r2, [r7, #22]
+ 216 00de 3B46     		mov	r3, r7
+ 217 00e0 0093     		str	r3, [sp]
+ 218 00e2 1046     		mov	r0, r2
+ 219 00e4 0321     		movs	r1, #3
+ 220 00e6 0122     		movs	r2, #1
+ 221 00e8 0023     		movs	r3, #0
+ 222 00ea FFF7FEFF 		bl	schedule_addActiveSlot
+  80:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    for (running_slotOffset=start_slotOffset;running_slotOffset<start_slotOffset+SCHEDULE_MINIMAL_6T
+ 223              		.loc 1 80 0 discriminator 3
+ 224 00ee FB8A     		ldrh	r3, [r7, #22]
+ 225 00f0 0133     		adds	r3, r3, #1
+ 226 00f2 FB82     		strh	r3, [r7, #22]	@ movhi
+ 227              	.L11:
+  80:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    for (running_slotOffset=start_slotOffset;running_slotOffset<start_slotOffset+SCHEDULE_MINIMAL_6T
+ 228              		.loc 1 80 0 is_stmt 0 discriminator 1
+ 229 00f4 FA8A     		ldrh	r2, [r7, #22]
+ 230 00f6 BB8A     		ldrh	r3, [r7, #20]
+ 231 00f8 0133     		adds	r3, r3, #1
+ 232 00fa 9A42     		cmp	r2, r3
+ 233 00fc EEDB     		blt	.L12
+  82:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****          running_slotOffset,                 // slot offset
+  83:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****          CELLTYPE_TXRX,                      // type of slot
+  84:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****          TRUE,                               // shared?
+  85:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****          SCHEDULE_MINIMAL_6TISCH_CHANNELOFFSET,    // channel offset
+  86:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****          &temp_neighbor                      // neighbor
+  87:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       );
+  88:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    }
+  89:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** }
+ 234              		.loc 1 89 0 is_stmt 1
+ 235 00fe 1837     		adds	r7, r7, #24
+ 236              		.cfi_def_cfa_offset 8
+ 237 0100 BD46     		mov	sp, r7
+ 238              		.cfi_def_cfa_register 13
+ 239              		@ sp needed
+ 240 0102 80BD     		pop	{r7, pc}
+ 241              	.L14:
+ 242              		.align	2
+ 243              	.L13:
+ 244 0104 00000000 		.word	schedule_vars
+ 245              		.cfi_endproc
+ 246              	.LFE1:
+ 248              		.align	2
+ 249              		.global	debugPrint_schedule
+ 250              		.thumb
+ 251              		.thumb_func
+ 253              	debugPrint_schedule:
+ 254              	.LFB2:
+  90:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** 
+  91:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** /**
+  92:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** \brief Trigger this module to print status information, over serial.
+  93:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** 
+  94:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** debugPrint_* functions are used by the openserial module to continuously print
+  95:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** status information about several modules in the OpenWSN stack.
+  96:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** 
+  97:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** \returns TRUE if this function printed something, FALSE otherwise.
+  98:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** */
+  99:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** bool debugPrint_schedule() {
+ 255              		.loc 1 99 0
+ 256              		.cfi_startproc
+ 257              		@ args = 0, pretend = 0, frame = 32
+ 258              		@ frame_needed = 1, uses_anonymous_args = 0
+ 259 0108 B0B5     		push	{r4, r5, r7, lr}
+ 260              		.cfi_def_cfa_offset 16
+ 261              		.cfi_offset 4, -16
+ 262              		.cfi_offset 5, -12
+ 263              		.cfi_offset 7, -8
+ 264              		.cfi_offset 14, -4
+ 265 010a 88B0     		sub	sp, sp, #32
+ 266              		.cfi_def_cfa_offset 48
+ 267 010c 00AF     		add	r7, sp, #0
+ 268              		.cfi_def_cfa_register 7
+ 100:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    debugScheduleEntry_t temp;
+ 101:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 102:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    // increment the row just printed
+ 103:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    schedule_vars.debugPrintRow         = (schedule_vars.debugPrintRow+1)%schedule_vars.maxActiveSlo
+ 269              		.loc 1 103 0
+ 270 010e 4F4B     		ldr	r3, .L17
+ 271 0110 93F80831 		ldrb	r3, [r3, #264]	@ zero_extendqisi2
+ 272 0114 0133     		adds	r3, r3, #1
+ 273 0116 4D4A     		ldr	r2, .L17
+ 274 0118 B2F80221 		ldrh	r2, [r2, #258]
+ 275 011c 93FBF2F1 		sdiv	r1, r3, r2
+ 276 0120 02FB01F2 		mul	r2, r2, r1
+ 277 0124 9B1A     		subs	r3, r3, r2
+ 278 0126 DAB2     		uxtb	r2, r3
+ 279 0128 484B     		ldr	r3, .L17
+ 280 012a 83F80821 		strb	r2, [r3, #264]
+ 104:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 105:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    // gather status data
+ 106:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    temp.row                            = schedule_vars.debugPrintRow;
+ 281              		.loc 1 106 0
+ 282 012e 474B     		ldr	r3, .L17
+ 283 0130 93F80831 		ldrb	r3, [r3, #264]	@ zero_extendqisi2
+ 284 0134 3B70     		strb	r3, [r7]
+ 107:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    temp.slotOffset                     = \
+ 108:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].slotOffset;
+ 285              		.loc 1 108 0
+ 286 0136 454B     		ldr	r3, .L17
+ 287 0138 93F80831 		ldrb	r3, [r3, #264]	@ zero_extendqisi2
+ 288 013c 1946     		mov	r1, r3
+ 289 013e 434A     		ldr	r2, .L17
+ 290 0140 0B46     		mov	r3, r1
+ 291 0142 DB00     		lsls	r3, r3, #3
+ 292 0144 0B44     		add	r3, r3, r1
+ 293 0146 9B00     		lsls	r3, r3, #2
+ 294 0148 1344     		add	r3, r3, r2
+ 295 014a 1B88     		ldrh	r3, [r3]
+ 107:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    temp.slotOffset                     = \
+ 296              		.loc 1 107 0
+ 297 014c A7F80130 		strh	r3, [r7, #1]	@ unaligned
+ 109:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    temp.type                           = \
+ 110:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].type;
+ 298              		.loc 1 110 0
+ 299 0150 3E4B     		ldr	r3, .L17
+ 300 0152 93F80831 		ldrb	r3, [r3, #264]	@ zero_extendqisi2
+ 109:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    temp.type                           = \
+ 301              		.loc 1 109 0
+ 302 0156 1946     		mov	r1, r3
+ 303              		.loc 1 110 0
+ 304 0158 3C4A     		ldr	r2, .L17
+ 305 015a 0B46     		mov	r3, r1
+ 306 015c DB00     		lsls	r3, r3, #3
+ 307 015e 0B44     		add	r3, r3, r1
+ 308 0160 9B00     		lsls	r3, r3, #2
+ 309 0162 1344     		add	r3, r3, r2
+ 310 0164 9B78     		ldrb	r3, [r3, #2]	@ zero_extendqisi2
+ 109:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    temp.type                           = \
+ 311              		.loc 1 109 0
+ 312 0166 FB70     		strb	r3, [r7, #3]
+ 111:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    temp.shared                         = \
+ 112:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].shared;
+ 313              		.loc 1 112 0
+ 314 0168 384B     		ldr	r3, .L17
+ 315 016a 93F80831 		ldrb	r3, [r3, #264]	@ zero_extendqisi2
+ 316 016e 1946     		mov	r1, r3
+ 317 0170 364A     		ldr	r2, .L17
+ 318 0172 0B46     		mov	r3, r1
+ 319 0174 DB00     		lsls	r3, r3, #3
+ 320 0176 0B44     		add	r3, r3, r1
+ 321 0178 9B00     		lsls	r3, r3, #2
+ 322 017a 1344     		add	r3, r3, r2
+ 323 017c DB78     		ldrb	r3, [r3, #3]	@ zero_extendqisi2
+ 111:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    temp.shared                         = \
+ 324              		.loc 1 111 0
+ 325 017e 3B71     		strb	r3, [r7, #4]
+ 113:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    temp.channelOffset                  = \
+ 114:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].channelOffset;
+ 326              		.loc 1 114 0
+ 327 0180 324B     		ldr	r3, .L17
+ 328 0182 93F80831 		ldrb	r3, [r3, #264]	@ zero_extendqisi2
+ 329 0186 1946     		mov	r1, r3
+ 330 0188 304A     		ldr	r2, .L17
+ 331 018a 0B46     		mov	r3, r1
+ 332 018c DB00     		lsls	r3, r3, #3
+ 333 018e 0B44     		add	r3, r3, r1
+ 334 0190 9B00     		lsls	r3, r3, #2
+ 335 0192 1344     		add	r3, r3, r2
+ 336 0194 1B79     		ldrb	r3, [r3, #4]	@ zero_extendqisi2
+ 113:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    temp.channelOffset                  = \
+ 337              		.loc 1 113 0
+ 338 0196 7B71     		strb	r3, [r7, #5]
+ 115:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    memcpy(
+ 116:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       &temp.neighbor,
+ 117:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       &schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].neighbor,
+ 339              		.loc 1 117 0
+ 340 0198 2C4B     		ldr	r3, .L17
+ 341 019a 93F80831 		ldrb	r3, [r3, #264]	@ zero_extendqisi2
+ 342 019e 1A46     		mov	r2, r3
+ 343 01a0 1346     		mov	r3, r2
+ 344 01a2 DB00     		lsls	r3, r3, #3
+ 345 01a4 1344     		add	r3, r3, r2
+ 346 01a6 9B00     		lsls	r3, r3, #2
+ 347 01a8 284A     		ldr	r2, .L17
+ 348 01aa 1344     		add	r3, r3, r2
+ 349 01ac 5A1D     		adds	r2, r3, #5
+ 115:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    memcpy(
+ 350              		.loc 1 115 0
+ 351 01ae BB1D     		adds	r3, r7, #6
+ 352 01b0 1568     		ldr	r5, [r2]	@ unaligned
+ 353 01b2 5468     		ldr	r4, [r2, #4]	@ unaligned
+ 354 01b4 9068     		ldr	r0, [r2, #8]	@ unaligned
+ 355 01b6 D168     		ldr	r1, [r2, #12]	@ unaligned
+ 356 01b8 1D60     		str	r5, [r3]	@ unaligned
+ 357 01ba 5C60     		str	r4, [r3, #4]	@ unaligned
+ 358 01bc 9860     		str	r0, [r3, #8]	@ unaligned
+ 359 01be D960     		str	r1, [r3, #12]	@ unaligned
+ 360 01c0 127C     		ldrb	r2, [r2, #16]
+ 361 01c2 1A74     		strb	r2, [r3, #16]
+ 118:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       sizeof(open_addr_t)
+ 119:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    );
+ 120:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    temp.numRx                          = \
+ 121:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].numRx;
+ 362              		.loc 1 121 0
+ 363 01c4 214B     		ldr	r3, .L17
+ 364 01c6 93F80831 		ldrb	r3, [r3, #264]	@ zero_extendqisi2
+ 365 01ca 1946     		mov	r1, r3
+ 366 01cc 1F4A     		ldr	r2, .L17
+ 367 01ce 0B46     		mov	r3, r1
+ 368 01d0 DB00     		lsls	r3, r3, #3
+ 369 01d2 0B44     		add	r3, r3, r1
+ 370 01d4 9B00     		lsls	r3, r3, #2
+ 371 01d6 1344     		add	r3, r3, r2
+ 372 01d8 1033     		adds	r3, r3, #16
+ 373 01da 9B79     		ldrb	r3, [r3, #6]	@ zero_extendqisi2
+ 120:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].numRx;
+ 374              		.loc 1 120 0
+ 375 01dc FB75     		strb	r3, [r7, #23]
+ 122:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    temp.numTx                          = \
+ 123:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].numTx;
+ 376              		.loc 1 123 0
+ 377 01de 1B4B     		ldr	r3, .L17
+ 378 01e0 93F80831 		ldrb	r3, [r3, #264]	@ zero_extendqisi2
+ 379 01e4 1946     		mov	r1, r3
+ 380 01e6 194A     		ldr	r2, .L17
+ 381 01e8 0B46     		mov	r3, r1
+ 382 01ea DB00     		lsls	r3, r3, #3
+ 383 01ec 0B44     		add	r3, r3, r1
+ 384 01ee 9B00     		lsls	r3, r3, #2
+ 385 01f0 1344     		add	r3, r3, r2
+ 386 01f2 1033     		adds	r3, r3, #16
+ 387 01f4 DB79     		ldrb	r3, [r3, #7]	@ zero_extendqisi2
+ 122:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    temp.numTx                          = \
+ 388              		.loc 1 122 0
+ 389 01f6 3B76     		strb	r3, [r7, #24]
+ 124:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    temp.numTxACK                       = \
+ 125:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].numTxACK;
+ 390              		.loc 1 125 0
+ 391 01f8 144B     		ldr	r3, .L17
+ 392 01fa 93F80831 		ldrb	r3, [r3, #264]	@ zero_extendqisi2
+ 393 01fe 1946     		mov	r1, r3
+ 394 0200 124A     		ldr	r2, .L17
+ 395 0202 0B46     		mov	r3, r1
+ 396 0204 DB00     		lsls	r3, r3, #3
+ 397 0206 0B44     		add	r3, r3, r1
+ 398 0208 9B00     		lsls	r3, r3, #2
+ 399 020a 1344     		add	r3, r3, r2
+ 400 020c 1833     		adds	r3, r3, #24
+ 401 020e 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 124:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    temp.numTxACK                       = \
+ 402              		.loc 1 124 0
+ 403 0210 7B76     		strb	r3, [r7, #25]
+ 126:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    memcpy(
+ 127:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       &temp.lastUsedAsn,
+ 128:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       &schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].lastUsedAsn,
+ 404              		.loc 1 128 0
+ 405 0212 0E4B     		ldr	r3, .L17
+ 406 0214 93F80831 		ldrb	r3, [r3, #264]	@ zero_extendqisi2
+ 407 0218 1A46     		mov	r2, r3
+ 408 021a 1346     		mov	r3, r2
+ 409 021c DB00     		lsls	r3, r3, #3
+ 410 021e 1344     		add	r3, r3, r2
+ 411 0220 9B00     		lsls	r3, r3, #2
+ 412 0222 1833     		adds	r3, r3, #24
+ 413 0224 094A     		ldr	r2, .L17
+ 414 0226 1344     		add	r3, r3, r2
+ 415 0228 5A1C     		adds	r2, r3, #1
+ 126:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    memcpy(
+ 416              		.loc 1 126 0
+ 417 022a 07F11A03 		add	r3, r7, #26
+ 418 022e 1168     		ldr	r1, [r2]	@ unaligned
+ 419 0230 1960     		str	r1, [r3]	@ unaligned
+ 420 0232 1279     		ldrb	r2, [r2, #4]
+ 421 0234 1A71     		strb	r2, [r3, #4]
+ 129:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       sizeof(asn_t)
+ 130:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    );
+ 131:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 132:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    // send status data over serial port
+ 133:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    openserial_printStatus(
+ 422              		.loc 1 133 0
+ 423 0236 3B46     		mov	r3, r7
+ 424 0238 0620     		movs	r0, #6
+ 425 023a 1946     		mov	r1, r3
+ 426 023c 1F22     		movs	r2, #31
+ 427 023e FFF7FEFF 		bl	openserial_printStatus
+ 134:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       STATUS_SCHEDULE,
+ 135:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       (uint8_t*)&temp,
+ 136:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       sizeof(debugScheduleEntry_t)
+ 137:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    );
+ 138:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 139:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    return TRUE;
+ 428              		.loc 1 139 0
+ 429 0242 0123     		movs	r3, #1
+ 140:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** }
+ 430              		.loc 1 140 0
+ 431 0244 1846     		mov	r0, r3
+ 432 0246 2037     		adds	r7, r7, #32
+ 433              		.cfi_def_cfa_offset 16
+ 434 0248 BD46     		mov	sp, r7
+ 435              		.cfi_def_cfa_register 13
+ 436              		@ sp needed
+ 437 024a B0BD     		pop	{r4, r5, r7, pc}
+ 438              	.L18:
+ 439              		.align	2
+ 440              	.L17:
+ 441 024c 00000000 		.word	schedule_vars
+ 442              		.cfi_endproc
+ 443              	.LFE2:
+ 445              		.align	2
+ 446              		.global	debugPrint_backoff
+ 447              		.thumb
+ 448              		.thumb_func
+ 450              	debugPrint_backoff:
+ 451              	.LFB3:
+ 141:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** 
+ 142:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** /**
+ 143:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** \brief Trigger this module to print status information, over serial.
+ 144:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** 
+ 145:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** debugPrint_* functions are used by the openserial module to continuously print
+ 146:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** status information about several modules in the OpenWSN stack.
+ 147:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** 
+ 148:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** \returns TRUE if this function printed something, FALSE otherwise.
+ 149:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** */
+ 150:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** bool debugPrint_backoff() {
+ 452              		.loc 1 150 0
+ 453              		.cfi_startproc
+ 454              		@ args = 0, pretend = 0, frame = 8
+ 455              		@ frame_needed = 1, uses_anonymous_args = 0
+ 456 0250 80B5     		push	{r7, lr}
+ 457              		.cfi_def_cfa_offset 8
+ 458              		.cfi_offset 7, -8
+ 459              		.cfi_offset 14, -4
+ 460 0252 82B0     		sub	sp, sp, #8
+ 461              		.cfi_def_cfa_offset 16
+ 462 0254 00AF     		add	r7, sp, #0
+ 463              		.cfi_def_cfa_register 7
+ 151:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    uint8_t temp[2];
+ 152:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 153:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    // gather status data
+ 154:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    temp[0] = schedule_vars.backoffExponent;
+ 464              		.loc 1 154 0
+ 465 0256 094B     		ldr	r3, .L21
+ 466 0258 93F80631 		ldrb	r3, [r3, #262]	@ zero_extendqisi2
+ 467 025c 3B71     		strb	r3, [r7, #4]
+ 155:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    temp[1] = schedule_vars.backoff;
+ 468              		.loc 1 155 0
+ 469 025e 074B     		ldr	r3, .L21
+ 470 0260 93F80731 		ldrb	r3, [r3, #263]	@ zero_extendqisi2
+ 471 0264 7B71     		strb	r3, [r7, #5]
+ 156:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 157:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    // send status data over serial port
+ 158:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    openserial_printStatus(
+ 472              		.loc 1 158 0
+ 473 0266 3B1D     		adds	r3, r7, #4
+ 474 0268 0720     		movs	r0, #7
+ 475 026a 1946     		mov	r1, r3
+ 476 026c 0222     		movs	r2, #2
+ 477 026e FFF7FEFF 		bl	openserial_printStatus
+ 159:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       STATUS_BACKOFF,
+ 160:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       (uint8_t*)&temp,
+ 161:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       sizeof(temp)
+ 162:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    );
+ 163:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 164:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    return TRUE;
+ 478              		.loc 1 164 0
+ 479 0272 0123     		movs	r3, #1
+ 165:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** }
+ 480              		.loc 1 165 0
+ 481 0274 1846     		mov	r0, r3
+ 482 0276 0837     		adds	r7, r7, #8
+ 483              		.cfi_def_cfa_offset 8
+ 484 0278 BD46     		mov	sp, r7
+ 485              		.cfi_def_cfa_register 13
+ 486              		@ sp needed
+ 487 027a 80BD     		pop	{r7, pc}
+ 488              	.L22:
+ 489              		.align	2
+ 490              	.L21:
+ 491 027c 00000000 		.word	schedule_vars
+ 492              		.cfi_endproc
+ 493              	.LFE3:
+ 495              		.align	2
+ 496              		.global	schedule_setFrameLength
+ 497              		.thumb
+ 498              		.thumb_func
+ 500              	schedule_setFrameLength:
+ 501              	.LFB4:
+ 166:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** 
+ 167:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** //=== from 6top (writing the schedule)
+ 168:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** 
+ 169:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** /**
+ 170:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** \brief Set frame length.
+ 171:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** 
+ 172:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** \param newFrameLength The new frame length.
+ 173:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** */
+ 174:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** void schedule_setFrameLength(frameLength_t newFrameLength) {
+ 502              		.loc 1 174 0
+ 503              		.cfi_startproc
+ 504              		@ args = 0, pretend = 0, frame = 8
+ 505              		@ frame_needed = 1, uses_anonymous_args = 0
+ 506 0280 80B5     		push	{r7, lr}
+ 507              		.cfi_def_cfa_offset 8
+ 508              		.cfi_offset 7, -8
+ 509              		.cfi_offset 14, -4
+ 510 0282 82B0     		sub	sp, sp, #8
+ 511              		.cfi_def_cfa_offset 16
+ 512 0284 00AF     		add	r7, sp, #0
+ 513              		.cfi_def_cfa_register 7
+ 514 0286 0346     		mov	r3, r0
+ 515 0288 FB80     		strh	r3, [r7, #6]	@ movhi
+ 175:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 176:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    INTERRUPT_DECLARATION();
+ 177:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    DISABLE_INTERRUPTS();
+ 516              		.loc 1 177 0
+ 517 028a FFF7FEFF 		bl	IntMasterDisable
+ 178:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 179:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    schedule_vars.frameLength = newFrameLength;
+ 518              		.loc 1 179 0
+ 519 028e 084A     		ldr	r2, .L25
+ 520 0290 FB88     		ldrh	r3, [r7, #6]	@ movhi
+ 521 0292 A2F80031 		strh	r3, [r2, #256]	@ movhi
+ 180:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    if (newFrameLength <= MAXACTIVESLOTS) {
+ 522              		.loc 1 180 0
+ 523 0296 FB88     		ldrh	r3, [r7, #6]
+ 524 0298 072B     		cmp	r3, #7
+ 525 029a 03D8     		bhi	.L24
+ 181:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       schedule_vars.maxActiveSlots = newFrameLength;
+ 526              		.loc 1 181 0
+ 527 029c 044A     		ldr	r2, .L25
+ 528 029e FB88     		ldrh	r3, [r7, #6]	@ movhi
+ 529 02a0 A2F80231 		strh	r3, [r2, #258]	@ movhi
+ 530              	.L24:
+ 182:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    }
+ 183:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    ENABLE_INTERRUPTS();
+ 531              		.loc 1 183 0
+ 532 02a4 FFF7FEFF 		bl	IntMasterEnable
+ 184:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** }
+ 533              		.loc 1 184 0
+ 534 02a8 0837     		adds	r7, r7, #8
+ 535              		.cfi_def_cfa_offset 8
+ 536 02aa BD46     		mov	sp, r7
+ 537              		.cfi_def_cfa_register 13
+ 538              		@ sp needed
+ 539 02ac 80BD     		pop	{r7, pc}
+ 540              	.L26:
+ 541 02ae 00BF     		.align	2
+ 542              	.L25:
+ 543 02b0 00000000 		.word	schedule_vars
+ 544              		.cfi_endproc
+ 545              	.LFE4:
+ 547              		.align	2
+ 548              		.global	schedule_setFrameHandle
+ 549              		.thumb
+ 550              		.thumb_func
+ 552              	schedule_setFrameHandle:
+ 553              	.LFB5:
+ 185:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** 
+ 186:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** /**
+ 187:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** \brief Set frame handle.
+ 188:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** 
+ 189:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** \param frameHandle The new frame handle.
+ 190:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** */
+ 191:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** void schedule_setFrameHandle(uint8_t frameHandle) {
+ 554              		.loc 1 191 0
+ 555              		.cfi_startproc
+ 556              		@ args = 0, pretend = 0, frame = 8
+ 557              		@ frame_needed = 1, uses_anonymous_args = 0
+ 558 02b4 80B5     		push	{r7, lr}
+ 559              		.cfi_def_cfa_offset 8
+ 560              		.cfi_offset 7, -8
+ 561              		.cfi_offset 14, -4
+ 562 02b6 82B0     		sub	sp, sp, #8
+ 563              		.cfi_def_cfa_offset 16
+ 564 02b8 00AF     		add	r7, sp, #0
+ 565              		.cfi_def_cfa_register 7
+ 566 02ba 0346     		mov	r3, r0
+ 567 02bc FB71     		strb	r3, [r7, #7]
+ 192:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 193:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    INTERRUPT_DECLARATION();
+ 194:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    DISABLE_INTERRUPTS();
+ 568              		.loc 1 194 0
+ 569 02be FFF7FEFF 		bl	IntMasterDisable
+ 195:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 196:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    schedule_vars.frameHandle = frameHandle;
+ 570              		.loc 1 196 0
+ 571 02c2 044A     		ldr	r2, .L28
+ 572 02c4 FB79     		ldrb	r3, [r7, #7]
+ 573 02c6 82F80431 		strb	r3, [r2, #260]
+ 197:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 198:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    ENABLE_INTERRUPTS();
+ 574              		.loc 1 198 0
+ 575 02ca FFF7FEFF 		bl	IntMasterEnable
+ 199:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** }
+ 576              		.loc 1 199 0
+ 577 02ce 0837     		adds	r7, r7, #8
+ 578              		.cfi_def_cfa_offset 8
+ 579 02d0 BD46     		mov	sp, r7
+ 580              		.cfi_def_cfa_register 13
+ 581              		@ sp needed
+ 582 02d2 80BD     		pop	{r7, pc}
+ 583              	.L29:
+ 584              		.align	2
+ 585              	.L28:
+ 586 02d4 00000000 		.word	schedule_vars
+ 587              		.cfi_endproc
+ 588              	.LFE5:
+ 590              		.align	2
+ 591              		.global	schedule_setFrameNumber
+ 592              		.thumb
+ 593              		.thumb_func
+ 595              	schedule_setFrameNumber:
+ 596              	.LFB6:
+ 200:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** 
+ 201:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** /**
+ 202:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** \brief Set frame number.
+ 203:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** 
+ 204:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** \param frameNumber The new frame number.
+ 205:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** */
+ 206:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** void schedule_setFrameNumber(uint8_t frameNumber) {
+ 597              		.loc 1 206 0
+ 598              		.cfi_startproc
+ 599              		@ args = 0, pretend = 0, frame = 8
+ 600              		@ frame_needed = 1, uses_anonymous_args = 0
+ 601 02d8 80B5     		push	{r7, lr}
+ 602              		.cfi_def_cfa_offset 8
+ 603              		.cfi_offset 7, -8
+ 604              		.cfi_offset 14, -4
+ 605 02da 82B0     		sub	sp, sp, #8
+ 606              		.cfi_def_cfa_offset 16
+ 607 02dc 00AF     		add	r7, sp, #0
+ 608              		.cfi_def_cfa_register 7
+ 609 02de 0346     		mov	r3, r0
+ 610 02e0 FB71     		strb	r3, [r7, #7]
+ 207:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 208:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    INTERRUPT_DECLARATION();
+ 209:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    DISABLE_INTERRUPTS();
+ 611              		.loc 1 209 0
+ 612 02e2 FFF7FEFF 		bl	IntMasterDisable
+ 210:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 211:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    schedule_vars.frameNumber = frameNumber;
+ 613              		.loc 1 211 0
+ 614 02e6 044A     		ldr	r2, .L31
+ 615 02e8 FB79     		ldrb	r3, [r7, #7]
+ 616 02ea 82F80531 		strb	r3, [r2, #261]
+ 212:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 213:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    ENABLE_INTERRUPTS();
+ 617              		.loc 1 213 0
+ 618 02ee FFF7FEFF 		bl	IntMasterEnable
+ 214:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** }
+ 619              		.loc 1 214 0
+ 620 02f2 0837     		adds	r7, r7, #8
+ 621              		.cfi_def_cfa_offset 8
+ 622 02f4 BD46     		mov	sp, r7
+ 623              		.cfi_def_cfa_register 13
+ 624              		@ sp needed
+ 625 02f6 80BD     		pop	{r7, pc}
+ 626              	.L32:
+ 627              		.align	2
+ 628              	.L31:
+ 629 02f8 00000000 		.word	schedule_vars
+ 630              		.cfi_endproc
+ 631              	.LFE6:
+ 633              		.align	2
+ 634              		.global	schedule_getSlotInfo
+ 635              		.thumb
+ 636              		.thumb_func
+ 638              	schedule_getSlotInfo:
+ 639              	.LFB7:
+ 215:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** 
+ 216:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** /**
+ 217:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** \brief Get the information of a specific slot.
+ 218:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** 
+ 219:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** \param slotOffset
+ 220:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** \param neighbor
+ 221:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** \param info
+ 222:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** */
+ 223:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** void  schedule_getSlotInfo(
+ 224:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    slotOffset_t         slotOffset,
+ 225:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    open_addr_t*         neighbor,
+ 226:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    slotinfo_element_t*  info
+ 227:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** ){
+ 640              		.loc 1 227 0
+ 641              		.cfi_startproc
+ 642              		@ args = 0, pretend = 0, frame = 24
+ 643              		@ frame_needed = 1, uses_anonymous_args = 0
+ 644 02fc 80B5     		push	{r7, lr}
+ 645              		.cfi_def_cfa_offset 8
+ 646              		.cfi_offset 7, -8
+ 647              		.cfi_offset 14, -4
+ 648 02fe 86B0     		sub	sp, sp, #24
+ 649              		.cfi_def_cfa_offset 32
+ 650 0300 00AF     		add	r7, sp, #0
+ 651              		.cfi_def_cfa_register 7
+ 652 0302 0346     		mov	r3, r0
+ 653 0304 B960     		str	r1, [r7, #8]
+ 654 0306 7A60     		str	r2, [r7, #4]
+ 655 0308 FB81     		strh	r3, [r7, #14]	@ movhi
+ 228:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 229:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    scheduleEntry_t* slotContainer;
+ 230:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****   
+ 231:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    // find an empty schedule entry container
+ 232:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    slotContainer = &schedule_vars.scheduleBuf[0];
+ 656              		.loc 1 232 0
+ 657 030a 1D4B     		ldr	r3, .L38
+ 658 030c 7B61     		str	r3, [r7, #20]
+ 233:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    while (slotContainer<=&schedule_vars.scheduleBuf[schedule_vars.maxActiveSlots-1]) {
+ 659              		.loc 1 233 0
+ 660 030e 1DE0     		b	.L34
+ 661              	.L37:
+ 234:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****        //check that this entry for that neighbour and timeslot is not already scheduled.
+ 235:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****        if (packetfunctions_sameAddress(neighbor,&(slotContainer->neighbor))&& (slotContainer->slotO
+ 662              		.loc 1 235 0
+ 663 0310 7B69     		ldr	r3, [r7, #20]
+ 664 0312 0533     		adds	r3, r3, #5
+ 665 0314 B868     		ldr	r0, [r7, #8]
+ 666 0316 1946     		mov	r1, r3
+ 667 0318 FFF7FEFF 		bl	packetfunctions_sameAddress
+ 668 031c 0346     		mov	r3, r0
+ 669 031e 002B     		cmp	r3, #0
+ 670 0320 11D0     		beq	.L35
+ 671              		.loc 1 235 0 is_stmt 0 discriminator 1
+ 672 0322 7B69     		ldr	r3, [r7, #20]
+ 673 0324 1B88     		ldrh	r3, [r3]
+ 674 0326 FA89     		ldrh	r2, [r7, #14]
+ 675 0328 9A42     		cmp	r2, r3
+ 676 032a 0CD1     		bne	.L35
+ 236:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****                //it exists so this is an update.
+ 237:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****                info->link_type                 = slotContainer->type;
+ 677              		.loc 1 237 0 is_stmt 1
+ 678 032c 7B69     		ldr	r3, [r7, #20]
+ 679 032e 9A78     		ldrb	r2, [r3, #2]	@ zero_extendqisi2
+ 680 0330 7B68     		ldr	r3, [r7, #4]
+ 681 0332 1A72     		strb	r2, [r3, #8]
+ 238:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****                info->shared                    =slotContainer->shared;
+ 682              		.loc 1 238 0
+ 683 0334 7B69     		ldr	r3, [r7, #20]
+ 684 0336 DA78     		ldrb	r2, [r3, #3]	@ zero_extendqisi2
+ 685 0338 7B68     		ldr	r3, [r7, #4]
+ 686 033a 5A72     		strb	r2, [r3, #9]
+ 239:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****                info->channelOffset             = slotContainer->channelOffset;
+ 687              		.loc 1 239 0
+ 688 033c 7B69     		ldr	r3, [r7, #20]
+ 689 033e 1A79     		ldrb	r2, [r3, #4]	@ zero_extendqisi2
+ 690 0340 7B68     		ldr	r3, [r7, #4]
+ 691 0342 1A73     		strb	r2, [r3, #12]
+ 240:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****                return; //as this is an update. No need to re-insert as it is in the same position o
+ 692              		.loc 1 240 0
+ 693 0344 18E0     		b	.L33
+ 694              	.L35:
+ 241:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****         }
+ 242:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****         slotContainer++;
+ 695              		.loc 1 242 0
+ 696 0346 7B69     		ldr	r3, [r7, #20]
+ 697 0348 2433     		adds	r3, r3, #36
+ 698 034a 7B61     		str	r3, [r7, #20]
+ 699              	.L34:
+ 233:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****        //check that this entry for that neighbour and timeslot is not already scheduled.
+ 700              		.loc 1 233 0
+ 701 034c 0C4B     		ldr	r3, .L38
+ 702 034e B3F80231 		ldrh	r3, [r3, #258]
+ 703 0352 5A1E     		subs	r2, r3, #1
+ 704 0354 1346     		mov	r3, r2
+ 705 0356 DB00     		lsls	r3, r3, #3
+ 706 0358 1344     		add	r3, r3, r2
+ 707 035a 9B00     		lsls	r3, r3, #2
+ 708 035c 084A     		ldr	r2, .L38
+ 709 035e 1A44     		add	r2, r2, r3
+ 710 0360 7B69     		ldr	r3, [r7, #20]
+ 711 0362 9A42     		cmp	r2, r3
+ 712 0364 D4D2     		bcs	.L37
+ 243:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    }
+ 244:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    //return cell type off.
+ 245:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    info->link_type                 = CELLTYPE_OFF;
+ 713              		.loc 1 245 0
+ 714 0366 7B68     		ldr	r3, [r7, #4]
+ 715 0368 0022     		movs	r2, #0
+ 716 036a 1A72     		strb	r2, [r3, #8]
+ 246:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    info->shared                    = FALSE;
+ 717              		.loc 1 246 0
+ 718 036c 7B68     		ldr	r3, [r7, #4]
+ 719 036e 0022     		movs	r2, #0
+ 720 0370 5A72     		strb	r2, [r3, #9]
+ 247:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    info->channelOffset             = 0;//set to zero if not set.                          
+ 721              		.loc 1 247 0
+ 722 0372 7B68     		ldr	r3, [r7, #4]
+ 723 0374 0022     		movs	r2, #0
+ 724 0376 1A73     		strb	r2, [r3, #12]
+ 725              	.L33:
+ 248:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** }
+ 726              		.loc 1 248 0
+ 727 0378 1837     		adds	r7, r7, #24
+ 728              		.cfi_def_cfa_offset 8
+ 729 037a BD46     		mov	sp, r7
+ 730              		.cfi_def_cfa_register 13
+ 731              		@ sp needed
+ 732 037c 80BD     		pop	{r7, pc}
+ 733              	.L39:
+ 734 037e 00BF     		.align	2
+ 735              	.L38:
+ 736 0380 00000000 		.word	schedule_vars
+ 737              		.cfi_endproc
+ 738              	.LFE7:
+ 740              		.align	2
+ 741              		.global	schedule_getMaxActiveSlots
+ 742              		.thumb
+ 743              		.thumb_func
+ 745              	schedule_getMaxActiveSlots:
+ 746              	.LFB8:
+ 249:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** 
+ 250:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** /**
+ 251:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** \brief Get the maximum number of active slots.
+ 252:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** 
+ 253:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** \param[out] maximum number of active slots
+ 254:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** */
+ 255:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** uint16_t  schedule_getMaxActiveSlots() {
+ 747              		.loc 1 255 0
+ 748              		.cfi_startproc
+ 749              		@ args = 0, pretend = 0, frame = 0
+ 750              		@ frame_needed = 1, uses_anonymous_args = 0
+ 751              		@ link register save eliminated.
+ 752 0384 80B4     		push	{r7}
+ 753              		.cfi_def_cfa_offset 4
+ 754              		.cfi_offset 7, -4
+ 755 0386 00AF     		add	r7, sp, #0
+ 756              		.cfi_def_cfa_register 7
+ 256:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    return schedule_vars.maxActiveSlots;
+ 757              		.loc 1 256 0
+ 758 0388 034B     		ldr	r3, .L42
+ 759 038a B3F80231 		ldrh	r3, [r3, #258]
+ 257:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** }
+ 760              		.loc 1 257 0
+ 761 038e 1846     		mov	r0, r3
+ 762 0390 BD46     		mov	sp, r7
+ 763              		.cfi_def_cfa_register 13
+ 764              		@ sp needed
+ 765 0392 5DF8047B 		ldr	r7, [sp], #4
+ 766              		.cfi_restore 7
+ 767              		.cfi_def_cfa_offset 0
+ 768 0396 7047     		bx	lr
+ 769              	.L43:
+ 770              		.align	2
+ 771              	.L42:
+ 772 0398 00000000 		.word	schedule_vars
+ 773              		.cfi_endproc
+ 774              	.LFE8:
+ 776              		.align	2
+ 777              		.global	schedule_addActiveSlot
+ 778              		.thumb
+ 779              		.thumb_func
+ 781              	schedule_addActiveSlot:
+ 782              	.LFB9:
+ 258:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** 
+ 259:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** /**
+ 260:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** \brief Add a new active slot into the schedule.
+ 261:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** 
+ 262:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** \param slotOffset       The slotoffset of the new slot
+ 263:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** \param type             The type of the cell
+ 264:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** \param shared           Whether this cell is shared (TRUE) or not (FALSE).
+ 265:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** \param channelOffset    The channelOffset of the new slot
+ 266:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** \param neighbor         The neighbor associated with this cell (all 0's if
+ 267:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    none)
+ 268:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** */
+ 269:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** owerror_t schedule_addActiveSlot(
+ 270:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       slotOffset_t    slotOffset,
+ 271:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       cellType_t      type,
+ 272:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       bool            shared,
+ 273:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       channelOffset_t channelOffset,
+ 274:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       open_addr_t*    neighbor
+ 275:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    ) {
+ 783              		.loc 1 275 0
+ 784              		.cfi_startproc
+ 785              		@ args = 4, pretend = 0, frame = 24
+ 786              		@ frame_needed = 1, uses_anonymous_args = 0
+ 787 039c 90B5     		push	{r4, r7, lr}
+ 788              		.cfi_def_cfa_offset 12
+ 789              		.cfi_offset 4, -12
+ 790              		.cfi_offset 7, -8
+ 791              		.cfi_offset 14, -4
+ 792 039e 87B0     		sub	sp, sp, #28
+ 793              		.cfi_def_cfa_offset 40
+ 794 03a0 00AF     		add	r7, sp, #0
+ 795              		.cfi_def_cfa_register 7
+ 796 03a2 0446     		mov	r4, r0
+ 797 03a4 0846     		mov	r0, r1
+ 798 03a6 1146     		mov	r1, r2
+ 799 03a8 1A46     		mov	r2, r3
+ 800 03aa 2346     		mov	r3, r4	@ movhi
+ 801 03ac FB80     		strh	r3, [r7, #6]	@ movhi
+ 802 03ae 0346     		mov	r3, r0
+ 803 03b0 7B71     		strb	r3, [r7, #5]
+ 804 03b2 0B46     		mov	r3, r1
+ 805 03b4 3B71     		strb	r3, [r7, #4]
+ 806 03b6 1346     		mov	r3, r2
+ 807 03b8 FB70     		strb	r3, [r7, #3]
+ 276:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    scheduleEntry_t* slotContainer;
+ 277:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    scheduleEntry_t* previousSlotWalker;
+ 278:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    scheduleEntry_t* nextSlotWalker;
+ 279:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 280:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    INTERRUPT_DECLARATION();
+ 281:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    DISABLE_INTERRUPTS();
+ 808              		.loc 1 281 0
+ 809 03ba FFF7FEFF 		bl	IntMasterDisable
+ 282:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 283:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    // find an empty schedule entry container
+ 284:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    slotContainer = &schedule_vars.scheduleBuf[0];
+ 810              		.loc 1 284 0
+ 811 03be 444B     		ldr	r3, .L57
+ 812 03c0 7B61     		str	r3, [r7, #20]
+ 285:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    while (
+ 813              		.loc 1 285 0
+ 814 03c2 02E0     		b	.L45
+ 815              	.L47:
+ 286:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****          slotContainer->type!=CELLTYPE_OFF &&
+ 287:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****          slotContainer<=&schedule_vars.scheduleBuf[schedule_vars.maxActiveSlots-1]
+ 288:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       ) {
+ 289:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       slotContainer++;
+ 816              		.loc 1 289 0
+ 817 03c4 7B69     		ldr	r3, [r7, #20]
+ 818 03c6 2433     		adds	r3, r3, #36
+ 819 03c8 7B61     		str	r3, [r7, #20]
+ 820              	.L45:
+ 286:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****          slotContainer->type!=CELLTYPE_OFF &&
+ 821              		.loc 1 286 0
+ 822 03ca 7B69     		ldr	r3, [r7, #20]
+ 823 03cc 9B78     		ldrb	r3, [r3, #2]	@ zero_extendqisi2
+ 285:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    while (
+ 824              		.loc 1 285 0
+ 825 03ce 002B     		cmp	r3, #0
+ 826 03d0 0CD0     		beq	.L46
+ 287:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       ) {
+ 827              		.loc 1 287 0
+ 828 03d2 3F4B     		ldr	r3, .L57
+ 829 03d4 B3F80231 		ldrh	r3, [r3, #258]
+ 830 03d8 5A1E     		subs	r2, r3, #1
+ 831 03da 1346     		mov	r3, r2
+ 832 03dc DB00     		lsls	r3, r3, #3
+ 833 03de 1344     		add	r3, r3, r2
+ 834 03e0 9B00     		lsls	r3, r3, #2
+ 835 03e2 3B4A     		ldr	r2, .L57
+ 836 03e4 1A44     		add	r2, r2, r3
+ 286:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****          slotContainer->type!=CELLTYPE_OFF &&
+ 837              		.loc 1 286 0
+ 838 03e6 7B69     		ldr	r3, [r7, #20]
+ 839 03e8 9A42     		cmp	r2, r3
+ 840 03ea EBD2     		bcs	.L47
+ 841              	.L46:
+ 290:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    }
+ 291:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 292:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    // abort it schedule overflow
+ 293:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    if (slotContainer>&schedule_vars.scheduleBuf[schedule_vars.maxActiveSlots-1]) {
+ 842              		.loc 1 293 0
+ 843 03ec 384B     		ldr	r3, .L57
+ 844 03ee B3F80231 		ldrh	r3, [r3, #258]
+ 845 03f2 5A1E     		subs	r2, r3, #1
+ 846 03f4 1346     		mov	r3, r2
+ 847 03f6 DB00     		lsls	r3, r3, #3
+ 848 03f8 1344     		add	r3, r3, r2
+ 849 03fa 9B00     		lsls	r3, r3, #2
+ 850 03fc 344A     		ldr	r2, .L57
+ 851 03fe 1A44     		add	r2, r2, r3
+ 852 0400 7B69     		ldr	r3, [r7, #20]
+ 853 0402 9A42     		cmp	r2, r3
+ 854 0404 09D2     		bcs	.L48
+ 294:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       ENABLE_INTERRUPTS();
+ 855              		.loc 1 294 0
+ 856 0406 FFF7FEFF 		bl	IntMasterEnable
+ 295:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       openserial_printCritical(
+ 857              		.loc 1 295 0
+ 858 040a 0E20     		movs	r0, #14
+ 859 040c 1721     		movs	r1, #23
+ 860 040e 0022     		movs	r2, #0
+ 861 0410 0023     		movs	r3, #0
+ 862 0412 FFF7FEFF 		bl	openserial_printCritical
+ 296:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****          COMPONENT_SCHEDULE,ERR_SCHEDULE_OVERFLOWN,
+ 297:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****          (errorparameter_t)0,
+ 298:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****          (errorparameter_t)0
+ 299:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       );
+ 300:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       return E_FAIL;
+ 863              		.loc 1 300 0
+ 864 0416 0123     		movs	r3, #1
+ 865 0418 56E0     		b	.L49
+ 866              	.L48:
+ 301:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    }
+ 302:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 303:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    // fill that schedule entry with parameters passed
+ 304:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    slotContainer->slotOffset                = slotOffset;
+ 867              		.loc 1 304 0
+ 868 041a 7B69     		ldr	r3, [r7, #20]
+ 869 041c FA88     		ldrh	r2, [r7, #6]	@ movhi
+ 870 041e 1A80     		strh	r2, [r3]	@ movhi
+ 305:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    slotContainer->type                      = type;
+ 871              		.loc 1 305 0
+ 872 0420 7B69     		ldr	r3, [r7, #20]
+ 873 0422 7A79     		ldrb	r2, [r7, #5]
+ 874 0424 9A70     		strb	r2, [r3, #2]
+ 306:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    slotContainer->shared                    = shared;
+ 875              		.loc 1 306 0
+ 876 0426 7B69     		ldr	r3, [r7, #20]
+ 877 0428 3A79     		ldrb	r2, [r7, #4]
+ 878 042a DA70     		strb	r2, [r3, #3]
+ 307:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    slotContainer->channelOffset             = channelOffset;
+ 879              		.loc 1 307 0
+ 880 042c 7B69     		ldr	r3, [r7, #20]
+ 881 042e FA78     		ldrb	r2, [r7, #3]
+ 882 0430 1A71     		strb	r2, [r3, #4]
+ 308:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    memcpy(&slotContainer->neighbor,neighbor,sizeof(open_addr_t));
+ 883              		.loc 1 308 0
+ 884 0432 7B69     		ldr	r3, [r7, #20]
+ 885 0434 0533     		adds	r3, r3, #5
+ 886 0436 1846     		mov	r0, r3
+ 887 0438 B96A     		ldr	r1, [r7, #40]
+ 888 043a 1122     		movs	r2, #17
+ 889 043c FFF7FEFF 		bl	memcpy
+ 309:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 310:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    // insert in circular list
+ 311:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    if (schedule_vars.currentScheduleEntry==NULL) {
+ 890              		.loc 1 311 0
+ 891 0440 234B     		ldr	r3, .L57
+ 892 0442 D3F8FC30 		ldr	r3, [r3, #252]
+ 893 0446 002B     		cmp	r3, #0
+ 894 0448 07D1     		bne	.L50
+ 312:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       // this is the first active slot added
+ 313:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       
+ 314:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       // the next slot of this slot is this slot
+ 315:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       slotContainer->next                   = slotContainer;
+ 895              		.loc 1 315 0
+ 896 044a 7B69     		ldr	r3, [r7, #20]
+ 897 044c 7A69     		ldr	r2, [r7, #20]
+ 898 044e 1A62     		str	r2, [r3, #32]
+ 316:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       
+ 317:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       // current slot points to this slot
+ 318:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       schedule_vars.currentScheduleEntry    = slotContainer;
+ 899              		.loc 1 318 0
+ 900 0450 1F4A     		ldr	r2, .L57
+ 901 0452 7B69     		ldr	r3, [r7, #20]
+ 902 0454 C2F8FC30 		str	r3, [r2, #252]
+ 903 0458 33E0     		b	.L51
+ 904              	.L50:
+ 319:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    } else  {
+ 320:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       // this is NOT the first active slot added
+ 321:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       
+ 322:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       // find position in schedule
+ 323:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       previousSlotWalker                    = schedule_vars.currentScheduleEntry;
+ 905              		.loc 1 323 0
+ 906 045a 1D4B     		ldr	r3, .L57
+ 907 045c D3F8FC30 		ldr	r3, [r3, #252]
+ 908 0460 3B61     		str	r3, [r7, #16]
+ 909              	.L56:
+ 324:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       while (1) {
+ 325:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****          nextSlotWalker                     = previousSlotWalker->next;
+ 910              		.loc 1 325 0
+ 911 0462 3B69     		ldr	r3, [r7, #16]
+ 912 0464 1B6A     		ldr	r3, [r3, #32]
+ 913 0466 FB60     		str	r3, [r7, #12]
+ 326:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****          if (
+ 327:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****                (
+ 328:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****                      (previousSlotWalker->slotOffset <  slotContainer->slotOffset) &&
+ 914              		.loc 1 328 0
+ 915 0468 3B69     		ldr	r3, [r7, #16]
+ 916 046a 1A88     		ldrh	r2, [r3]
+ 917 046c 7B69     		ldr	r3, [r7, #20]
+ 918 046e 1B88     		ldrh	r3, [r3]
+ 326:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****          if (
+ 919              		.loc 1 326 0
+ 920 0470 9A42     		cmp	r2, r3
+ 921 0472 05D2     		bcs	.L52
+ 329:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****                      (slotContainer->slotOffset <  nextSlotWalker->slotOffset)
+ 922              		.loc 1 329 0
+ 923 0474 7B69     		ldr	r3, [r7, #20]
+ 924 0476 1A88     		ldrh	r2, [r3]
+ 925 0478 FB68     		ldr	r3, [r7, #12]
+ 926 047a 1B88     		ldrh	r3, [r3]
+ 328:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****                      (slotContainer->slotOffset <  nextSlotWalker->slotOffset)
+ 927              		.loc 1 328 0
+ 928 047c 9A42     		cmp	r2, r3
+ 929 047e 1AD3     		bcc	.L53
+ 930              	.L52:
+ 330:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****                )
+ 331:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****                ||
+ 332:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****                (
+ 333:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****                      (previousSlotWalker->slotOffset <  slotContainer->slotOffset) &&
+ 931              		.loc 1 333 0
+ 932 0480 3B69     		ldr	r3, [r7, #16]
+ 933 0482 1A88     		ldrh	r2, [r3]
+ 934 0484 7B69     		ldr	r3, [r7, #20]
+ 935 0486 1B88     		ldrh	r3, [r3]
+ 331:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****                (
+ 936              		.loc 1 331 0
+ 937 0488 9A42     		cmp	r2, r3
+ 938 048a 05D2     		bcs	.L54
+ 334:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****                      (nextSlotWalker->slotOffset <= previousSlotWalker->slotOffset)
+ 939              		.loc 1 334 0
+ 940 048c FB68     		ldr	r3, [r7, #12]
+ 941 048e 1A88     		ldrh	r2, [r3]
+ 942 0490 3B69     		ldr	r3, [r7, #16]
+ 943 0492 1B88     		ldrh	r3, [r3]
+ 333:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****                      (nextSlotWalker->slotOffset <= previousSlotWalker->slotOffset)
+ 944              		.loc 1 333 0
+ 945 0494 9A42     		cmp	r2, r3
+ 946 0496 0ED9     		bls	.L53
+ 947              	.L54:
+ 335:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****                )
+ 336:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****                ||
+ 337:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****                (
+ 338:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****                      (slotContainer->slotOffset <  nextSlotWalker->slotOffset) &&
+ 948              		.loc 1 338 0
+ 949 0498 7B69     		ldr	r3, [r7, #20]
+ 950 049a 1A88     		ldrh	r2, [r3]
+ 951 049c FB68     		ldr	r3, [r7, #12]
+ 952 049e 1B88     		ldrh	r3, [r3]
+ 336:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****                (
+ 953              		.loc 1 336 0
+ 954 04a0 9A42     		cmp	r2, r3
+ 955 04a2 05D2     		bcs	.L55
+ 339:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****                      (nextSlotWalker->slotOffset <= previousSlotWalker->slotOffset)
+ 956              		.loc 1 339 0
+ 957 04a4 FB68     		ldr	r3, [r7, #12]
+ 958 04a6 1A88     		ldrh	r2, [r3]
+ 959 04a8 3B69     		ldr	r3, [r7, #16]
+ 960 04aa 1B88     		ldrh	r3, [r3]
+ 338:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****                      (nextSlotWalker->slotOffset <= previousSlotWalker->slotOffset)
+ 961              		.loc 1 338 0
+ 962 04ac 9A42     		cmp	r2, r3
+ 963 04ae 02D9     		bls	.L53
+ 964              	.L55:
+ 340:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****                )
+ 341:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****          ) {
+ 342:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****             break;
+ 343:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****          }
+ 344:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****          previousSlotWalker                 = nextSlotWalker;
+ 965              		.loc 1 344 0
+ 966 04b0 FB68     		ldr	r3, [r7, #12]
+ 967 04b2 3B61     		str	r3, [r7, #16]
+ 345:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       }
+ 968              		.loc 1 345 0
+ 969 04b4 D5E7     		b	.L56
+ 970              	.L53:
+ 346:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       // insert between previousSlotWalker and nextSlotWalker
+ 347:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       previousSlotWalker->next              = slotContainer;
+ 971              		.loc 1 347 0
+ 972 04b6 3B69     		ldr	r3, [r7, #16]
+ 973 04b8 7A69     		ldr	r2, [r7, #20]
+ 974 04ba 1A62     		str	r2, [r3, #32]
+ 348:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       slotContainer->next                   = nextSlotWalker;
+ 975              		.loc 1 348 0
+ 976 04bc 7B69     		ldr	r3, [r7, #20]
+ 977 04be FA68     		ldr	r2, [r7, #12]
+ 978 04c0 1A62     		str	r2, [r3, #32]
+ 979              	.L51:
+ 349:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    }
+ 350:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 351:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    ENABLE_INTERRUPTS();
+ 980              		.loc 1 351 0
+ 981 04c2 FFF7FEFF 		bl	IntMasterEnable
+ 352:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    return E_SUCCESS;
+ 982              		.loc 1 352 0
+ 983 04c6 0023     		movs	r3, #0
+ 984              	.L49:
+ 353:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** }
+ 985              		.loc 1 353 0
+ 986 04c8 1846     		mov	r0, r3
+ 987 04ca 1C37     		adds	r7, r7, #28
+ 988              		.cfi_def_cfa_offset 12
+ 989 04cc BD46     		mov	sp, r7
+ 990              		.cfi_def_cfa_register 13
+ 991              		@ sp needed
+ 992 04ce 90BD     		pop	{r4, r7, pc}
+ 993              	.L58:
+ 994              		.align	2
+ 995              	.L57:
+ 996 04d0 00000000 		.word	schedule_vars
+ 997              		.cfi_endproc
+ 998              	.LFE9:
+ 1000              		.align	2
+ 1001              		.global	schedule_removeActiveSlot
+ 1002              		.thumb
+ 1003              		.thumb_func
+ 1005              	schedule_removeActiveSlot:
+ 1006              	.LFB10:
+ 354:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** 
+ 355:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** /**
+ 356:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** \brief Remove an active slot from the schedule.
+ 357:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** 
+ 358:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** \param slotOffset       The slotoffset of the slot to remove.
+ 359:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** \param neighbor         The neighbor associated with this cell (all 0's if
+ 360:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    none)
+ 361:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** */
+ 362:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** owerror_t schedule_removeActiveSlot(slotOffset_t slotOffset, open_addr_t* neighbor) {
+ 1007              		.loc 1 362 0
+ 1008              		.cfi_startproc
+ 1009              		@ args = 0, pretend = 0, frame = 16
+ 1010              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1011 04d4 80B5     		push	{r7, lr}
+ 1012              		.cfi_def_cfa_offset 8
+ 1013              		.cfi_offset 7, -8
+ 1014              		.cfi_offset 14, -4
+ 1015 04d6 84B0     		sub	sp, sp, #16
+ 1016              		.cfi_def_cfa_offset 24
+ 1017 04d8 00AF     		add	r7, sp, #0
+ 1018              		.cfi_def_cfa_register 7
+ 1019 04da 0346     		mov	r3, r0
+ 1020 04dc 3960     		str	r1, [r7]
+ 1021 04de FB80     		strh	r3, [r7, #6]	@ movhi
+ 363:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    scheduleEntry_t* slotContainer;
+ 364:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    scheduleEntry_t* previousSlotWalker;
+ 365:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 366:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    INTERRUPT_DECLARATION();
+ 367:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    DISABLE_INTERRUPTS();
+ 1022              		.loc 1 367 0
+ 1023 04e0 FFF7FEFF 		bl	IntMasterDisable
+ 368:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 369:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    // find the schedule entry
+ 370:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    slotContainer = &schedule_vars.scheduleBuf[0];
+ 1024              		.loc 1 370 0
+ 1025 04e4 364B     		ldr	r3, .L72
+ 1026 04e6 FB60     		str	r3, [r7, #12]
+ 371:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    while (slotContainer<=&schedule_vars.scheduleBuf[schedule_vars.maxActiveSlots-1]) {
+ 1027              		.loc 1 371 0
+ 1028 04e8 11E0     		b	.L60
+ 1029              	.L63:
+ 372:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       if (
+ 373:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****             slotContainer->slotOffset==slotOffset
+ 1030              		.loc 1 373 0
+ 1031 04ea FB68     		ldr	r3, [r7, #12]
+ 1032 04ec 1B88     		ldrh	r3, [r3]
+ 372:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       if (
+ 1033              		.loc 1 372 0
+ 1034 04ee FA88     		ldrh	r2, [r7, #6]
+ 1035 04f0 9A42     		cmp	r2, r3
+ 1036 04f2 09D1     		bne	.L61
+ 374:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****             &&
+ 375:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****             packetfunctions_sameAddress(neighbor,&(slotContainer->neighbor))
+ 1037              		.loc 1 375 0
+ 1038 04f4 FB68     		ldr	r3, [r7, #12]
+ 1039 04f6 0533     		adds	r3, r3, #5
+ 1040 04f8 3868     		ldr	r0, [r7]
+ 1041 04fa 1946     		mov	r1, r3
+ 1042 04fc FFF7FEFF 		bl	packetfunctions_sameAddress
+ 1043 0500 0346     		mov	r3, r0
+ 374:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****             &&
+ 1044              		.loc 1 374 0
+ 1045 0502 002B     		cmp	r3, #0
+ 1046 0504 00D0     		beq	.L61
+ 376:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****             ){
+ 377:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****          break;
+ 1047              		.loc 1 377 0
+ 1048 0506 0FE0     		b	.L62
+ 1049              	.L61:
+ 378:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       }
+ 379:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       slotContainer++;
+ 1050              		.loc 1 379 0
+ 1051 0508 FB68     		ldr	r3, [r7, #12]
+ 1052 050a 2433     		adds	r3, r3, #36
+ 1053 050c FB60     		str	r3, [r7, #12]
+ 1054              	.L60:
+ 371:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       if (
+ 1055              		.loc 1 371 0
+ 1056 050e 2C4B     		ldr	r3, .L72
+ 1057 0510 B3F80231 		ldrh	r3, [r3, #258]
+ 1058 0514 5A1E     		subs	r2, r3, #1
+ 1059 0516 1346     		mov	r3, r2
+ 1060 0518 DB00     		lsls	r3, r3, #3
+ 1061 051a 1344     		add	r3, r3, r2
+ 1062 051c 9B00     		lsls	r3, r3, #2
+ 1063 051e 284A     		ldr	r2, .L72
+ 1064 0520 1A44     		add	r2, r2, r3
+ 1065 0522 FB68     		ldr	r3, [r7, #12]
+ 1066 0524 9A42     		cmp	r2, r3
+ 1067 0526 E0D2     		bcs	.L63
+ 1068              	.L62:
+ 380:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    }
+ 381:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 382:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    // abort it could not find
+ 383:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    if (slotContainer>&schedule_vars.scheduleBuf[schedule_vars.maxActiveSlots-1]) {
+ 1069              		.loc 1 383 0
+ 1070 0528 254B     		ldr	r3, .L72
+ 1071 052a B3F80231 		ldrh	r3, [r3, #258]
+ 1072 052e 5A1E     		subs	r2, r3, #1
+ 1073 0530 1346     		mov	r3, r2
+ 1074 0532 DB00     		lsls	r3, r3, #3
+ 1075 0534 1344     		add	r3, r3, r2
+ 1076 0536 9B00     		lsls	r3, r3, #2
+ 1077 0538 214A     		ldr	r2, .L72
+ 1078 053a 1A44     		add	r2, r2, r3
+ 1079 053c FB68     		ldr	r3, [r7, #12]
+ 1080 053e 9A42     		cmp	r2, r3
+ 1081 0540 09D2     		bcs	.L64
+ 384:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       ENABLE_INTERRUPTS();
+ 1082              		.loc 1 384 0
+ 1083 0542 FFF7FEFF 		bl	IntMasterEnable
+ 385:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       openserial_printCritical(
+ 1084              		.loc 1 385 0
+ 1085 0546 0E20     		movs	r0, #14
+ 1086 0548 2E21     		movs	r1, #46
+ 1087 054a 0022     		movs	r2, #0
+ 1088 054c 0023     		movs	r3, #0
+ 1089 054e FFF7FEFF 		bl	openserial_printCritical
+ 386:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****          COMPONENT_SCHEDULE,ERR_FREEING_ERROR,
+ 387:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****          (errorparameter_t)0,
+ 388:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****          (errorparameter_t)0
+ 389:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       );
+ 390:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       return E_FAIL;
+ 1090              		.loc 1 390 0
+ 1091 0552 0123     		movs	r3, #1
+ 1092 0554 30E0     		b	.L65
+ 1093              	.L64:
+ 391:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    }
+ 392:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 393:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    // remove from linked list
+ 394:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    if (slotContainer->next==slotContainer) {
+ 1094              		.loc 1 394 0
+ 1095 0556 FB68     		ldr	r3, [r7, #12]
+ 1096 0558 1A6A     		ldr	r2, [r3, #32]
+ 1097 055a FB68     		ldr	r3, [r7, #12]
+ 1098 055c 9A42     		cmp	r2, r3
+ 1099 055e 07D1     		bne	.L66
+ 395:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       // this is the last active slot
+ 396:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       
+ 397:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       // the next slot of this slot is NULL
+ 398:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       slotContainer->next                   = NULL;
+ 1100              		.loc 1 398 0
+ 1101 0560 FB68     		ldr	r3, [r7, #12]
+ 1102 0562 0022     		movs	r2, #0
+ 1103 0564 1A62     		str	r2, [r3, #32]
+ 399:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       
+ 400:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       // current slot points to this slot
+ 401:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       schedule_vars.currentScheduleEntry    = NULL;
+ 1104              		.loc 1 401 0
+ 1105 0566 164B     		ldr	r3, .L72
+ 1106 0568 0022     		movs	r2, #0
+ 1107 056a C3F8FC20 		str	r2, [r3, #252]
+ 1108 056e 1DE0     		b	.L67
+ 1109              	.L66:
+ 402:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    } else  {
+ 403:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       // this is NOT the last active slot
+ 404:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       
+ 405:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       // find the previous in the schedule
+ 406:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       previousSlotWalker                    = schedule_vars.currentScheduleEntry;
+ 1110              		.loc 1 406 0
+ 1111 0570 134B     		ldr	r3, .L72
+ 1112 0572 D3F8FC30 		ldr	r3, [r3, #252]
+ 1113 0576 BB60     		str	r3, [r7, #8]
+ 1114              	.L70:
+ 407:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       
+ 408:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       while (1) {
+ 409:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****          if (previousSlotWalker->next==slotContainer){
+ 1115              		.loc 1 409 0
+ 1116 0578 BB68     		ldr	r3, [r7, #8]
+ 1117 057a 1A6A     		ldr	r2, [r3, #32]
+ 1118 057c FB68     		ldr	r3, [r7, #12]
+ 1119 057e 9A42     		cmp	r2, r3
+ 1120 0580 0BD1     		bne	.L68
+ 410:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****             break;
+ 1121              		.loc 1 410 0
+ 1122 0582 00BF     		nop
+ 411:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****          }
+ 412:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****          previousSlotWalker                 = previousSlotWalker->next;
+ 413:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       }
+ 414:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       
+ 415:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       // remove this element from the linked list, i.e. have the previous slot
+ 416:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       // "jump" to slotContainer's next
+ 417:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       previousSlotWalker->next              = slotContainer->next;
+ 1123              		.loc 1 417 0
+ 1124 0584 FB68     		ldr	r3, [r7, #12]
+ 1125 0586 1A6A     		ldr	r2, [r3, #32]
+ 1126 0588 BB68     		ldr	r3, [r7, #8]
+ 1127 058a 1A62     		str	r2, [r3, #32]
+ 418:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       
+ 419:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       // update current slot if points to slot I just removed
+ 420:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       if (schedule_vars.currentScheduleEntry==slotContainer) {
+ 1128              		.loc 1 420 0
+ 1129 058c 0C4B     		ldr	r3, .L72
+ 1130 058e D3F8FC20 		ldr	r2, [r3, #252]
+ 1131 0592 FB68     		ldr	r3, [r7, #12]
+ 1132 0594 9A42     		cmp	r2, r3
+ 1133 0596 09D1     		bne	.L67
+ 1134 0598 03E0     		b	.L71
+ 1135              	.L68:
+ 412:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       }
+ 1136              		.loc 1 412 0
+ 1137 059a BB68     		ldr	r3, [r7, #8]
+ 1138 059c 1B6A     		ldr	r3, [r3, #32]
+ 1139 059e BB60     		str	r3, [r7, #8]
+ 413:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       
+ 1140              		.loc 1 413 0
+ 1141 05a0 EAE7     		b	.L70
+ 1142              	.L71:
+ 421:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****          schedule_vars.currentScheduleEntry = slotContainer->next;
+ 1143              		.loc 1 421 0
+ 1144 05a2 FB68     		ldr	r3, [r7, #12]
+ 1145 05a4 1B6A     		ldr	r3, [r3, #32]
+ 1146 05a6 064A     		ldr	r2, .L72
+ 1147 05a8 C2F8FC30 		str	r3, [r2, #252]
+ 1148              	.L67:
+ 422:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       }
+ 423:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    }
+ 424:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 425:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    // reset removed schedule entry
+ 426:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    schedule_resetEntry(slotContainer);
+ 1149              		.loc 1 426 0
+ 1150 05ac F868     		ldr	r0, [r7, #12]
+ 1151 05ae FFF7FEFF 		bl	schedule_resetEntry
+ 427:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 428:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    ENABLE_INTERRUPTS();
+ 1152              		.loc 1 428 0
+ 1153 05b2 FFF7FEFF 		bl	IntMasterEnable
+ 429:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 430:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    return E_SUCCESS;
+ 1154              		.loc 1 430 0
+ 1155 05b6 0023     		movs	r3, #0
+ 1156              	.L65:
+ 431:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** }
+ 1157              		.loc 1 431 0
+ 1158 05b8 1846     		mov	r0, r3
+ 1159 05ba 1037     		adds	r7, r7, #16
+ 1160              		.cfi_def_cfa_offset 8
+ 1161 05bc BD46     		mov	sp, r7
+ 1162              		.cfi_def_cfa_register 13
+ 1163              		@ sp needed
+ 1164 05be 80BD     		pop	{r7, pc}
+ 1165              	.L73:
+ 1166              		.align	2
+ 1167              	.L72:
+ 1168 05c0 00000000 		.word	schedule_vars
+ 1169              		.cfi_endproc
+ 1170              	.LFE10:
+ 1172              		.align	2
+ 1173              		.global	schedule_isSlotOffsetAvailable
+ 1174              		.thumb
+ 1175              		.thumb_func
+ 1177              	schedule_isSlotOffsetAvailable:
+ 1178              	.LFB11:
+ 432:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** 
+ 433:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** bool schedule_isSlotOffsetAvailable(uint16_t slotOffset){
+ 1179              		.loc 1 433 0
+ 1180              		.cfi_startproc
+ 1181              		@ args = 0, pretend = 0, frame = 16
+ 1182              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1183 05c4 80B5     		push	{r7, lr}
+ 1184              		.cfi_def_cfa_offset 8
+ 1185              		.cfi_offset 7, -8
+ 1186              		.cfi_offset 14, -4
+ 1187 05c6 84B0     		sub	sp, sp, #16
+ 1188              		.cfi_def_cfa_offset 24
+ 1189 05c8 00AF     		add	r7, sp, #0
+ 1190              		.cfi_def_cfa_register 7
+ 1191 05ca 0346     		mov	r3, r0
+ 1192 05cc FB80     		strh	r3, [r7, #6]	@ movhi
+ 434:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 435:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    scheduleEntry_t* scheduleWalker;
+ 436:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 437:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    INTERRUPT_DECLARATION();
+ 438:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    DISABLE_INTERRUPTS();
+ 1193              		.loc 1 438 0
+ 1194 05ce FFF7FEFF 		bl	IntMasterDisable
+ 439:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 440:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    scheduleWalker = schedule_vars.currentScheduleEntry;
+ 1195              		.loc 1 440 0
+ 1196 05d2 0E4B     		ldr	r3, .L78
+ 1197 05d4 D3F8FC30 		ldr	r3, [r3, #252]
+ 1198 05d8 FB60     		str	r3, [r7, #12]
+ 1199              	.L77:
+ 441:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    do {
+ 442:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       if(slotOffset == scheduleWalker->slotOffset){
+ 1200              		.loc 1 442 0
+ 1201 05da FB68     		ldr	r3, [r7, #12]
+ 1202 05dc 1B88     		ldrh	r3, [r3]
+ 1203 05de FA88     		ldrh	r2, [r7, #6]
+ 1204 05e0 9A42     		cmp	r2, r3
+ 1205 05e2 03D1     		bne	.L75
+ 443:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****           ENABLE_INTERRUPTS();
+ 1206              		.loc 1 443 0
+ 1207 05e4 FFF7FEFF 		bl	IntMasterEnable
+ 444:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****           return FALSE;
+ 1208              		.loc 1 444 0
+ 1209 05e8 0023     		movs	r3, #0
+ 1210 05ea 0BE0     		b	.L76
+ 1211              	.L75:
+ 445:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       }
+ 446:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       scheduleWalker = scheduleWalker->next;
+ 1212              		.loc 1 446 0
+ 1213 05ec FB68     		ldr	r3, [r7, #12]
+ 1214 05ee 1B6A     		ldr	r3, [r3, #32]
+ 1215 05f0 FB60     		str	r3, [r7, #12]
+ 447:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    }while(scheduleWalker!=schedule_vars.currentScheduleEntry);
+ 1216              		.loc 1 447 0
+ 1217 05f2 064B     		ldr	r3, .L78
+ 1218 05f4 D3F8FC20 		ldr	r2, [r3, #252]
+ 1219 05f8 FB68     		ldr	r3, [r7, #12]
+ 1220 05fa 9A42     		cmp	r2, r3
+ 1221 05fc EDD1     		bne	.L77
+ 448:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 449:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    ENABLE_INTERRUPTS();
+ 1222              		.loc 1 449 0
+ 1223 05fe FFF7FEFF 		bl	IntMasterEnable
+ 450:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 451:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    return TRUE;
+ 1224              		.loc 1 451 0
+ 1225 0602 0123     		movs	r3, #1
+ 1226              	.L76:
+ 452:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** }
+ 1227              		.loc 1 452 0
+ 1228 0604 1846     		mov	r0, r3
+ 1229 0606 1037     		adds	r7, r7, #16
+ 1230              		.cfi_def_cfa_offset 8
+ 1231 0608 BD46     		mov	sp, r7
+ 1232              		.cfi_def_cfa_register 13
+ 1233              		@ sp needed
+ 1234 060a 80BD     		pop	{r7, pc}
+ 1235              	.L79:
+ 1236              		.align	2
+ 1237              	.L78:
+ 1238 060c 00000000 		.word	schedule_vars
+ 1239              		.cfi_endproc
+ 1240              	.LFE11:
+ 1242              		.align	2
+ 1243              		.global	schedule_statistic_poorLinkQuality
+ 1244              		.thumb
+ 1245              		.thumb_func
+ 1247              	schedule_statistic_poorLinkQuality:
+ 1248              	.LFB12:
+ 453:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** 
+ 454:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** scheduleEntry_t* schedule_statistic_poorLinkQuality(){
+ 1249              		.loc 1 454 0
+ 1250              		.cfi_startproc
+ 1251              		@ args = 0, pretend = 0, frame = 8
+ 1252              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1253 0610 80B5     		push	{r7, lr}
+ 1254              		.cfi_def_cfa_offset 8
+ 1255              		.cfi_offset 7, -8
+ 1256              		.cfi_offset 14, -4
+ 1257 0612 82B0     		sub	sp, sp, #8
+ 1258              		.cfi_def_cfa_offset 16
+ 1259 0614 00AF     		add	r7, sp, #0
+ 1260              		.cfi_def_cfa_register 7
+ 455:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    scheduleEntry_t* scheduleWalker;
+ 456:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 457:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    INTERRUPT_DECLARATION();
+ 458:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    DISABLE_INTERRUPTS();
+ 1261              		.loc 1 458 0
+ 1262 0616 FFF7FEFF 		bl	IntMasterDisable
+ 459:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 460:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    scheduleWalker = schedule_vars.currentScheduleEntry;
+ 1263              		.loc 1 460 0
+ 1264 061a 174B     		ldr	r3, .L86
+ 1265 061c D3F8FC30 		ldr	r3, [r3, #252]
+ 1266 0620 7B60     		str	r3, [r7, #4]
+ 1267              	.L83:
+ 461:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    do {
+ 462:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       if(
+ 463:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****          scheduleWalker->numTx > MIN_NUMTX_FOR_PDR                     &&\
+ 1268              		.loc 1 463 0
+ 1269 0622 7B68     		ldr	r3, [r7, #4]
+ 1270 0624 DB7D     		ldrb	r3, [r3, #23]	@ zero_extendqisi2
+ 462:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****          scheduleWalker->numTx > MIN_NUMTX_FOR_PDR                     &&\
+ 1271              		.loc 1 462 0
+ 1272 0626 322B     		cmp	r3, #50
+ 1273 0628 0CD9     		bls	.L81
+ 464:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****          PDR_THRESHOLD > 100*scheduleWalker->numTxACK/scheduleWalker->numTx
+ 1274              		.loc 1 464 0
+ 1275 062a 7B68     		ldr	r3, [r7, #4]
+ 1276 062c 1B7E     		ldrb	r3, [r3, #24]	@ zero_extendqisi2
+ 1277 062e 1A46     		mov	r2, r3
+ 1278 0630 6423     		movs	r3, #100
+ 1279 0632 03FB02F3 		mul	r3, r3, r2
+ 1280 0636 7A68     		ldr	r2, [r7, #4]
+ 1281 0638 D27D     		ldrb	r2, [r2, #23]	@ zero_extendqisi2
+ 1282 063a 93FBF2F3 		sdiv	r3, r3, r2
+ 463:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****          PDR_THRESHOLD > 100*scheduleWalker->numTxACK/scheduleWalker->numTx
+ 1283              		.loc 1 463 0
+ 1284 063e 4F2B     		cmp	r3, #79
+ 1285 0640 00DC     		bgt	.L81
+ 465:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       ){
+ 466:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****          break;
+ 1286              		.loc 1 466 0
+ 1287 0642 08E0     		b	.L82
+ 1288              	.L81:
+ 467:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       }
+ 468:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       scheduleWalker = scheduleWalker->next;
+ 1289              		.loc 1 468 0
+ 1290 0644 7B68     		ldr	r3, [r7, #4]
+ 1291 0646 1B6A     		ldr	r3, [r3, #32]
+ 1292 0648 7B60     		str	r3, [r7, #4]
+ 469:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    }while(scheduleWalker!=schedule_vars.currentScheduleEntry);
+ 1293              		.loc 1 469 0
+ 1294 064a 0B4B     		ldr	r3, .L86
+ 1295 064c D3F8FC20 		ldr	r2, [r3, #252]
+ 1296 0650 7B68     		ldr	r3, [r7, #4]
+ 1297 0652 9A42     		cmp	r2, r3
+ 1298 0654 E5D1     		bne	.L83
+ 1299              	.L82:
+ 470:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 471:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    if (scheduleWalker == schedule_vars.currentScheduleEntry){
+ 1300              		.loc 1 471 0
+ 1301 0656 084B     		ldr	r3, .L86
+ 1302 0658 D3F8FC20 		ldr	r2, [r3, #252]
+ 1303 065c 7B68     		ldr	r3, [r7, #4]
+ 1304 065e 9A42     		cmp	r2, r3
+ 1305 0660 03D1     		bne	.L84
+ 472:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****        ENABLE_INTERRUPTS();
+ 1306              		.loc 1 472 0
+ 1307 0662 FFF7FEFF 		bl	IntMasterEnable
+ 473:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****        return NULL;
+ 1308              		.loc 1 473 0
+ 1309 0666 0023     		movs	r3, #0
+ 1310 0668 02E0     		b	.L85
+ 1311              	.L84:
+ 474:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    } else {
+ 475:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****        ENABLE_INTERRUPTS();
+ 1312              		.loc 1 475 0
+ 1313 066a FFF7FEFF 		bl	IntMasterEnable
+ 476:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****        return scheduleWalker;
+ 1314              		.loc 1 476 0
+ 1315 066e 7B68     		ldr	r3, [r7, #4]
+ 1316              	.L85:
+ 477:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    }
+ 478:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** }
+ 1317              		.loc 1 478 0
+ 1318 0670 1846     		mov	r0, r3
+ 1319 0672 0837     		adds	r7, r7, #8
+ 1320              		.cfi_def_cfa_offset 8
+ 1321 0674 BD46     		mov	sp, r7
+ 1322              		.cfi_def_cfa_register 13
+ 1323              		@ sp needed
+ 1324 0676 80BD     		pop	{r7, pc}
+ 1325              	.L87:
+ 1326              		.align	2
+ 1327              	.L86:
+ 1328 0678 00000000 		.word	schedule_vars
+ 1329              		.cfi_endproc
+ 1330              	.LFE12:
+ 1332              		.align	2
+ 1333              		.global	schedule_getCellsCounts
+ 1334              		.thumb
+ 1335              		.thumb_func
+ 1337              	schedule_getCellsCounts:
+ 1338              	.LFB13:
+ 479:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** 
+ 480:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** uint16_t  schedule_getCellsCounts(uint8_t frameID,cellType_t type, open_addr_t* neighbor){
+ 1339              		.loc 1 480 0
+ 1340              		.cfi_startproc
+ 1341              		@ args = 0, pretend = 0, frame = 16
+ 1342              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1343 067c 80B5     		push	{r7, lr}
+ 1344              		.cfi_def_cfa_offset 8
+ 1345              		.cfi_offset 7, -8
+ 1346              		.cfi_offset 14, -4
+ 1347 067e 84B0     		sub	sp, sp, #16
+ 1348              		.cfi_def_cfa_offset 24
+ 1349 0680 00AF     		add	r7, sp, #0
+ 1350              		.cfi_def_cfa_register 7
+ 1351 0682 0346     		mov	r3, r0
+ 1352 0684 3A60     		str	r2, [r7]
+ 1353 0686 FB71     		strb	r3, [r7, #7]
+ 1354 0688 0B46     		mov	r3, r1
+ 1355 068a BB71     		strb	r3, [r7, #6]
+ 481:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****     uint16_t         count = 0;
+ 1356              		.loc 1 481 0
+ 1357 068c 0023     		movs	r3, #0
+ 1358 068e FB81     		strh	r3, [r7, #14]	@ movhi
+ 482:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****     scheduleEntry_t* scheduleWalker;
+ 483:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 484:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****     INTERRUPT_DECLARATION();
+ 485:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****     DISABLE_INTERRUPTS();
+ 1359              		.loc 1 485 0
+ 1360 0690 FFF7FEFF 		bl	IntMasterDisable
+ 486:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****     
+ 487:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****     if (frameID != SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE){
+ 1361              		.loc 1 487 0
+ 1362 0694 FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 1363 0696 012B     		cmp	r3, #1
+ 1364 0698 03D0     		beq	.L89
+ 488:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****         ENABLE_INTERRUPTS();
+ 1365              		.loc 1 488 0
+ 1366 069a FFF7FEFF 		bl	IntMasterEnable
+ 489:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****         return 0;
+ 1367              		.loc 1 489 0
+ 1368 069e 0023     		movs	r3, #0
+ 1369 06a0 20E0     		b	.L90
+ 1370              	.L89:
+ 490:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****     }
+ 491:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 492:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****     scheduleWalker = schedule_vars.currentScheduleEntry;
+ 1371              		.loc 1 492 0
+ 1372 06a2 124B     		ldr	r3, .L93
+ 1373 06a4 D3F8FC30 		ldr	r3, [r3, #252]
+ 1374 06a8 BB60     		str	r3, [r7, #8]
+ 1375              	.L92:
+ 493:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****     do {
+ 494:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****        if(
+ 495:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****           packetfunctions_sameAddress(&(scheduleWalker->neighbor),neighbor) &&
+ 1376              		.loc 1 495 0
+ 1377 06aa BB68     		ldr	r3, [r7, #8]
+ 1378 06ac 0533     		adds	r3, r3, #5
+ 1379 06ae 1846     		mov	r0, r3
+ 1380 06b0 3968     		ldr	r1, [r7]
+ 1381 06b2 FFF7FEFF 		bl	packetfunctions_sameAddress
+ 1382 06b6 0346     		mov	r3, r0
+ 494:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****           packetfunctions_sameAddress(&(scheduleWalker->neighbor),neighbor) &&
+ 1383              		.loc 1 494 0
+ 1384 06b8 002B     		cmp	r3, #0
+ 1385 06ba 07D0     		beq	.L91
+ 496:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****           type == scheduleWalker->type
+ 1386              		.loc 1 496 0
+ 1387 06bc BB68     		ldr	r3, [r7, #8]
+ 1388 06be 9B78     		ldrb	r3, [r3, #2]	@ zero_extendqisi2
+ 495:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****           type == scheduleWalker->type
+ 1389              		.loc 1 495 0
+ 1390 06c0 BA79     		ldrb	r2, [r7, #6]	@ zero_extendqisi2
+ 1391 06c2 9A42     		cmp	r2, r3
+ 1392 06c4 02D1     		bne	.L91
+ 497:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****        ){
+ 498:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****            count++;
+ 1393              		.loc 1 498 0
+ 1394 06c6 FB89     		ldrh	r3, [r7, #14]
+ 1395 06c8 0133     		adds	r3, r3, #1
+ 1396 06ca FB81     		strh	r3, [r7, #14]	@ movhi
+ 1397              	.L91:
+ 499:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****        }
+ 500:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****        scheduleWalker = scheduleWalker->next;
+ 1398              		.loc 1 500 0
+ 1399 06cc BB68     		ldr	r3, [r7, #8]
+ 1400 06ce 1B6A     		ldr	r3, [r3, #32]
+ 1401 06d0 BB60     		str	r3, [r7, #8]
+ 501:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****     }while(scheduleWalker!=schedule_vars.currentScheduleEntry);
+ 1402              		.loc 1 501 0
+ 1403 06d2 064B     		ldr	r3, .L93
+ 1404 06d4 D3F8FC20 		ldr	r2, [r3, #252]
+ 1405 06d8 BB68     		ldr	r3, [r7, #8]
+ 1406 06da 9A42     		cmp	r2, r3
+ 1407 06dc E5D1     		bne	.L92
+ 502:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 503:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****     ENABLE_INTERRUPTS();
+ 1408              		.loc 1 503 0
+ 1409 06de FFF7FEFF 		bl	IntMasterEnable
+ 504:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****     return count;
+ 1410              		.loc 1 504 0
+ 1411 06e2 FB89     		ldrh	r3, [r7, #14]
+ 1412              	.L90:
+ 505:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** }
+ 1413              		.loc 1 505 0
+ 1414 06e4 1846     		mov	r0, r3
+ 1415 06e6 1037     		adds	r7, r7, #16
+ 1416              		.cfi_def_cfa_offset 8
+ 1417 06e8 BD46     		mov	sp, r7
+ 1418              		.cfi_def_cfa_register 13
+ 1419              		@ sp needed
+ 1420 06ea 80BD     		pop	{r7, pc}
+ 1421              	.L94:
+ 1422              		.align	2
+ 1423              	.L93:
+ 1424 06ec 00000000 		.word	schedule_vars
+ 1425              		.cfi_endproc
+ 1426              	.LFE13:
+ 1428              		.align	2
+ 1429              		.global	schedule_removeAllCells
+ 1430              		.thumb
+ 1431              		.thumb_func
+ 1433              	schedule_removeAllCells:
+ 1434              	.LFB14:
+ 506:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** void schedule_removeAllCells(
+ 507:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****     uint8_t        slotframeID,
+ 508:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****     open_addr_t*   previousHop
+ 509:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****     ){
+ 1435              		.loc 1 509 0
+ 1436              		.cfi_startproc
+ 1437              		@ args = 0, pretend = 0, frame = 16
+ 1438              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1439 06f0 80B5     		push	{r7, lr}
+ 1440              		.cfi_def_cfa_offset 8
+ 1441              		.cfi_offset 7, -8
+ 1442              		.cfi_offset 14, -4
+ 1443 06f2 84B0     		sub	sp, sp, #16
+ 1444              		.cfi_def_cfa_offset 24
+ 1445 06f4 00AF     		add	r7, sp, #0
+ 1446              		.cfi_def_cfa_register 7
+ 1447 06f6 0346     		mov	r3, r0
+ 1448 06f8 3960     		str	r1, [r7]
+ 1449 06fa FB71     		strb	r3, [r7, #7]
+ 510:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****     uint8_t i;
+ 511:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****     
+ 512:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****     // remove all entries in schedule with previousHop address
+ 513:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****     for(i=0;i<MAXACTIVESLOTS;i++){
+ 1450              		.loc 1 513 0
+ 1451 06fc 0023     		movs	r3, #0
+ 1452 06fe FB73     		strb	r3, [r7, #15]
+ 1453 0700 1DE0     		b	.L96
+ 1454              	.L98:
+ 514:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****         if (packetfunctions_sameAddress(&(schedule_vars.scheduleBuf[i].neighbor),previousHop)){
+ 1455              		.loc 1 514 0
+ 1456 0702 FA7B     		ldrb	r2, [r7, #15]	@ zero_extendqisi2
+ 1457 0704 1346     		mov	r3, r2
+ 1458 0706 DB00     		lsls	r3, r3, #3
+ 1459 0708 1344     		add	r3, r3, r2
+ 1460 070a 9B00     		lsls	r3, r3, #2
+ 1461 070c 0F4A     		ldr	r2, .L99
+ 1462 070e 1344     		add	r3, r3, r2
+ 1463 0710 0533     		adds	r3, r3, #5
+ 1464 0712 1846     		mov	r0, r3
+ 1465 0714 3968     		ldr	r1, [r7]
+ 1466 0716 FFF7FEFF 		bl	packetfunctions_sameAddress
+ 1467 071a 0346     		mov	r3, r0
+ 1468 071c 002B     		cmp	r3, #0
+ 1469 071e 0BD0     		beq	.L97
+ 515:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****            schedule_removeActiveSlot(
+ 1470              		.loc 1 515 0
+ 1471 0720 FA7B     		ldrb	r2, [r7, #15]	@ zero_extendqisi2
+ 1472 0722 0A49     		ldr	r1, .L99
+ 1473 0724 1346     		mov	r3, r2
+ 1474 0726 DB00     		lsls	r3, r3, #3
+ 1475 0728 1344     		add	r3, r3, r2
+ 1476 072a 9B00     		lsls	r3, r3, #2
+ 1477 072c 0B44     		add	r3, r3, r1
+ 1478 072e 1B88     		ldrh	r3, [r3]
+ 1479 0730 1846     		mov	r0, r3
+ 1480 0732 3968     		ldr	r1, [r7]
+ 1481 0734 FFF7FEFF 		bl	schedule_removeActiveSlot
+ 1482              	.L97:
+ 513:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****         if (packetfunctions_sameAddress(&(schedule_vars.scheduleBuf[i].neighbor),previousHop)){
+ 1483              		.loc 1 513 0 discriminator 2
+ 1484 0738 FB7B     		ldrb	r3, [r7, #15]	@ zero_extendqisi2
+ 1485 073a 0133     		adds	r3, r3, #1
+ 1486 073c FB73     		strb	r3, [r7, #15]
+ 1487              	.L96:
+ 513:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****         if (packetfunctions_sameAddress(&(schedule_vars.scheduleBuf[i].neighbor),previousHop)){
+ 1488              		.loc 1 513 0 is_stmt 0 discriminator 1
+ 1489 073e FB7B     		ldrb	r3, [r7, #15]	@ zero_extendqisi2
+ 1490 0740 062B     		cmp	r3, #6
+ 1491 0742 DED9     		bls	.L98
+ 516:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****               schedule_vars.scheduleBuf[i].slotOffset,
+ 517:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****               previousHop
+ 518:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****            );
+ 519:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****         }
+ 520:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****     }
+ 521:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** }
+ 1492              		.loc 1 521 0 is_stmt 1
+ 1493 0744 1037     		adds	r7, r7, #16
+ 1494              		.cfi_def_cfa_offset 8
+ 1495 0746 BD46     		mov	sp, r7
+ 1496              		.cfi_def_cfa_register 13
+ 1497              		@ sp needed
+ 1498 0748 80BD     		pop	{r7, pc}
+ 1499              	.L100:
+ 1500 074a 00BF     		.align	2
+ 1501              	.L99:
+ 1502 074c 00000000 		.word	schedule_vars
+ 1503              		.cfi_endproc
+ 1504              	.LFE14:
+ 1506              		.align	2
+ 1507              		.global	schedule_getCurrentScheduleEntry
+ 1508              		.thumb
+ 1509              		.thumb_func
+ 1511              	schedule_getCurrentScheduleEntry:
+ 1512              	.LFB15:
+ 522:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** 
+ 523:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** scheduleEntry_t* schedule_getCurrentScheduleEntry(){
+ 1513              		.loc 1 523 0
+ 1514              		.cfi_startproc
+ 1515              		@ args = 0, pretend = 0, frame = 0
+ 1516              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1517              		@ link register save eliminated.
+ 1518 0750 80B4     		push	{r7}
+ 1519              		.cfi_def_cfa_offset 4
+ 1520              		.cfi_offset 7, -4
+ 1521 0752 00AF     		add	r7, sp, #0
+ 1522              		.cfi_def_cfa_register 7
+ 524:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****     return schedule_vars.currentScheduleEntry;
+ 1523              		.loc 1 524 0
+ 1524 0754 034B     		ldr	r3, .L103
+ 1525 0756 D3F8FC30 		ldr	r3, [r3, #252]
+ 525:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** }
+ 1526              		.loc 1 525 0
+ 1527 075a 1846     		mov	r0, r3
+ 1528 075c BD46     		mov	sp, r7
+ 1529              		.cfi_def_cfa_register 13
+ 1530              		@ sp needed
+ 1531 075e 5DF8047B 		ldr	r7, [sp], #4
+ 1532              		.cfi_restore 7
+ 1533              		.cfi_def_cfa_offset 0
+ 1534 0762 7047     		bx	lr
+ 1535              	.L104:
+ 1536              		.align	2
+ 1537              	.L103:
+ 1538 0764 00000000 		.word	schedule_vars
+ 1539              		.cfi_endproc
+ 1540              	.LFE15:
+ 1542              		.align	2
+ 1543              		.global	schedule_syncSlotOffset
+ 1544              		.thumb
+ 1545              		.thumb_func
+ 1547              	schedule_syncSlotOffset:
+ 1548              	.LFB16:
+ 526:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** 
+ 527:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** //=== from IEEE802154E: reading the schedule and updating statistics
+ 528:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** 
+ 529:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** void schedule_syncSlotOffset(slotOffset_t targetSlotOffset) {
+ 1549              		.loc 1 529 0
+ 1550              		.cfi_startproc
+ 1551              		@ args = 0, pretend = 0, frame = 8
+ 1552              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1553 0768 80B5     		push	{r7, lr}
+ 1554              		.cfi_def_cfa_offset 8
+ 1555              		.cfi_offset 7, -8
+ 1556              		.cfi_offset 14, -4
+ 1557 076a 82B0     		sub	sp, sp, #8
+ 1558              		.cfi_def_cfa_offset 16
+ 1559 076c 00AF     		add	r7, sp, #0
+ 1560              		.cfi_def_cfa_register 7
+ 1561 076e 0346     		mov	r3, r0
+ 1562 0770 FB80     		strh	r3, [r7, #6]	@ movhi
+ 530:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 531:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    INTERRUPT_DECLARATION();
+ 532:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    DISABLE_INTERRUPTS();
+ 1563              		.loc 1 532 0
+ 1564 0772 FFF7FEFF 		bl	IntMasterDisable
+ 533:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 534:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    while (schedule_vars.currentScheduleEntry->slotOffset!=targetSlotOffset) {
+ 1565              		.loc 1 534 0
+ 1566 0776 01E0     		b	.L106
+ 1567              	.L107:
+ 535:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       schedule_advanceSlot();
+ 1568              		.loc 1 535 0
+ 1569 0778 FFF7FEFF 		bl	schedule_advanceSlot
+ 1570              	.L106:
+ 534:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       schedule_advanceSlot();
+ 1571              		.loc 1 534 0
+ 1572 077c 054B     		ldr	r3, .L108
+ 1573 077e D3F8FC30 		ldr	r3, [r3, #252]
+ 1574 0782 1B88     		ldrh	r3, [r3]
+ 1575 0784 FA88     		ldrh	r2, [r7, #6]
+ 1576 0786 9A42     		cmp	r2, r3
+ 1577 0788 F6D1     		bne	.L107
+ 536:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    }
+ 537:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 538:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    ENABLE_INTERRUPTS();
+ 1578              		.loc 1 538 0
+ 1579 078a FFF7FEFF 		bl	IntMasterEnable
+ 539:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** }
+ 1580              		.loc 1 539 0
+ 1581 078e 0837     		adds	r7, r7, #8
+ 1582              		.cfi_def_cfa_offset 8
+ 1583 0790 BD46     		mov	sp, r7
+ 1584              		.cfi_def_cfa_register 13
+ 1585              		@ sp needed
+ 1586 0792 80BD     		pop	{r7, pc}
+ 1587              	.L109:
+ 1588              		.align	2
+ 1589              	.L108:
+ 1590 0794 00000000 		.word	schedule_vars
+ 1591              		.cfi_endproc
+ 1592              	.LFE16:
+ 1594              		.align	2
+ 1595              		.global	schedule_advanceSlot
+ 1596              		.thumb
+ 1597              		.thumb_func
+ 1599              	schedule_advanceSlot:
+ 1600              	.LFB17:
+ 540:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** 
+ 541:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** /**
+ 542:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** \brief advance to next active slot
+ 543:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** */
+ 544:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** void schedule_advanceSlot() {
+ 1601              		.loc 1 544 0
+ 1602              		.cfi_startproc
+ 1603              		@ args = 0, pretend = 0, frame = 0
+ 1604              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1605 0798 80B5     		push	{r7, lr}
+ 1606              		.cfi_def_cfa_offset 8
+ 1607              		.cfi_offset 7, -8
+ 1608              		.cfi_offset 14, -4
+ 1609 079a 00AF     		add	r7, sp, #0
+ 1610              		.cfi_def_cfa_register 7
+ 545:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 546:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    INTERRUPT_DECLARATION();
+ 547:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    DISABLE_INTERRUPTS();
+ 1611              		.loc 1 547 0
+ 1612 079c FFF7FEFF 		bl	IntMasterDisable
+ 548:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 549:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    schedule_vars.currentScheduleEntry = schedule_vars.currentScheduleEntry->next;
+ 1613              		.loc 1 549 0
+ 1614 07a0 044B     		ldr	r3, .L111
+ 1615 07a2 D3F8FC30 		ldr	r3, [r3, #252]
+ 1616 07a6 1B6A     		ldr	r3, [r3, #32]
+ 1617 07a8 024A     		ldr	r2, .L111
+ 1618 07aa C2F8FC30 		str	r3, [r2, #252]
+ 550:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 551:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    ENABLE_INTERRUPTS();
+ 1619              		.loc 1 551 0
+ 1620 07ae FFF7FEFF 		bl	IntMasterEnable
+ 552:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** }
+ 1621              		.loc 1 552 0
+ 1622 07b2 80BD     		pop	{r7, pc}
+ 1623              	.L112:
+ 1624              		.align	2
+ 1625              	.L111:
+ 1626 07b4 00000000 		.word	schedule_vars
+ 1627              		.cfi_endproc
+ 1628              	.LFE17:
+ 1630              		.align	2
+ 1631              		.global	schedule_getNextActiveSlotOffset
+ 1632              		.thumb
+ 1633              		.thumb_func
+ 1635              	schedule_getNextActiveSlotOffset:
+ 1636              	.LFB18:
+ 553:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** 
+ 554:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** /**
+ 555:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** \brief return slotOffset of next active slot
+ 556:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** */
+ 557:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** slotOffset_t schedule_getNextActiveSlotOffset() {
+ 1637              		.loc 1 557 0
+ 1638              		.cfi_startproc
+ 1639              		@ args = 0, pretend = 0, frame = 8
+ 1640              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1641 07b8 80B5     		push	{r7, lr}
+ 1642              		.cfi_def_cfa_offset 8
+ 1643              		.cfi_offset 7, -8
+ 1644              		.cfi_offset 14, -4
+ 1645 07ba 82B0     		sub	sp, sp, #8
+ 1646              		.cfi_def_cfa_offset 16
+ 1647 07bc 00AF     		add	r7, sp, #0
+ 1648              		.cfi_def_cfa_register 7
+ 558:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    slotOffset_t res;   
+ 559:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 560:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    INTERRUPT_DECLARATION();
+ 561:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    DISABLE_INTERRUPTS();
+ 1649              		.loc 1 561 0
+ 1650 07be FFF7FEFF 		bl	IntMasterDisable
+ 562:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 563:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    res = ((scheduleEntry_t*)(schedule_vars.currentScheduleEntry->next))->slotOffset;
+ 1651              		.loc 1 563 0
+ 1652 07c2 064B     		ldr	r3, .L115
+ 1653 07c4 D3F8FC30 		ldr	r3, [r3, #252]
+ 1654 07c8 1B6A     		ldr	r3, [r3, #32]
+ 1655 07ca 1B88     		ldrh	r3, [r3]	@ movhi
+ 1656 07cc FB80     		strh	r3, [r7, #6]	@ movhi
+ 564:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 565:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    ENABLE_INTERRUPTS();
+ 1657              		.loc 1 565 0
+ 1658 07ce FFF7FEFF 		bl	IntMasterEnable
+ 566:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 567:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    return res;
+ 1659              		.loc 1 567 0
+ 1660 07d2 FB88     		ldrh	r3, [r7, #6]
+ 568:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** }
+ 1661              		.loc 1 568 0
+ 1662 07d4 1846     		mov	r0, r3
+ 1663 07d6 0837     		adds	r7, r7, #8
+ 1664              		.cfi_def_cfa_offset 8
+ 1665 07d8 BD46     		mov	sp, r7
+ 1666              		.cfi_def_cfa_register 13
+ 1667              		@ sp needed
+ 1668 07da 80BD     		pop	{r7, pc}
+ 1669              	.L116:
+ 1670              		.align	2
+ 1671              	.L115:
+ 1672 07dc 00000000 		.word	schedule_vars
+ 1673              		.cfi_endproc
+ 1674              	.LFE18:
+ 1676              		.align	2
+ 1677              		.global	schedule_getFrameLength
+ 1678              		.thumb
+ 1679              		.thumb_func
+ 1681              	schedule_getFrameLength:
+ 1682              	.LFB19:
+ 569:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** 
+ 570:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** /**
+ 571:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** \brief Get the frame length.
+ 572:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** 
+ 573:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** \returns The frame length.
+ 574:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** */
+ 575:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** frameLength_t schedule_getFrameLength() {
+ 1683              		.loc 1 575 0
+ 1684              		.cfi_startproc
+ 1685              		@ args = 0, pretend = 0, frame = 8
+ 1686              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1687 07e0 80B5     		push	{r7, lr}
+ 1688              		.cfi_def_cfa_offset 8
+ 1689              		.cfi_offset 7, -8
+ 1690              		.cfi_offset 14, -4
+ 1691 07e2 82B0     		sub	sp, sp, #8
+ 1692              		.cfi_def_cfa_offset 16
+ 1693 07e4 00AF     		add	r7, sp, #0
+ 1694              		.cfi_def_cfa_register 7
+ 576:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    frameLength_t returnVal;
+ 577:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 578:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    INTERRUPT_DECLARATION();
+ 579:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    DISABLE_INTERRUPTS();
+ 1695              		.loc 1 579 0
+ 1696 07e6 FFF7FEFF 		bl	IntMasterDisable
+ 580:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 581:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    returnVal = schedule_vars.frameLength;
+ 1697              		.loc 1 581 0
+ 1698 07ea 054B     		ldr	r3, .L119
+ 1699 07ec B3F80031 		ldrh	r3, [r3, #256]	@ movhi
+ 1700 07f0 FB80     		strh	r3, [r7, #6]	@ movhi
+ 582:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 583:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    ENABLE_INTERRUPTS();
+ 1701              		.loc 1 583 0
+ 1702 07f2 FFF7FEFF 		bl	IntMasterEnable
+ 584:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 585:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    return returnVal;
+ 1703              		.loc 1 585 0
+ 1704 07f6 FB88     		ldrh	r3, [r7, #6]
+ 586:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** }
+ 1705              		.loc 1 586 0
+ 1706 07f8 1846     		mov	r0, r3
+ 1707 07fa 0837     		adds	r7, r7, #8
+ 1708              		.cfi_def_cfa_offset 8
+ 1709 07fc BD46     		mov	sp, r7
+ 1710              		.cfi_def_cfa_register 13
+ 1711              		@ sp needed
+ 1712 07fe 80BD     		pop	{r7, pc}
+ 1713              	.L120:
+ 1714              		.align	2
+ 1715              	.L119:
+ 1716 0800 00000000 		.word	schedule_vars
+ 1717              		.cfi_endproc
+ 1718              	.LFE19:
+ 1720              		.align	2
+ 1721              		.global	schedule_getFrameHandle
+ 1722              		.thumb
+ 1723              		.thumb_func
+ 1725              	schedule_getFrameHandle:
+ 1726              	.LFB20:
+ 587:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** 
+ 588:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** /**
+ 589:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** \brief Get the frame handle.
+ 590:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** 
+ 591:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** \returns The frame handle.
+ 592:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** */
+ 593:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** uint8_t schedule_getFrameHandle() {
+ 1727              		.loc 1 593 0
+ 1728              		.cfi_startproc
+ 1729              		@ args = 0, pretend = 0, frame = 8
+ 1730              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1731 0804 80B5     		push	{r7, lr}
+ 1732              		.cfi_def_cfa_offset 8
+ 1733              		.cfi_offset 7, -8
+ 1734              		.cfi_offset 14, -4
+ 1735 0806 82B0     		sub	sp, sp, #8
+ 1736              		.cfi_def_cfa_offset 16
+ 1737 0808 00AF     		add	r7, sp, #0
+ 1738              		.cfi_def_cfa_register 7
+ 594:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    uint8_t returnVal;
+ 595:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 596:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    INTERRUPT_DECLARATION();
+ 597:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    DISABLE_INTERRUPTS();
+ 1739              		.loc 1 597 0
+ 1740 080a FFF7FEFF 		bl	IntMasterDisable
+ 598:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 599:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    returnVal = schedule_vars.frameHandle;
+ 1741              		.loc 1 599 0
+ 1742 080e 054B     		ldr	r3, .L123
+ 1743 0810 93F80431 		ldrb	r3, [r3, #260]
+ 1744 0814 FB71     		strb	r3, [r7, #7]
+ 600:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 601:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    ENABLE_INTERRUPTS();
+ 1745              		.loc 1 601 0
+ 1746 0816 FFF7FEFF 		bl	IntMasterEnable
+ 602:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 603:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    return returnVal;
+ 1747              		.loc 1 603 0
+ 1748 081a FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 604:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** }
+ 1749              		.loc 1 604 0
+ 1750 081c 1846     		mov	r0, r3
+ 1751 081e 0837     		adds	r7, r7, #8
+ 1752              		.cfi_def_cfa_offset 8
+ 1753 0820 BD46     		mov	sp, r7
+ 1754              		.cfi_def_cfa_register 13
+ 1755              		@ sp needed
+ 1756 0822 80BD     		pop	{r7, pc}
+ 1757              	.L124:
+ 1758              		.align	2
+ 1759              	.L123:
+ 1760 0824 00000000 		.word	schedule_vars
+ 1761              		.cfi_endproc
+ 1762              	.LFE20:
+ 1764              		.align	2
+ 1765              		.global	schedule_getFrameNumber
+ 1766              		.thumb
+ 1767              		.thumb_func
+ 1769              	schedule_getFrameNumber:
+ 1770              	.LFB21:
+ 605:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** 
+ 606:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** /**
+ 607:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** \brief Get the frame number.
+ 608:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** 
+ 609:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** \returns The frame number.
+ 610:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** */
+ 611:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** uint8_t schedule_getFrameNumber() {
+ 1771              		.loc 1 611 0
+ 1772              		.cfi_startproc
+ 1773              		@ args = 0, pretend = 0, frame = 8
+ 1774              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1775 0828 80B5     		push	{r7, lr}
+ 1776              		.cfi_def_cfa_offset 8
+ 1777              		.cfi_offset 7, -8
+ 1778              		.cfi_offset 14, -4
+ 1779 082a 82B0     		sub	sp, sp, #8
+ 1780              		.cfi_def_cfa_offset 16
+ 1781 082c 00AF     		add	r7, sp, #0
+ 1782              		.cfi_def_cfa_register 7
+ 612:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    uint8_t returnVal;
+ 613:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 614:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    INTERRUPT_DECLARATION();
+ 615:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    DISABLE_INTERRUPTS();
+ 1783              		.loc 1 615 0
+ 1784 082e FFF7FEFF 		bl	IntMasterDisable
+ 616:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 617:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    returnVal = schedule_vars.frameNumber;
+ 1785              		.loc 1 617 0
+ 1786 0832 054B     		ldr	r3, .L127
+ 1787 0834 93F80531 		ldrb	r3, [r3, #261]
+ 1788 0838 FB71     		strb	r3, [r7, #7]
+ 618:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 619:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    ENABLE_INTERRUPTS();
+ 1789              		.loc 1 619 0
+ 1790 083a FFF7FEFF 		bl	IntMasterEnable
+ 620:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 621:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    return returnVal;
+ 1791              		.loc 1 621 0
+ 1792 083e FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 622:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** }
+ 1793              		.loc 1 622 0
+ 1794 0840 1846     		mov	r0, r3
+ 1795 0842 0837     		adds	r7, r7, #8
+ 1796              		.cfi_def_cfa_offset 8
+ 1797 0844 BD46     		mov	sp, r7
+ 1798              		.cfi_def_cfa_register 13
+ 1799              		@ sp needed
+ 1800 0846 80BD     		pop	{r7, pc}
+ 1801              	.L128:
+ 1802              		.align	2
+ 1803              	.L127:
+ 1804 0848 00000000 		.word	schedule_vars
+ 1805              		.cfi_endproc
+ 1806              	.LFE21:
+ 1808              		.align	2
+ 1809              		.global	schedule_getType
+ 1810              		.thumb
+ 1811              		.thumb_func
+ 1813              	schedule_getType:
+ 1814              	.LFB22:
+ 623:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** /**
+ 624:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** \brief Get the type of the current schedule entry.
+ 625:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** 
+ 626:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** \returns The type of the current schedule entry.
+ 627:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** */
+ 628:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** cellType_t schedule_getType() {
+ 1815              		.loc 1 628 0
+ 1816              		.cfi_startproc
+ 1817              		@ args = 0, pretend = 0, frame = 8
+ 1818              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1819 084c 80B5     		push	{r7, lr}
+ 1820              		.cfi_def_cfa_offset 8
+ 1821              		.cfi_offset 7, -8
+ 1822              		.cfi_offset 14, -4
+ 1823 084e 82B0     		sub	sp, sp, #8
+ 1824              		.cfi_def_cfa_offset 16
+ 1825 0850 00AF     		add	r7, sp, #0
+ 1826              		.cfi_def_cfa_register 7
+ 629:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    cellType_t returnVal;
+ 630:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 631:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    INTERRUPT_DECLARATION();
+ 632:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    DISABLE_INTERRUPTS();
+ 1827              		.loc 1 632 0
+ 1828 0852 FFF7FEFF 		bl	IntMasterDisable
+ 633:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 634:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    returnVal = schedule_vars.currentScheduleEntry->type;
+ 1829              		.loc 1 634 0
+ 1830 0856 064B     		ldr	r3, .L131
+ 1831 0858 D3F8FC30 		ldr	r3, [r3, #252]
+ 1832 085c 9B78     		ldrb	r3, [r3, #2]
+ 1833 085e FB71     		strb	r3, [r7, #7]
+ 635:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 636:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    ENABLE_INTERRUPTS();
+ 1834              		.loc 1 636 0
+ 1835 0860 FFF7FEFF 		bl	IntMasterEnable
+ 637:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 638:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    return returnVal;
+ 1836              		.loc 1 638 0
+ 1837 0864 FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 639:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** }
+ 1838              		.loc 1 639 0
+ 1839 0866 1846     		mov	r0, r3
+ 1840 0868 0837     		adds	r7, r7, #8
+ 1841              		.cfi_def_cfa_offset 8
+ 1842 086a BD46     		mov	sp, r7
+ 1843              		.cfi_def_cfa_register 13
+ 1844              		@ sp needed
+ 1845 086c 80BD     		pop	{r7, pc}
+ 1846              	.L132:
+ 1847 086e 00BF     		.align	2
+ 1848              	.L131:
+ 1849 0870 00000000 		.word	schedule_vars
+ 1850              		.cfi_endproc
+ 1851              	.LFE22:
+ 1853              		.align	2
+ 1854              		.global	schedule_getNeighbor
+ 1855              		.thumb
+ 1856              		.thumb_func
+ 1858              	schedule_getNeighbor:
+ 1859              	.LFB23:
+ 640:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** 
+ 641:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** /**
+ 642:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** \brief Get the neighbor associated wit the current schedule entry.
+ 643:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** 
+ 644:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** \returns The neighbor associated wit the current schedule entry.
+ 645:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** */
+ 646:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** void schedule_getNeighbor(open_addr_t* addrToWrite) {
+ 1860              		.loc 1 646 0
+ 1861              		.cfi_startproc
+ 1862              		@ args = 0, pretend = 0, frame = 8
+ 1863              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1864 0874 80B5     		push	{r7, lr}
+ 1865              		.cfi_def_cfa_offset 8
+ 1866              		.cfi_offset 7, -8
+ 1867              		.cfi_offset 14, -4
+ 1868 0876 82B0     		sub	sp, sp, #8
+ 1869              		.cfi_def_cfa_offset 16
+ 1870 0878 00AF     		add	r7, sp, #0
+ 1871              		.cfi_def_cfa_register 7
+ 1872 087a 7860     		str	r0, [r7, #4]
+ 647:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 648:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    INTERRUPT_DECLARATION();
+ 649:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    DISABLE_INTERRUPTS();
+ 1873              		.loc 1 649 0
+ 1874 087c FFF7FEFF 		bl	IntMasterDisable
+ 650:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 651:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    memcpy(addrToWrite,&(schedule_vars.currentScheduleEntry->neighbor),sizeof(open_addr_t));
+ 1875              		.loc 1 651 0
+ 1876 0880 064B     		ldr	r3, .L134
+ 1877 0882 D3F8FC30 		ldr	r3, [r3, #252]
+ 1878 0886 0533     		adds	r3, r3, #5
+ 1879 0888 7868     		ldr	r0, [r7, #4]
+ 1880 088a 1946     		mov	r1, r3
+ 1881 088c 1122     		movs	r2, #17
+ 1882 088e FFF7FEFF 		bl	memcpy
+ 652:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 653:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    ENABLE_INTERRUPTS();
+ 1883              		.loc 1 653 0
+ 1884 0892 FFF7FEFF 		bl	IntMasterEnable
+ 654:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** }
+ 1885              		.loc 1 654 0
+ 1886 0896 0837     		adds	r7, r7, #8
+ 1887              		.cfi_def_cfa_offset 8
+ 1888 0898 BD46     		mov	sp, r7
+ 1889              		.cfi_def_cfa_register 13
+ 1890              		@ sp needed
+ 1891 089a 80BD     		pop	{r7, pc}
+ 1892              	.L135:
+ 1893              		.align	2
+ 1894              	.L134:
+ 1895 089c 00000000 		.word	schedule_vars
+ 1896              		.cfi_endproc
+ 1897              	.LFE23:
+ 1899              		.align	2
+ 1900              		.global	schedule_getChannelOffset
+ 1901              		.thumb
+ 1902              		.thumb_func
+ 1904              	schedule_getChannelOffset:
+ 1905              	.LFB24:
+ 655:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** 
+ 656:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** /**
+ 657:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** \brief Get the channel offset of the current schedule entry.
+ 658:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** 
+ 659:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** \returns The channel offset of the current schedule entry.
+ 660:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** */
+ 661:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** channelOffset_t schedule_getChannelOffset() {
+ 1906              		.loc 1 661 0
+ 1907              		.cfi_startproc
+ 1908              		@ args = 0, pretend = 0, frame = 8
+ 1909              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1910 08a0 80B5     		push	{r7, lr}
+ 1911              		.cfi_def_cfa_offset 8
+ 1912              		.cfi_offset 7, -8
+ 1913              		.cfi_offset 14, -4
+ 1914 08a2 82B0     		sub	sp, sp, #8
+ 1915              		.cfi_def_cfa_offset 16
+ 1916 08a4 00AF     		add	r7, sp, #0
+ 1917              		.cfi_def_cfa_register 7
+ 662:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    channelOffset_t returnVal;
+ 663:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 664:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    INTERRUPT_DECLARATION();
+ 665:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    DISABLE_INTERRUPTS();
+ 1918              		.loc 1 665 0
+ 1919 08a6 FFF7FEFF 		bl	IntMasterDisable
+ 666:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 667:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    returnVal = schedule_vars.currentScheduleEntry->channelOffset;
+ 1920              		.loc 1 667 0
+ 1921 08aa 064B     		ldr	r3, .L138
+ 1922 08ac D3F8FC30 		ldr	r3, [r3, #252]
+ 1923 08b0 1B79     		ldrb	r3, [r3, #4]
+ 1924 08b2 FB71     		strb	r3, [r7, #7]
+ 668:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 669:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    ENABLE_INTERRUPTS();
+ 1925              		.loc 1 669 0
+ 1926 08b4 FFF7FEFF 		bl	IntMasterEnable
+ 670:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 671:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    return returnVal;
+ 1927              		.loc 1 671 0
+ 1928 08b8 FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 672:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** }
+ 1929              		.loc 1 672 0
+ 1930 08ba 1846     		mov	r0, r3
+ 1931 08bc 0837     		adds	r7, r7, #8
+ 1932              		.cfi_def_cfa_offset 8
+ 1933 08be BD46     		mov	sp, r7
+ 1934              		.cfi_def_cfa_register 13
+ 1935              		@ sp needed
+ 1936 08c0 80BD     		pop	{r7, pc}
+ 1937              	.L139:
+ 1938 08c2 00BF     		.align	2
+ 1939              	.L138:
+ 1940 08c4 00000000 		.word	schedule_vars
+ 1941              		.cfi_endproc
+ 1942              	.LFE24:
+ 1944              		.align	2
+ 1945              		.global	schedule_getOkToSend
+ 1946              		.thumb
+ 1947              		.thumb_func
+ 1949              	schedule_getOkToSend:
+ 1950              	.LFB25:
+ 673:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** 
+ 674:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** /**
+ 675:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** \brief Check whether I can send on this slot.
+ 676:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** 
+ 677:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** This function is called at the beginning of every TX slot.
+ 678:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** If the slot is *not* a shared slot, it always return TRUE.
+ 679:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** If the slot is a shared slot, it decrements the backoff counter and returns 
+ 680:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** TRUE only if it hits 0.
+ 681:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** 
+ 682:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** Note that the backoff counter is global, not per slot.
+ 683:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** 
+ 684:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** \returns TRUE if it is OK to send on this slot, FALSE otherwise.
+ 685:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** */
+ 686:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** bool schedule_getOkToSend() {
+ 1951              		.loc 1 686 0
+ 1952              		.cfi_startproc
+ 1953              		@ args = 0, pretend = 0, frame = 8
+ 1954              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1955 08c8 80B5     		push	{r7, lr}
+ 1956              		.cfi_def_cfa_offset 8
+ 1957              		.cfi_offset 7, -8
+ 1958              		.cfi_offset 14, -4
+ 1959 08ca 82B0     		sub	sp, sp, #8
+ 1960              		.cfi_def_cfa_offset 16
+ 1961 08cc 00AF     		add	r7, sp, #0
+ 1962              		.cfi_def_cfa_register 7
+ 687:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    bool returnVal;
+ 688:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 689:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    INTERRUPT_DECLARATION();
+ 690:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    DISABLE_INTERRUPTS();
+ 1963              		.loc 1 690 0
+ 1964 08ce FFF7FEFF 		bl	IntMasterDisable
+ 691:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 692:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    if (schedule_vars.currentScheduleEntry->shared==FALSE) {
+ 1965              		.loc 1 692 0
+ 1966 08d2 154B     		ldr	r3, .L146
+ 1967 08d4 D3F8FC30 		ldr	r3, [r3, #252]
+ 1968 08d8 DB78     		ldrb	r3, [r3, #3]	@ zero_extendqisi2
+ 1969 08da 83F00103 		eor	r3, r3, #1
+ 1970 08de DBB2     		uxtb	r3, r3
+ 1971 08e0 002B     		cmp	r3, #0
+ 1972 08e2 02D0     		beq	.L141
+ 693:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       // non-shared slot: backoff does not apply
+ 694:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       
+ 695:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       returnVal = TRUE;
+ 1973              		.loc 1 695 0
+ 1974 08e4 0123     		movs	r3, #1
+ 1975 08e6 FB71     		strb	r3, [r7, #7]
+ 1976 08e8 16E0     		b	.L142
+ 1977              	.L141:
+ 696:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    } else {
+ 697:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       // non-shared slot: check backoff before answering
+ 698:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       
+ 699:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       // decrement backoff
+ 700:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       if (schedule_vars.backoff>0) {
+ 1978              		.loc 1 700 0
+ 1979 08ea 0F4B     		ldr	r3, .L146
+ 1980 08ec 93F80731 		ldrb	r3, [r3, #263]	@ zero_extendqisi2
+ 1981 08f0 002B     		cmp	r3, #0
+ 1982 08f2 07D0     		beq	.L143
+ 701:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****          schedule_vars.backoff--;
+ 1983              		.loc 1 701 0
+ 1984 08f4 0C4B     		ldr	r3, .L146
+ 1985 08f6 93F80731 		ldrb	r3, [r3, #263]	@ zero_extendqisi2
+ 1986 08fa 013B     		subs	r3, r3, #1
+ 1987 08fc DAB2     		uxtb	r2, r3
+ 1988 08fe 0A4B     		ldr	r3, .L146
+ 1989 0900 83F80721 		strb	r2, [r3, #263]
+ 1990              	.L143:
+ 702:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       }
+ 703:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       
+ 704:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       // only return TRUE if backoff hit 0
+ 705:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       if (schedule_vars.backoff==0) {
+ 1991              		.loc 1 705 0
+ 1992 0904 084B     		ldr	r3, .L146
+ 1993 0906 93F80731 		ldrb	r3, [r3, #263]	@ zero_extendqisi2
+ 1994 090a 002B     		cmp	r3, #0
+ 1995 090c 02D1     		bne	.L144
+ 706:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****          returnVal = TRUE;
+ 1996              		.loc 1 706 0
+ 1997 090e 0123     		movs	r3, #1
+ 1998 0910 FB71     		strb	r3, [r7, #7]
+ 1999 0912 01E0     		b	.L142
+ 2000              	.L144:
+ 707:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       } else {
+ 708:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****          returnVal = FALSE;
+ 2001              		.loc 1 708 0
+ 2002 0914 0023     		movs	r3, #0
+ 2003 0916 FB71     		strb	r3, [r7, #7]
+ 2004              	.L142:
+ 709:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       }
+ 710:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    }
+ 711:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 712:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    ENABLE_INTERRUPTS();
+ 2005              		.loc 1 712 0
+ 2006 0918 FFF7FEFF 		bl	IntMasterEnable
+ 713:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 714:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    return returnVal;
+ 2007              		.loc 1 714 0
+ 2008 091c FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 715:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** }
+ 2009              		.loc 1 715 0
+ 2010 091e 1846     		mov	r0, r3
+ 2011 0920 0837     		adds	r7, r7, #8
+ 2012              		.cfi_def_cfa_offset 8
+ 2013 0922 BD46     		mov	sp, r7
+ 2014              		.cfi_def_cfa_register 13
+ 2015              		@ sp needed
+ 2016 0924 80BD     		pop	{r7, pc}
+ 2017              	.L147:
+ 2018 0926 00BF     		.align	2
+ 2019              	.L146:
+ 2020 0928 00000000 		.word	schedule_vars
+ 2021              		.cfi_endproc
+ 2022              	.LFE25:
+ 2024              		.align	2
+ 2025              		.global	schedule_resetBackoff
+ 2026              		.thumb
+ 2027              		.thumb_func
+ 2029              	schedule_resetBackoff:
+ 2030              	.LFB26:
+ 716:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** 
+ 717:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** /**
+ 718:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** \brief Reset the backoff and backoffExponent.
+ 719:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** */
+ 720:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** void schedule_resetBackoff() {
+ 2031              		.loc 1 720 0
+ 2032              		.cfi_startproc
+ 2033              		@ args = 0, pretend = 0, frame = 0
+ 2034              		@ frame_needed = 1, uses_anonymous_args = 0
+ 2035 092c 80B5     		push	{r7, lr}
+ 2036              		.cfi_def_cfa_offset 8
+ 2037              		.cfi_offset 7, -8
+ 2038              		.cfi_offset 14, -4
+ 2039 092e 00AF     		add	r7, sp, #0
+ 2040              		.cfi_def_cfa_register 7
+ 721:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 722:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    INTERRUPT_DECLARATION();
+ 723:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    DISABLE_INTERRUPTS();
+ 2041              		.loc 1 723 0
+ 2042 0930 FFF7FEFF 		bl	IntMasterDisable
+ 724:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 725:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    // reset backoffExponent
+ 726:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    schedule_vars.backoffExponent = MINBE-1;
+ 2043              		.loc 1 726 0
+ 2044 0934 054B     		ldr	r3, .L149
+ 2045 0936 0122     		movs	r2, #1
+ 2046 0938 83F80621 		strb	r2, [r3, #262]
+ 727:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    // reset backoff
+ 728:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    schedule_vars.backoff         = 0;
+ 2047              		.loc 1 728 0
+ 2048 093c 034B     		ldr	r3, .L149
+ 2049 093e 0022     		movs	r2, #0
+ 2050 0940 83F80721 		strb	r2, [r3, #263]
+ 729:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 730:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    ENABLE_INTERRUPTS();
+ 2051              		.loc 1 730 0
+ 2052 0944 FFF7FEFF 		bl	IntMasterEnable
+ 731:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** }
+ 2053              		.loc 1 731 0
+ 2054 0948 80BD     		pop	{r7, pc}
+ 2055              	.L150:
+ 2056 094a 00BF     		.align	2
+ 2057              	.L149:
+ 2058 094c 00000000 		.word	schedule_vars
+ 2059              		.cfi_endproc
+ 2060              	.LFE26:
+ 2062              		.align	2
+ 2063              		.global	schedule_indicateRx
+ 2064              		.thumb
+ 2065              		.thumb_func
+ 2067              	schedule_indicateRx:
+ 2068              	.LFB27:
+ 732:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** 
+ 733:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** /**
+ 734:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** \brief Indicate the reception of a packet.
+ 735:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** */
+ 736:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** void schedule_indicateRx(asn_t* asnTimestamp) {
+ 2069              		.loc 1 736 0
+ 2070              		.cfi_startproc
+ 2071              		@ args = 0, pretend = 0, frame = 8
+ 2072              		@ frame_needed = 1, uses_anonymous_args = 0
+ 2073 0950 80B5     		push	{r7, lr}
+ 2074              		.cfi_def_cfa_offset 8
+ 2075              		.cfi_offset 7, -8
+ 2076              		.cfi_offset 14, -4
+ 2077 0952 82B0     		sub	sp, sp, #8
+ 2078              		.cfi_def_cfa_offset 16
+ 2079 0954 00AF     		add	r7, sp, #0
+ 2080              		.cfi_def_cfa_register 7
+ 2081 0956 7860     		str	r0, [r7, #4]
+ 737:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 738:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    INTERRUPT_DECLARATION();
+ 739:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    DISABLE_INTERRUPTS();
+ 2082              		.loc 1 739 0
+ 2083 0958 FFF7FEFF 		bl	IntMasterDisable
+ 740:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 741:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    // increment usage statistics
+ 742:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    schedule_vars.currentScheduleEntry->numRx++;
+ 2084              		.loc 1 742 0
+ 2085 095c 0A4B     		ldr	r3, .L152
+ 2086 095e D3F8FC30 		ldr	r3, [r3, #252]
+ 2087 0962 9A7D     		ldrb	r2, [r3, #22]	@ zero_extendqisi2
+ 2088 0964 0132     		adds	r2, r2, #1
+ 2089 0966 D2B2     		uxtb	r2, r2
+ 2090 0968 9A75     		strb	r2, [r3, #22]
+ 743:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** 
+ 744:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    // update last used timestamp
+ 745:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    memcpy(&(schedule_vars.currentScheduleEntry->lastUsedAsn), asnTimestamp, sizeof(asn_t));
+ 2091              		.loc 1 745 0
+ 2092 096a 074B     		ldr	r3, .L152
+ 2093 096c D3F8FC30 		ldr	r3, [r3, #252]
+ 2094 0970 1933     		adds	r3, r3, #25
+ 2095 0972 1846     		mov	r0, r3
+ 2096 0974 7968     		ldr	r1, [r7, #4]
+ 2097 0976 0522     		movs	r2, #5
+ 2098 0978 FFF7FEFF 		bl	memcpy
+ 746:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 747:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    ENABLE_INTERRUPTS();
+ 2099              		.loc 1 747 0
+ 2100 097c FFF7FEFF 		bl	IntMasterEnable
+ 748:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** }
+ 2101              		.loc 1 748 0
+ 2102 0980 0837     		adds	r7, r7, #8
+ 2103              		.cfi_def_cfa_offset 8
+ 2104 0982 BD46     		mov	sp, r7
+ 2105              		.cfi_def_cfa_register 13
+ 2106              		@ sp needed
+ 2107 0984 80BD     		pop	{r7, pc}
+ 2108              	.L153:
+ 2109 0986 00BF     		.align	2
+ 2110              	.L152:
+ 2111 0988 00000000 		.word	schedule_vars
+ 2112              		.cfi_endproc
+ 2113              	.LFE27:
+ 2115              		.align	2
+ 2116              		.global	schedule_indicateTx
+ 2117              		.thumb
+ 2118              		.thumb_func
+ 2120              	schedule_indicateTx:
+ 2121              	.LFB28:
+ 749:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** 
+ 750:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** /**
+ 751:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** \brief Indicate the transmission of a packet.
+ 752:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** */
+ 753:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** void schedule_indicateTx(asn_t* asnTimestamp, bool succesfullTx) {
+ 2122              		.loc 1 753 0
+ 2123              		.cfi_startproc
+ 2124              		@ args = 0, pretend = 0, frame = 8
+ 2125              		@ frame_needed = 1, uses_anonymous_args = 0
+ 2126 098c 80B5     		push	{r7, lr}
+ 2127              		.cfi_def_cfa_offset 8
+ 2128              		.cfi_offset 7, -8
+ 2129              		.cfi_offset 14, -4
+ 2130 098e 82B0     		sub	sp, sp, #8
+ 2131              		.cfi_def_cfa_offset 16
+ 2132 0990 00AF     		add	r7, sp, #0
+ 2133              		.cfi_def_cfa_register 7
+ 2134 0992 7860     		str	r0, [r7, #4]
+ 2135 0994 0B46     		mov	r3, r1
+ 2136 0996 FB70     		strb	r3, [r7, #3]
+ 754:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 755:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    INTERRUPT_DECLARATION();
+ 756:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    DISABLE_INTERRUPTS();
+ 2137              		.loc 1 756 0
+ 2138 0998 FFF7FEFF 		bl	IntMasterDisable
+ 757:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 758:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    // increment usage statistics
+ 759:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    if (schedule_vars.currentScheduleEntry->numTx==0xFF) {
+ 2139              		.loc 1 759 0
+ 2140 099c 354B     		ldr	r3, .L160
+ 2141 099e D3F8FC30 		ldr	r3, [r3, #252]
+ 2142 09a2 DB7D     		ldrb	r3, [r3, #23]	@ zero_extendqisi2
+ 2143 09a4 FF2B     		cmp	r3, #255
+ 2144 09a6 13D1     		bne	.L155
+ 760:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       schedule_vars.currentScheduleEntry->numTx/=2;
+ 2145              		.loc 1 760 0
+ 2146 09a8 324B     		ldr	r3, .L160
+ 2147 09aa D3F8FC30 		ldr	r3, [r3, #252]
+ 2148 09ae 314A     		ldr	r2, .L160
+ 2149 09b0 D2F8FC20 		ldr	r2, [r2, #252]
+ 2150 09b4 D27D     		ldrb	r2, [r2, #23]	@ zero_extendqisi2
+ 2151 09b6 5208     		lsrs	r2, r2, #1
+ 2152 09b8 D2B2     		uxtb	r2, r2
+ 2153 09ba DA75     		strb	r2, [r3, #23]
+ 761:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       schedule_vars.currentScheduleEntry->numTxACK/=2;
+ 2154              		.loc 1 761 0
+ 2155 09bc 2D4B     		ldr	r3, .L160
+ 2156 09be D3F8FC30 		ldr	r3, [r3, #252]
+ 2157 09c2 2C4A     		ldr	r2, .L160
+ 2158 09c4 D2F8FC20 		ldr	r2, [r2, #252]
+ 2159 09c8 127E     		ldrb	r2, [r2, #24]	@ zero_extendqisi2
+ 2160 09ca 5208     		lsrs	r2, r2, #1
+ 2161 09cc D2B2     		uxtb	r2, r2
+ 2162 09ce 1A76     		strb	r2, [r3, #24]
+ 2163              	.L155:
+ 762:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    }
+ 763:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    schedule_vars.currentScheduleEntry->numTx++;
+ 2164              		.loc 1 763 0
+ 2165 09d0 284B     		ldr	r3, .L160
+ 2166 09d2 D3F8FC30 		ldr	r3, [r3, #252]
+ 2167 09d6 DA7D     		ldrb	r2, [r3, #23]	@ zero_extendqisi2
+ 2168 09d8 0132     		adds	r2, r2, #1
+ 2169 09da D2B2     		uxtb	r2, r2
+ 2170 09dc DA75     		strb	r2, [r3, #23]
+ 764:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    if (succesfullTx==TRUE) {
+ 2171              		.loc 1 764 0
+ 2172 09de FB78     		ldrb	r3, [r7, #3]	@ zero_extendqisi2
+ 2173 09e0 002B     		cmp	r3, #0
+ 2174 09e2 06D0     		beq	.L156
+ 765:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       schedule_vars.currentScheduleEntry->numTxACK++;
+ 2175              		.loc 1 765 0
+ 2176 09e4 234B     		ldr	r3, .L160
+ 2177 09e6 D3F8FC30 		ldr	r3, [r3, #252]
+ 2178 09ea 1A7E     		ldrb	r2, [r3, #24]	@ zero_extendqisi2
+ 2179 09ec 0132     		adds	r2, r2, #1
+ 2180 09ee D2B2     		uxtb	r2, r2
+ 2181 09f0 1A76     		strb	r2, [r3, #24]
+ 2182              	.L156:
+ 766:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    }
+ 767:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** 
+ 768:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    // update last used timestamp
+ 769:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    memcpy(&schedule_vars.currentScheduleEntry->lastUsedAsn, asnTimestamp, sizeof(asn_t));
+ 2183              		.loc 1 769 0
+ 2184 09f2 204B     		ldr	r3, .L160
+ 2185 09f4 D3F8FC30 		ldr	r3, [r3, #252]
+ 2186 09f8 1933     		adds	r3, r3, #25
+ 2187 09fa 1846     		mov	r0, r3
+ 2188 09fc 7968     		ldr	r1, [r7, #4]
+ 2189 09fe 0522     		movs	r2, #5
+ 2190 0a00 FFF7FEFF 		bl	memcpy
+ 770:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** 
+ 771:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    // update this backoff parameters for shared slots
+ 772:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    if (schedule_vars.currentScheduleEntry->shared==TRUE) {
+ 2191              		.loc 1 772 0
+ 2192 0a04 1B4B     		ldr	r3, .L160
+ 2193 0a06 D3F8FC30 		ldr	r3, [r3, #252]
+ 2194 0a0a DB78     		ldrb	r3, [r3, #3]	@ zero_extendqisi2
+ 2195 0a0c 002B     		cmp	r3, #0
+ 2196 0a0e 2CD0     		beq	.L157
+ 773:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       if (succesfullTx==TRUE) {
+ 2197              		.loc 1 773 0
+ 2198 0a10 FB78     		ldrb	r3, [r7, #3]	@ zero_extendqisi2
+ 2199 0a12 002B     		cmp	r3, #0
+ 2200 0a14 08D0     		beq	.L158
+ 774:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****          // reset backoffExponent
+ 775:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****          schedule_vars.backoffExponent = MINBE-1;
+ 2201              		.loc 1 775 0
+ 2202 0a16 174B     		ldr	r3, .L160
+ 2203 0a18 0122     		movs	r2, #1
+ 2204 0a1a 83F80621 		strb	r2, [r3, #262]
+ 776:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****          // reset backoff
+ 777:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****          schedule_vars.backoff         = 0;
+ 2205              		.loc 1 777 0
+ 2206 0a1e 154B     		ldr	r3, .L160
+ 2207 0a20 0022     		movs	r2, #0
+ 2208 0a22 83F80721 		strb	r2, [r3, #263]
+ 2209 0a26 20E0     		b	.L157
+ 2210              	.L158:
+ 778:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       } else {
+ 779:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****          // increase the backoffExponent
+ 780:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****          if (schedule_vars.backoffExponent<MAXBE) {
+ 2211              		.loc 1 780 0
+ 2212 0a28 124B     		ldr	r3, .L160
+ 2213 0a2a 93F80631 		ldrb	r3, [r3, #262]	@ zero_extendqisi2
+ 2214 0a2e 032B     		cmp	r3, #3
+ 2215 0a30 07D8     		bhi	.L159
+ 781:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****             schedule_vars.backoffExponent++;
+ 2216              		.loc 1 781 0
+ 2217 0a32 104B     		ldr	r3, .L160
+ 2218 0a34 93F80631 		ldrb	r3, [r3, #262]	@ zero_extendqisi2
+ 2219 0a38 0133     		adds	r3, r3, #1
+ 2220 0a3a DAB2     		uxtb	r2, r3
+ 2221 0a3c 0D4B     		ldr	r3, .L160
+ 2222 0a3e 83F80621 		strb	r2, [r3, #262]
+ 2223              	.L159:
+ 782:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****          }
+ 783:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****          // set the backoff to a random value in [0..2^BE]
+ 784:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****          schedule_vars.backoff         = openrandom_get16b()%(1<<schedule_vars.backoffExponent);
+ 2224              		.loc 1 784 0
+ 2225 0a42 FFF7FEFF 		bl	openrandom_get16b
+ 2226 0a46 0346     		mov	r3, r0
+ 2227 0a48 DAB2     		uxtb	r2, r3
+ 2228 0a4a 0A4B     		ldr	r3, .L160
+ 2229 0a4c 93F80631 		ldrb	r3, [r3, #262]	@ zero_extendqisi2
+ 2230 0a50 1946     		mov	r1, r3
+ 2231 0a52 0123     		movs	r3, #1
+ 2232 0a54 8B40     		lsls	r3, r3, r1
+ 2233 0a56 DBB2     		uxtb	r3, r3
+ 2234 0a58 013B     		subs	r3, r3, #1
+ 2235 0a5a DBB2     		uxtb	r3, r3
+ 2236 0a5c DBB2     		uxtb	r3, r3
+ 2237 0a5e 1340     		ands	r3, r3, r2
+ 2238 0a60 DBB2     		uxtb	r3, r3
+ 2239 0a62 DAB2     		uxtb	r2, r3
+ 2240 0a64 034B     		ldr	r3, .L160
+ 2241 0a66 83F80721 		strb	r2, [r3, #263]
+ 2242              	.L157:
+ 785:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****       }
+ 786:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    }
+ 787:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    
+ 788:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    ENABLE_INTERRUPTS();
+ 2243              		.loc 1 788 0
+ 2244 0a6a FFF7FEFF 		bl	IntMasterEnable
+ 789:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** }
+ 2245              		.loc 1 789 0
+ 2246 0a6e 0837     		adds	r7, r7, #8
+ 2247              		.cfi_def_cfa_offset 8
+ 2248 0a70 BD46     		mov	sp, r7
+ 2249              		.cfi_def_cfa_register 13
+ 2250              		@ sp needed
+ 2251 0a72 80BD     		pop	{r7, pc}
+ 2252              	.L161:
+ 2253              		.align	2
+ 2254              	.L160:
+ 2255 0a74 00000000 		.word	schedule_vars
+ 2256              		.cfi_endproc
+ 2257              	.LFE28:
+ 2259              		.align	2
+ 2260              		.global	schedule_resetEntry
+ 2261              		.thumb
+ 2262              		.thumb_func
+ 2264              	schedule_resetEntry:
+ 2265              	.LFB29:
+ 790:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** 
+ 791:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** //=========================== private =========================================
+ 792:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** 
+ 793:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** /**
+ 794:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** \pre This function assumes interrupts are already disabled.
+ 795:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** */
+ 796:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** void schedule_resetEntry(scheduleEntry_t* e) {
+ 2266              		.loc 1 796 0
+ 2267              		.cfi_startproc
+ 2268              		@ args = 0, pretend = 0, frame = 8
+ 2269              		@ frame_needed = 1, uses_anonymous_args = 0
+ 2270 0a78 80B5     		push	{r7, lr}
+ 2271              		.cfi_def_cfa_offset 8
+ 2272              		.cfi_offset 7, -8
+ 2273              		.cfi_offset 14, -4
+ 2274 0a7a 82B0     		sub	sp, sp, #8
+ 2275              		.cfi_def_cfa_offset 16
+ 2276 0a7c 00AF     		add	r7, sp, #0
+ 2277              		.cfi_def_cfa_register 7
+ 2278 0a7e 7860     		str	r0, [r7, #4]
+ 797:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    e->slotOffset             = 0;
+ 2279              		.loc 1 797 0
+ 2280 0a80 7B68     		ldr	r3, [r7, #4]
+ 2281 0a82 0022     		movs	r2, #0
+ 2282 0a84 1A80     		strh	r2, [r3]	@ movhi
+ 798:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    e->type                   = CELLTYPE_OFF;
+ 2283              		.loc 1 798 0
+ 2284 0a86 7B68     		ldr	r3, [r7, #4]
+ 2285 0a88 0022     		movs	r2, #0
+ 2286 0a8a 9A70     		strb	r2, [r3, #2]
+ 799:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    e->shared                 = FALSE;
+ 2287              		.loc 1 799 0
+ 2288 0a8c 7B68     		ldr	r3, [r7, #4]
+ 2289 0a8e 0022     		movs	r2, #0
+ 2290 0a90 DA70     		strb	r2, [r3, #3]
+ 800:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    e->channelOffset          = 0;
+ 2291              		.loc 1 800 0
+ 2292 0a92 7B68     		ldr	r3, [r7, #4]
+ 2293 0a94 0022     		movs	r2, #0
+ 2294 0a96 1A71     		strb	r2, [r3, #4]
+ 801:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** 
+ 802:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    e->neighbor.type          = ADDR_NONE;
+ 2295              		.loc 1 802 0
+ 2296 0a98 7B68     		ldr	r3, [r7, #4]
+ 2297 0a9a 0022     		movs	r2, #0
+ 2298 0a9c 5A71     		strb	r2, [r3, #5]
+ 803:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    memset(&e->neighbor.addr_64b[0], 0x00, sizeof(e->neighbor.addr_64b));
+ 2299              		.loc 1 803 0
+ 2300 0a9e 7B68     		ldr	r3, [r7, #4]
+ 2301 0aa0 0633     		adds	r3, r3, #6
+ 2302 0aa2 1846     		mov	r0, r3
+ 2303 0aa4 0021     		movs	r1, #0
+ 2304 0aa6 0822     		movs	r2, #8
+ 2305 0aa8 FFF7FEFF 		bl	memset
+ 804:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** 
+ 805:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    e->numRx                  = 0;
+ 2306              		.loc 1 805 0
+ 2307 0aac 7B68     		ldr	r3, [r7, #4]
+ 2308 0aae 0022     		movs	r2, #0
+ 2309 0ab0 9A75     		strb	r2, [r3, #22]
+ 806:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    e->numTx                  = 0;
+ 2310              		.loc 1 806 0
+ 2311 0ab2 7B68     		ldr	r3, [r7, #4]
+ 2312 0ab4 0022     		movs	r2, #0
+ 2313 0ab6 DA75     		strb	r2, [r3, #23]
+ 807:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    e->numTxACK               = 0;
+ 2314              		.loc 1 807 0
+ 2315 0ab8 7B68     		ldr	r3, [r7, #4]
+ 2316 0aba 0022     		movs	r2, #0
+ 2317 0abc 1A76     		strb	r2, [r3, #24]
+ 808:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    e->lastUsedAsn.bytes0and1 = 0;
+ 2318              		.loc 1 808 0
+ 2319 0abe 7B68     		ldr	r3, [r7, #4]
+ 2320 0ac0 0022     		movs	r2, #0
+ 2321 0ac2 9A83     		strh	r2, [r3, #28]	@ movhi
+ 809:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    e->lastUsedAsn.bytes2and3 = 0;
+ 2322              		.loc 1 809 0
+ 2323 0ac4 7B68     		ldr	r3, [r7, #4]
+ 2324 0ac6 0022     		movs	r2, #0
+ 2325 0ac8 5A83     		strh	r2, [r3, #26]	@ movhi
+ 810:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    e->lastUsedAsn.byte4      = 0;
+ 2326              		.loc 1 810 0
+ 2327 0aca 7B68     		ldr	r3, [r7, #4]
+ 2328 0acc 0022     		movs	r2, #0
+ 2329 0ace 5A76     		strb	r2, [r3, #25]
+ 811:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c ****    e->next                   = NULL;
+ 2330              		.loc 1 811 0
+ 2331 0ad0 7B68     		ldr	r3, [r7, #4]
+ 2332 0ad2 0022     		movs	r2, #0
+ 2333 0ad4 1A62     		str	r2, [r3, #32]
+ 812:build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.c **** }
+ 2334              		.loc 1 812 0
+ 2335 0ad6 0837     		adds	r7, r7, #8
+ 2336              		.cfi_def_cfa_offset 8
+ 2337 0ad8 BD46     		mov	sp, r7
+ 2338              		.cfi_def_cfa_register 13
+ 2339              		@ sp needed
+ 2340 0ada 80BD     		pop	{r7, pc}
+ 2341              		.cfi_endproc
+ 2342              	.LFE29:
+ 2344              	.Letext0:
+ 2345              		.file 2 "/usr/arm-none-eabi/include/machine/_default_types.h"
+ 2346              		.file 3 "/usr/arm-none-eabi/include/sys/_stdint.h"
+ 2347              		.file 4 "inc/opendefs.h"
+ 2348              		.file 5 "build/OpenMote-CC2538_armgcc/openstack/02b-MAChigh/schedule.h"
+ 2349              		.file 6 "bsp/boards/OpenMote-CC2538/board_info.h"
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 schedule.c
+     /tmp/ccmxrZc1.s:19     .rodata:0000000000000000 $d
+     /tmp/ccmxrZc1.s:22     .rodata:0000000000000000 rreg_uriquery
+     /tmp/ccmxrZc1.s:27     .rodata:0000000000000008 infoBoardname
+     /tmp/ccmxrZc1.s:32     .rodata:0000000000000010 infouCName
+     /tmp/ccmxrZc1.s:37     .rodata:0000000000000018 infoRadioName
+     /tmp/ccmxrZc1.s:42     .rodata:0000000000000024 infoStackName
+                            *COM*:000000000000010c schedule_vars
+     /tmp/ccmxrZc1.s:46     .text:0000000000000000 $t
+     /tmp/ccmxrZc1.s:51     .text:0000000000000000 schedule_init
+     /tmp/ccmxrZc1.s:2264   .text:0000000000000a78 schedule_resetEntry
+     /tmp/ccmxrZc1.s:168    .text:00000000000000a0 schedule_startDAGroot
+     /tmp/ccmxrZc1.s:781    .text:000000000000039c schedule_addActiveSlot
+     /tmp/ccmxrZc1.s:159    .text:000000000000009c $d
+     /tmp/ccmxrZc1.s:163    .text:00000000000000a0 $t
+     /tmp/ccmxrZc1.s:500    .text:0000000000000280 schedule_setFrameLength
+     /tmp/ccmxrZc1.s:552    .text:00000000000002b4 schedule_setFrameHandle
+     /tmp/ccmxrZc1.s:595    .text:00000000000002d8 schedule_setFrameNumber
+     /tmp/ccmxrZc1.s:244    .text:0000000000000104 $d
+     /tmp/ccmxrZc1.s:248    .text:0000000000000108 $t
+     /tmp/ccmxrZc1.s:253    .text:0000000000000108 debugPrint_schedule
+     /tmp/ccmxrZc1.s:441    .text:000000000000024c $d
+     /tmp/ccmxrZc1.s:445    .text:0000000000000250 $t
+     /tmp/ccmxrZc1.s:450    .text:0000000000000250 debugPrint_backoff
+     /tmp/ccmxrZc1.s:491    .text:000000000000027c $d
+     /tmp/ccmxrZc1.s:495    .text:0000000000000280 $t
+     /tmp/ccmxrZc1.s:543    .text:00000000000002b0 $d
+     /tmp/ccmxrZc1.s:547    .text:00000000000002b4 $t
+     /tmp/ccmxrZc1.s:586    .text:00000000000002d4 $d
+     /tmp/ccmxrZc1.s:590    .text:00000000000002d8 $t
+     /tmp/ccmxrZc1.s:629    .text:00000000000002f8 $d
+     /tmp/ccmxrZc1.s:633    .text:00000000000002fc $t
+     /tmp/ccmxrZc1.s:638    .text:00000000000002fc schedule_getSlotInfo
+     /tmp/ccmxrZc1.s:736    .text:0000000000000380 $d
+     /tmp/ccmxrZc1.s:740    .text:0000000000000384 $t
+     /tmp/ccmxrZc1.s:745    .text:0000000000000384 schedule_getMaxActiveSlots
+     /tmp/ccmxrZc1.s:772    .text:0000000000000398 $d
+     /tmp/ccmxrZc1.s:776    .text:000000000000039c $t
+     /tmp/ccmxrZc1.s:996    .text:00000000000004d0 $d
+     /tmp/ccmxrZc1.s:1000   .text:00000000000004d4 $t
+     /tmp/ccmxrZc1.s:1005   .text:00000000000004d4 schedule_removeActiveSlot
+     /tmp/ccmxrZc1.s:1168   .text:00000000000005c0 $d
+     /tmp/ccmxrZc1.s:1172   .text:00000000000005c4 $t
+     /tmp/ccmxrZc1.s:1177   .text:00000000000005c4 schedule_isSlotOffsetAvailable
+     /tmp/ccmxrZc1.s:1238   .text:000000000000060c $d
+     /tmp/ccmxrZc1.s:1242   .text:0000000000000610 $t
+     /tmp/ccmxrZc1.s:1247   .text:0000000000000610 schedule_statistic_poorLinkQuality
+     /tmp/ccmxrZc1.s:1328   .text:0000000000000678 $d
+     /tmp/ccmxrZc1.s:1332   .text:000000000000067c $t
+     /tmp/ccmxrZc1.s:1337   .text:000000000000067c schedule_getCellsCounts
+     /tmp/ccmxrZc1.s:1424   .text:00000000000006ec $d
+     /tmp/ccmxrZc1.s:1428   .text:00000000000006f0 $t
+     /tmp/ccmxrZc1.s:1433   .text:00000000000006f0 schedule_removeAllCells
+     /tmp/ccmxrZc1.s:1502   .text:000000000000074c $d
+     /tmp/ccmxrZc1.s:1506   .text:0000000000000750 $t
+     /tmp/ccmxrZc1.s:1511   .text:0000000000000750 schedule_getCurrentScheduleEntry
+     /tmp/ccmxrZc1.s:1538   .text:0000000000000764 $d
+     /tmp/ccmxrZc1.s:1542   .text:0000000000000768 $t
+     /tmp/ccmxrZc1.s:1547   .text:0000000000000768 schedule_syncSlotOffset
+     /tmp/ccmxrZc1.s:1599   .text:0000000000000798 schedule_advanceSlot
+     /tmp/ccmxrZc1.s:1590   .text:0000000000000794 $d
+     /tmp/ccmxrZc1.s:1594   .text:0000000000000798 $t
+     /tmp/ccmxrZc1.s:1626   .text:00000000000007b4 $d
+     /tmp/ccmxrZc1.s:1630   .text:00000000000007b8 $t
+     /tmp/ccmxrZc1.s:1635   .text:00000000000007b8 schedule_getNextActiveSlotOffset
+     /tmp/ccmxrZc1.s:1672   .text:00000000000007dc $d
+     /tmp/ccmxrZc1.s:1676   .text:00000000000007e0 $t
+     /tmp/ccmxrZc1.s:1681   .text:00000000000007e0 schedule_getFrameLength
+     /tmp/ccmxrZc1.s:1716   .text:0000000000000800 $d
+     /tmp/ccmxrZc1.s:1720   .text:0000000000000804 $t
+     /tmp/ccmxrZc1.s:1725   .text:0000000000000804 schedule_getFrameHandle
+     /tmp/ccmxrZc1.s:1760   .text:0000000000000824 $d
+     /tmp/ccmxrZc1.s:1764   .text:0000000000000828 $t
+     /tmp/ccmxrZc1.s:1769   .text:0000000000000828 schedule_getFrameNumber
+     /tmp/ccmxrZc1.s:1804   .text:0000000000000848 $d
+     /tmp/ccmxrZc1.s:1808   .text:000000000000084c $t
+     /tmp/ccmxrZc1.s:1813   .text:000000000000084c schedule_getType
+     /tmp/ccmxrZc1.s:1849   .text:0000000000000870 $d
+     /tmp/ccmxrZc1.s:1853   .text:0000000000000874 $t
+     /tmp/ccmxrZc1.s:1858   .text:0000000000000874 schedule_getNeighbor
+     /tmp/ccmxrZc1.s:1895   .text:000000000000089c $d
+     /tmp/ccmxrZc1.s:1899   .text:00000000000008a0 $t
+     /tmp/ccmxrZc1.s:1904   .text:00000000000008a0 schedule_getChannelOffset
+     /tmp/ccmxrZc1.s:1940   .text:00000000000008c4 $d
+     /tmp/ccmxrZc1.s:1944   .text:00000000000008c8 $t
+     /tmp/ccmxrZc1.s:1949   .text:00000000000008c8 schedule_getOkToSend
+     /tmp/ccmxrZc1.s:2020   .text:0000000000000928 $d
+     /tmp/ccmxrZc1.s:2024   .text:000000000000092c $t
+     /tmp/ccmxrZc1.s:2029   .text:000000000000092c schedule_resetBackoff
+     /tmp/ccmxrZc1.s:2058   .text:000000000000094c $d
+     /tmp/ccmxrZc1.s:2062   .text:0000000000000950 $t
+     /tmp/ccmxrZc1.s:2067   .text:0000000000000950 schedule_indicateRx
+     /tmp/ccmxrZc1.s:2111   .text:0000000000000988 $d
+     /tmp/ccmxrZc1.s:2115   .text:000000000000098c $t
+     /tmp/ccmxrZc1.s:2120   .text:000000000000098c schedule_indicateTx
+     /tmp/ccmxrZc1.s:2255   .text:0000000000000a74 $d
+     /tmp/ccmxrZc1.s:2259   .text:0000000000000a78 $t
+                     .debug_frame:0000000000000010 $d
+                           .group:0000000000000000 wm4.0.59116071098782a37a9183a8102fe91b
+                           .group:0000000000000000 wm4.features.h.22.2e382148a0560adabf236cddd4e880f4
+                           .group:0000000000000000 wm4._default_types.h.15.933e8edd27a65e0b69af4a865eb623d2
+                           .group:0000000000000000 wm4._intsup.h.10.35a45952db64d30146faa63a55c20c1c
+                           .group:0000000000000000 wm4._stdint.h.10.f76354baea1c7088202064e6f3d4f5e3
+                           .group:0000000000000000 wm4.stdint.h.23.373a9d32a9e4c2e88fd347156532d281
+                           .group:0000000000000000 wm4.toolchain_defs.h.2.e4ebbe6e0a48032a9b79077dc42e1ffd
+                           .group:0000000000000000 wm4.newlib.h.8.2702bca278809460f0af6fba1d84eb68
+                           .group:0000000000000000 wm4.config.h.220.a09b0b0de3c25be3f39d71990e617bff
+                           .group:0000000000000000 wm4._ansi.h.23.84af8eb8cd468d25cc5f45f5eb13ec51
+                           .group:0000000000000000 wm4.stddef.h.39.daafd3d79fe2f3a84d2d73d7d4e706f8
+                           .group:0000000000000000 wm4.lock.h.2.9bc98482741e5e2a9450b12934a684ea
+                           .group:0000000000000000 wm4._types.h.54.d3d34a3b7f3cc230cd159baf022b4b08
+                           .group:0000000000000000 wm4.stddef.h.158.61317cdbfb4026324507d123a50b0fd6
+                           .group:0000000000000000 wm4.reent.h.17.8bd9e4098e0428508c282cad794fae43
+                           .group:0000000000000000 wm4.cdefs.h.47.e6563c1c3863188ba4ac4eaa2c85b6f1
+                           .group:0000000000000000 wm4.string.h.15.dab3980bf35408a4c507182805e2de3a
+                           .group:0000000000000000 wm4.stddef.h.158.a7efb00f6cbc6f43213b50e183c9830c
+                           .group:0000000000000000 wm4.stdbool.h.29.1c9ee6859ce8145f7838a4f2549ccec2
+                           .group:0000000000000000 wm4.hw_types.h.67.b10589a0806dcc2d274d6fab6b736519
+                           .group:0000000000000000 wm4.interrupt.h.41.272fc4ec0e276feb439e7974d0f77eaf
+                           .group:0000000000000000 wm4.board_info.h.22.aeb00002354a4949fff54190040e37af
+                           .group:0000000000000000 wm4.opendefs.h.23.bdaf9c024be66ead04de21e3ce3dfaf2
+                           .group:0000000000000000 wm4.schedule.h.2.80d40225a0ebadc3afa75a6755f49055
+                           .group:0000000000000000 wm4.openserial.h.8.a9fe077ce3323e4f6730d3ecdff542cc
+                           .group:0000000000000000 wm4.opentimers.h.8.044f2d040a134cdb0ddb58adfc2508be
+                           .group:0000000000000000 wm4.processIE.h.2.08a2f2ba75e9146930605c9ce967d701
+                           .group:0000000000000000 wm4.sixtop.h.16.86500a0bb0402cd2ae7c7334d9c87a2b
+                           .group:0000000000000000 wm4.idmanager.h.2.8c0e2159b32ef3125cbb1e984805cbfe
+
+UNDEFINED SYMBOLS
+memset
+idmanager_getIsDAGroot
+openserial_printStatus
+IntMasterDisable
+IntMasterEnable
+packetfunctions_sameAddress
+openserial_printCritical
+memcpy
+openrandom_get16b

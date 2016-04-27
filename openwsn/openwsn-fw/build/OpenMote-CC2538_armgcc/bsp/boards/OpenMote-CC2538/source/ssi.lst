@@ -1,0 +1,1715 @@
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 6
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.file	"ssi.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.align	2
+  19              		.global	SSIConfigSetExpClk
+  20              		.thumb
+  21              		.thumb_func
+  23              	SSIConfigSetExpClk:
+  24              	.LFB0:
+  25              		.file 1 "build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c"
+   1:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** /******************************************************************************
+   2:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** *  Filename:       ssi.c
+   3:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** *  Revised:        $Date: 2013-03-20 14:47:53 +0100 (Wed, 20 Mar 2013) $
+   4:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** *  Revision:       $Revision: 9489 $
+   5:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** *
+   6:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** *  Description:    Driver for Synchronous Serial Interface.
+   7:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** *
+   8:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** *  Copyright (C) 2012 Texas Instruments Incorporated - http://www.ti.com/
+   9:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** *
+  10:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** *
+  11:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** *  Redistribution and use in source and binary forms, with or without
+  12:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** *  modification, are permitted provided that the following conditions
+  13:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** *  are met:
+  14:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** *
+  15:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** *    Redistributions of source code must retain the above copyright
+  16:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** *    notice, this list of conditions and the following disclaimer.
+  17:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** *
+  18:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** *    Redistributions in binary form must reproduce the above copyright
+  19:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** *    notice, this list of conditions and the following disclaimer in the
+  20:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** *    documentation and/or other materials provided with the distribution.
+  21:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** *
+  22:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** *    Neither the name of Texas Instruments Incorporated nor the names of
+  23:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** *    its contributors may be used to endorse or promote products derived
+  24:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** *    from this software without specific prior written permission.
+  25:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** *
+  26:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  27:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** *  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  28:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** *  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  29:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** *  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  30:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** *  OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  31:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** *  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  32:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** *  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  33:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** *  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  34:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** *  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  35:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  36:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** *  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  37:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** *
+  38:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** ******************************************************************************/
+  39:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** 
+  40:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //*****************************************************************************
+  41:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //
+  42:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! \addtogroup ssi_api
+  43:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! @{
+  44:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //
+  45:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //*****************************************************************************
+  46:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** 
+  47:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** #include <headers/hw_ints.h>
+  48:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** #include <headers/hw_memmap.h>
+  49:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** #include <headers/hw_ssi.h>
+  50:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** #include "debug.h"
+  51:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** #include "interrupt.h"
+  52:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** #include "ssi.h"
+  53:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** 
+  54:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //*****************************************************************************
+  55:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //
+  56:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! Configures the synchronous serial interface
+  57:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //!
+  58:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! \param ui32Base specifies the SSI module base address.
+  59:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! \param ui32SSIClk is the rate of the clock supplied to the SSI module.
+  60:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! \param ui32Protocol specifies the data transfer protocol.
+  61:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! \param ui32Mode specifies the mode of operation.
+  62:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! \param ui32BitRate specifies the clock rate.
+  63:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! \param ui32DataWidth specifies number of bits transferred per frame.
+  64:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //!
+  65:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! This function configures the synchronous serial interface.  It sets
+  66:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! the SSI protocol, mode of operation, bit rate, and data width.
+  67:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //!
+  68:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! The \e ui32Protocol parameter defines the data frame format.  The
+  69:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! \e ui32Protocol parameter can be one of the following values:
+  70:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! \b SSI_FRF_MOTO_MODE_0, \b SSI_FRF_MOTO_MODE_1, \b SSI_FRF_MOTO_MODE_2,
+  71:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! \b SSI_FRF_MOTO_MODE_3, \b SSI_FRF_TI, or \b SSI_FRF_NMW.  The Motorola
+  72:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! frame formats imply the following polarity and phase configurations:
+  73:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //!
+  74:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! <pre>
+  75:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! Polarity Phase       Mode
+  76:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //!   0       0   SSI_FRF_MOTO_MODE_0
+  77:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //!   0       1   SSI_FRF_MOTO_MODE_1
+  78:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //!   1       0   SSI_FRF_MOTO_MODE_2
+  79:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //!   1       1   SSI_FRF_MOTO_MODE_3
+  80:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! </pre>
+  81:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //!
+  82:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! The \e ui32Mode parameter defines the operating mode of the SSI module.  The
+  83:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! SSI module can operate as a master or slave; if a slave, the SSI can be
+  84:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! configured to disable output on its serial output line.  The \e ui32Mode
+  85:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! parameter can be one of the following values: \b SSI_MODE_MASTER,
+  86:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! \b SSI_MODE_SLAVE, or \b SSI_MODE_SLAVE_OD.
+  87:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //!
+  88:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! The \e ui32BitRate parameter defines the bit rate for the SSI.  This bit rate
+  89:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! must satisfy the following clock ratio criteria:
+  90:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //!
+  91:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! - FSSI >= 2 * bit rate (master mode)
+  92:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! - FSSI >= 12 * bit rate (slave modes)
+  93:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //!
+  94:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! where FSSI is the frequency of the clock supplied to the SSI module.
+  95:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //!
+  96:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! The \e ui32DataWidth parameter defines the width of the data transfers, and
+  97:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! can be a value between 4 and 16, inclusive.
+  98:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //!
+  99:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! The peripheral clock is set in the System Control module.  The frequency of
+ 100:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! the system clock is the value returned by SysCtrlClockGet() or
+ 101:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! SysCtrlIOClockGet() depending on the chosen clock source as set by
+ 102:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! SSIClockSourceSet(), or it can be explicitly hard coded if it is constant
+ 103:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! and known (to save the code/execution overhead of a call to
+ 104:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! SysCtrlClockGet() or SysCtrlIOClockGet()).
+ 105:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //!
+ 106:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! \return None
+ 107:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //
+ 108:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //*****************************************************************************
+ 109:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** void
+ 110:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** SSIConfigSetExpClk(uint32_t ui32Base, uint32_t ui32SSIClk,
+ 111:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****                    uint32_t ui32Protocol, uint32_t ui32Mode,
+ 112:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****                    uint32_t ui32BitRate, uint32_t ui32DataWidth)
+ 113:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** {
+  26              		.loc 1 113 0
+  27              		.cfi_startproc
+  28              		@ args = 8, pretend = 0, frame = 40
+  29              		@ frame_needed = 1, uses_anonymous_args = 0
+  30              		@ link register save eliminated.
+  31 0000 80B4     		push	{r7}
+  32              		.cfi_def_cfa_offset 4
+  33              		.cfi_offset 7, -4
+  34 0002 8BB0     		sub	sp, sp, #44
+  35              		.cfi_def_cfa_offset 48
+  36 0004 00AF     		add	r7, sp, #0
+  37              		.cfi_def_cfa_register 7
+  38 0006 F860     		str	r0, [r7, #12]
+  39 0008 B960     		str	r1, [r7, #8]
+  40 000a 7A60     		str	r2, [r7, #4]
+  41 000c 3B60     		str	r3, [r7]
+ 114:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     uint32_t ui32MaxBitRate;
+ 115:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     uint32_t ui32RegVal;
+ 116:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     uint32_t ui32PreDiv;
+ 117:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     uint32_t ui32SCR;
+ 118:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     uint32_t ui32SPH_SPO;
+ 119:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** 
+ 120:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 121:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     // Check the arguments.
+ 122:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 123:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     ASSERT((ui32Base == SSI0_BASE) || (ui32Base == SSI1_BASE));
+ 124:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     ASSERT((ui32Protocol == SSI_FRF_MOTO_MODE_0) ||
+ 125:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****            (ui32Protocol == SSI_FRF_MOTO_MODE_1) ||
+ 126:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****            (ui32Protocol == SSI_FRF_MOTO_MODE_2) ||
+ 127:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****            (ui32Protocol == SSI_FRF_MOTO_MODE_3) ||
+ 128:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****            (ui32Protocol == SSI_FRF_TI) ||
+ 129:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****            (ui32Protocol == SSI_FRF_NMW));
+ 130:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     ASSERT((ui32Mode == SSI_MODE_MASTER) ||
+ 131:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****            (ui32Mode == SSI_MODE_SLAVE) ||
+ 132:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****            (ui32Mode == SSI_MODE_SLAVE_OD));
+ 133:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     ASSERT(((ui32Mode == SSI_MODE_MASTER) && (ui32BitRate <= (ui32SSIClk / 2))) ||
+ 134:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****            ((ui32Mode != SSI_MODE_MASTER) && (ui32BitRate <= (ui32SSIClk / 12))));
+ 135:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     ASSERT((ui32SSIClk / ui32BitRate) <= (254 * 256));
+ 136:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     ASSERT((ui32DataWidth >= 4) && (ui32DataWidth <= 16));
+ 137:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** 
+ 138:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 139:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     // Set the mode.
+ 140:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 141:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     ui32RegVal = (ui32Mode == SSI_MODE_SLAVE_OD) ? SSI_CR1_SOD : 0;
+  42              		.loc 1 141 0
+  43 000e 3B68     		ldr	r3, [r7]
+  44 0010 022B     		cmp	r3, #2
+  45 0012 01D1     		bne	.L2
+  46              		.loc 1 141 0 is_stmt 0 discriminator 1
+  47 0014 0823     		movs	r3, #8
+  48 0016 00E0     		b	.L3
+  49              	.L2:
+  50              		.loc 1 141 0 discriminator 2
+  51 0018 0023     		movs	r3, #0
+  52              	.L3:
+  53              		.loc 1 141 0 discriminator 4
+  54 001a 3B62     		str	r3, [r7, #32]
+ 142:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     ui32RegVal |= (ui32Mode == SSI_MODE_MASTER) ? 0 : SSI_CR1_MS;
+  55              		.loc 1 142 0 is_stmt 1 discriminator 4
+  56 001c 3B68     		ldr	r3, [r7]
+  57 001e 002B     		cmp	r3, #0
+  58 0020 01D1     		bne	.L4
+  59              		.loc 1 142 0 is_stmt 0 discriminator 1
+  60 0022 0023     		movs	r3, #0
+  61 0024 00E0     		b	.L5
+  62              	.L4:
+  63              		.loc 1 142 0 discriminator 2
+  64 0026 0423     		movs	r3, #4
+  65              	.L5:
+  66              		.loc 1 142 0 discriminator 4
+  67 0028 3A6A     		ldr	r2, [r7, #32]
+  68 002a 1343     		orrs	r3, r3, r2
+  69 002c 3B62     		str	r3, [r7, #32]
+ 143:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     HWREG(ui32Base + SSI_O_CR1) = ui32RegVal;
+  70              		.loc 1 143 0 is_stmt 1 discriminator 4
+  71 002e FB68     		ldr	r3, [r7, #12]
+  72 0030 0433     		adds	r3, r3, #4
+  73 0032 1A46     		mov	r2, r3
+  74 0034 3B6A     		ldr	r3, [r7, #32]
+  75 0036 1360     		str	r3, [r2]
+ 144:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** 
+ 145:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 146:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     // Set the clock predivider.
+ 147:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 148:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     ui32MaxBitRate = ui32SSIClk / ui32BitRate;
+  76              		.loc 1 148 0 discriminator 4
+  77 0038 BA68     		ldr	r2, [r7, #8]
+  78 003a 3B6B     		ldr	r3, [r7, #48]
+  79 003c B2FBF3F3 		udiv	r3, r2, r3
+  80 0040 FB61     		str	r3, [r7, #28]
+ 149:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     ui32PreDiv = 0;
+  81              		.loc 1 149 0 discriminator 4
+  82 0042 0023     		movs	r3, #0
+  83 0044 7B62     		str	r3, [r7, #36]
+  84              	.L6:
+ 150:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     do
+ 151:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     {
+ 152:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****         ui32PreDiv += 2;
+  85              		.loc 1 152 0 discriminator 1
+  86 0046 7B6A     		ldr	r3, [r7, #36]
+  87 0048 0233     		adds	r3, r3, #2
+  88 004a 7B62     		str	r3, [r7, #36]
+ 153:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****         ui32SCR = (ui32MaxBitRate / ui32PreDiv) - 1;
+  89              		.loc 1 153 0 discriminator 1
+  90 004c FA69     		ldr	r2, [r7, #28]
+  91 004e 7B6A     		ldr	r3, [r7, #36]
+  92 0050 B2FBF3F3 		udiv	r3, r2, r3
+  93 0054 013B     		subs	r3, r3, #1
+  94 0056 BB61     		str	r3, [r7, #24]
+ 154:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     }
+ 155:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     while(ui32SCR > 255);
+  95              		.loc 1 155 0 discriminator 1
+  96 0058 BB69     		ldr	r3, [r7, #24]
+  97 005a FF2B     		cmp	r3, #255
+  98 005c F3D8     		bhi	.L6
+ 156:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     HWREG(ui32Base + SSI_O_CPSR) = ui32PreDiv;
+  99              		.loc 1 156 0
+ 100 005e FB68     		ldr	r3, [r7, #12]
+ 101 0060 1033     		adds	r3, r3, #16
+ 102 0062 1A46     		mov	r2, r3
+ 103 0064 7B6A     		ldr	r3, [r7, #36]
+ 104 0066 1360     		str	r3, [r2]
+ 157:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** 
+ 158:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 159:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     // Set protocol and clock rate.
+ 160:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 161:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     ui32SPH_SPO = (ui32Protocol & 3) << 6;
+ 105              		.loc 1 161 0
+ 106 0068 7B68     		ldr	r3, [r7, #4]
+ 107 006a 9B01     		lsls	r3, r3, #6
+ 108 006c DBB2     		uxtb	r3, r3
+ 109 006e 7B61     		str	r3, [r7, #20]
+ 162:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     ui32Protocol &= SSI_CR0_FRF_M;
+ 110              		.loc 1 162 0
+ 111 0070 7B68     		ldr	r3, [r7, #4]
+ 112 0072 03F03003 		and	r3, r3, #48
+ 113 0076 7B60     		str	r3, [r7, #4]
+ 163:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     ui32RegVal = (ui32SCR << 8) | ui32SPH_SPO | ui32Protocol | (ui32DataWidth - 1);
+ 114              		.loc 1 163 0
+ 115 0078 BB69     		ldr	r3, [r7, #24]
+ 116 007a 1A02     		lsls	r2, r3, #8
+ 117 007c 7B69     		ldr	r3, [r7, #20]
+ 118 007e 1A43     		orrs	r2, r2, r3
+ 119 0080 7B68     		ldr	r3, [r7, #4]
+ 120 0082 1A43     		orrs	r2, r2, r3
+ 121 0084 7B6B     		ldr	r3, [r7, #52]
+ 122 0086 013B     		subs	r3, r3, #1
+ 123 0088 1343     		orrs	r3, r3, r2
+ 124 008a 3B62     		str	r3, [r7, #32]
+ 164:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     HWREG(ui32Base + SSI_O_CR0) = ui32RegVal;
+ 125              		.loc 1 164 0
+ 126 008c FB68     		ldr	r3, [r7, #12]
+ 127 008e 3A6A     		ldr	r2, [r7, #32]
+ 128 0090 1A60     		str	r2, [r3]
+ 165:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** }
+ 129              		.loc 1 165 0
+ 130 0092 2C37     		adds	r7, r7, #44
+ 131              		.cfi_def_cfa_offset 4
+ 132 0094 BD46     		mov	sp, r7
+ 133              		.cfi_def_cfa_register 13
+ 134              		@ sp needed
+ 135 0096 5DF8047B 		ldr	r7, [sp], #4
+ 136              		.cfi_restore 7
+ 137              		.cfi_def_cfa_offset 0
+ 138 009a 7047     		bx	lr
+ 139              		.cfi_endproc
+ 140              	.LFE0:
+ 142              		.align	2
+ 143              		.global	SSIEnable
+ 144              		.thumb
+ 145              		.thumb_func
+ 147              	SSIEnable:
+ 148              	.LFB1:
+ 166:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** 
+ 167:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //*****************************************************************************
+ 168:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //
+ 169:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! Enables the synchronous serial interface
+ 170:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //!
+ 171:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! \param ui32Base specifies the SSI module base address.
+ 172:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //!
+ 173:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! This function enables operation of the synchronous serial interface.  The
+ 174:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! synchronous serial interface must be configured before it is enabled.
+ 175:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //!
+ 176:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! \return None
+ 177:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //
+ 178:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //*****************************************************************************
+ 179:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** void
+ 180:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** SSIEnable(uint32_t ui32Base)
+ 181:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** {
+ 149              		.loc 1 181 0
+ 150              		.cfi_startproc
+ 151              		@ args = 0, pretend = 0, frame = 8
+ 152              		@ frame_needed = 1, uses_anonymous_args = 0
+ 153              		@ link register save eliminated.
+ 154 009c 80B4     		push	{r7}
+ 155              		.cfi_def_cfa_offset 4
+ 156              		.cfi_offset 7, -4
+ 157 009e 83B0     		sub	sp, sp, #12
+ 158              		.cfi_def_cfa_offset 16
+ 159 00a0 00AF     		add	r7, sp, #0
+ 160              		.cfi_def_cfa_register 7
+ 161 00a2 7860     		str	r0, [r7, #4]
+ 182:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 183:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     // Check the arguments.
+ 184:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 185:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     ASSERT((ui32Base == SSI0_BASE) || (ui32Base == SSI1_BASE));
+ 186:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** 
+ 187:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 188:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     // Read-modify-write the enable bit.
+ 189:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 190:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     HWREG(ui32Base + SSI_O_CR1) |= SSI_CR1_SSE;
+ 162              		.loc 1 190 0
+ 163 00a4 7B68     		ldr	r3, [r7, #4]
+ 164 00a6 0433     		adds	r3, r3, #4
+ 165 00a8 1A46     		mov	r2, r3
+ 166 00aa 7B68     		ldr	r3, [r7, #4]
+ 167 00ac 0433     		adds	r3, r3, #4
+ 168 00ae 1B68     		ldr	r3, [r3]
+ 169 00b0 43F00203 		orr	r3, r3, #2
+ 170 00b4 1360     		str	r3, [r2]
+ 191:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** }
+ 171              		.loc 1 191 0
+ 172 00b6 0C37     		adds	r7, r7, #12
+ 173              		.cfi_def_cfa_offset 4
+ 174 00b8 BD46     		mov	sp, r7
+ 175              		.cfi_def_cfa_register 13
+ 176              		@ sp needed
+ 177 00ba 5DF8047B 		ldr	r7, [sp], #4
+ 178              		.cfi_restore 7
+ 179              		.cfi_def_cfa_offset 0
+ 180 00be 7047     		bx	lr
+ 181              		.cfi_endproc
+ 182              	.LFE1:
+ 184              		.align	2
+ 185              		.global	SSIDisable
+ 186              		.thumb
+ 187              		.thumb_func
+ 189              	SSIDisable:
+ 190              	.LFB2:
+ 192:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** 
+ 193:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //*****************************************************************************
+ 194:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //
+ 195:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! Disables the synchronous serial interface
+ 196:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //!
+ 197:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! \param ui32Base specifies the SSI module base address.
+ 198:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //!
+ 199:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! This function disables operation of the synchronous serial interface.
+ 200:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //!
+ 201:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! \return None
+ 202:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //
+ 203:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //*****************************************************************************
+ 204:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** void
+ 205:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** SSIDisable(uint32_t ui32Base)
+ 206:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** {
+ 191              		.loc 1 206 0
+ 192              		.cfi_startproc
+ 193              		@ args = 0, pretend = 0, frame = 8
+ 194              		@ frame_needed = 1, uses_anonymous_args = 0
+ 195              		@ link register save eliminated.
+ 196 00c0 80B4     		push	{r7}
+ 197              		.cfi_def_cfa_offset 4
+ 198              		.cfi_offset 7, -4
+ 199 00c2 83B0     		sub	sp, sp, #12
+ 200              		.cfi_def_cfa_offset 16
+ 201 00c4 00AF     		add	r7, sp, #0
+ 202              		.cfi_def_cfa_register 7
+ 203 00c6 7860     		str	r0, [r7, #4]
+ 207:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 208:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     // Check the arguments.
+ 209:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 210:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     ASSERT((ui32Base == SSI0_BASE) || (ui32Base == SSI1_BASE));
+ 211:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** 
+ 212:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 213:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     // Read-modify-write the enable bit.
+ 214:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 215:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     HWREG(ui32Base + SSI_O_CR1) &= ~(SSI_CR1_SSE);
+ 204              		.loc 1 215 0
+ 205 00c8 7B68     		ldr	r3, [r7, #4]
+ 206 00ca 0433     		adds	r3, r3, #4
+ 207 00cc 1A46     		mov	r2, r3
+ 208 00ce 7B68     		ldr	r3, [r7, #4]
+ 209 00d0 0433     		adds	r3, r3, #4
+ 210 00d2 1B68     		ldr	r3, [r3]
+ 211 00d4 23F00203 		bic	r3, r3, #2
+ 212 00d8 1360     		str	r3, [r2]
+ 216:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** }
+ 213              		.loc 1 216 0
+ 214 00da 0C37     		adds	r7, r7, #12
+ 215              		.cfi_def_cfa_offset 4
+ 216 00dc BD46     		mov	sp, r7
+ 217              		.cfi_def_cfa_register 13
+ 218              		@ sp needed
+ 219 00de 5DF8047B 		ldr	r7, [sp], #4
+ 220              		.cfi_restore 7
+ 221              		.cfi_def_cfa_offset 0
+ 222 00e2 7047     		bx	lr
+ 223              		.cfi_endproc
+ 224              	.LFE2:
+ 226              		.align	2
+ 227              		.global	SSIIntRegister
+ 228              		.thumb
+ 229              		.thumb_func
+ 231              	SSIIntRegister:
+ 232              	.LFB3:
+ 217:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** 
+ 218:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //*****************************************************************************
+ 219:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //
+ 220:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! Registers an interrupt handler for the synchronous serial interface
+ 221:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //!
+ 222:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! \param ui32Base specifies the SSI module base address.
+ 223:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! \param pfnHandler is a pointer to the function to be called when the
+ 224:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! synchronous serial interface interrupt occurs.
+ 225:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //!
+ 226:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! This sets the handler to be called when an SSI interrupt
+ 227:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! occurs.  This will enable the global interrupt in the interrupt controller;
+ 228:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! specific SSI interrupts must be enabled via SSIIntEnable().  If necessary,
+ 229:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! it is the interrupt handler's responsibility to clear the interrupt source
+ 230:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! via SSIIntClear().
+ 231:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //!
+ 232:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! \sa See IntRegister() for important information about registering interrupt
+ 233:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! handlers.
+ 234:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //!
+ 235:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! \return None
+ 236:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //
+ 237:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //*****************************************************************************
+ 238:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** void
+ 239:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** SSIIntRegister(uint32_t ui32Base, void (*pfnHandler)(void))
+ 240:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** {
+ 233              		.loc 1 240 0
+ 234              		.cfi_startproc
+ 235              		@ args = 0, pretend = 0, frame = 16
+ 236              		@ frame_needed = 1, uses_anonymous_args = 0
+ 237 00e4 80B5     		push	{r7, lr}
+ 238              		.cfi_def_cfa_offset 8
+ 239              		.cfi_offset 7, -8
+ 240              		.cfi_offset 14, -4
+ 241 00e6 84B0     		sub	sp, sp, #16
+ 242              		.cfi_def_cfa_offset 24
+ 243 00e8 00AF     		add	r7, sp, #0
+ 244              		.cfi_def_cfa_register 7
+ 245 00ea 7860     		str	r0, [r7, #4]
+ 246 00ec 3960     		str	r1, [r7]
+ 241:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     uint32_t ui32Int;
+ 242:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** 
+ 243:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 244:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     // Check the arguments.
+ 245:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 246:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     ASSERT((ui32Base == SSI0_BASE) || (ui32Base == SSI1_BASE));
+ 247:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** 
+ 248:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 249:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     // Determine the interrupt number based on the SSI port.
+ 250:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 251:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     ui32Int = (ui32Base == SSI0_BASE) ? INT_SSI0 : INT_SSI1;
+ 247              		.loc 1 251 0
+ 248 00ee 7B68     		ldr	r3, [r7, #4]
+ 249 00f0 084A     		ldr	r2, .L12
+ 250 00f2 9342     		cmp	r3, r2
+ 251 00f4 01D1     		bne	.L10
+ 252              		.loc 1 251 0 is_stmt 0 discriminator 1
+ 253 00f6 1723     		movs	r3, #23
+ 254 00f8 00E0     		b	.L11
+ 255              	.L10:
+ 256              		.loc 1 251 0 discriminator 2
+ 257 00fa 3223     		movs	r3, #50
+ 258              	.L11:
+ 259              		.loc 1 251 0 discriminator 4
+ 260 00fc FB60     		str	r3, [r7, #12]
+ 252:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** 
+ 253:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 254:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     // Register the interrupt handler, returning an error if an error occurs.
+ 255:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 256:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     IntRegister(ui32Int, pfnHandler);
+ 261              		.loc 1 256 0 is_stmt 1 discriminator 4
+ 262 00fe F868     		ldr	r0, [r7, #12]
+ 263 0100 3968     		ldr	r1, [r7]
+ 264 0102 FFF7FEFF 		bl	IntRegister
+ 257:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** 
+ 258:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 259:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     // Enable the synchronous serial interface interrupt.
+ 260:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 261:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     IntEnable(ui32Int);
+ 265              		.loc 1 261 0 discriminator 4
+ 266 0106 F868     		ldr	r0, [r7, #12]
+ 267 0108 FFF7FEFF 		bl	IntEnable
+ 262:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** }
+ 268              		.loc 1 262 0 discriminator 4
+ 269 010c 1037     		adds	r7, r7, #16
+ 270              		.cfi_def_cfa_offset 8
+ 271 010e BD46     		mov	sp, r7
+ 272              		.cfi_def_cfa_register 13
+ 273              		@ sp needed
+ 274 0110 80BD     		pop	{r7, pc}
+ 275              	.L13:
+ 276 0112 00BF     		.align	2
+ 277              	.L12:
+ 278 0114 00800040 		.word	1073774592
+ 279              		.cfi_endproc
+ 280              	.LFE3:
+ 282              		.align	2
+ 283              		.global	SSIIntUnregister
+ 284              		.thumb
+ 285              		.thumb_func
+ 287              	SSIIntUnregister:
+ 288              	.LFB4:
+ 263:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** 
+ 264:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //*****************************************************************************
+ 265:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //
+ 266:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! Unregisters an interrupt handler for the synchronous serial interface
+ 267:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //!
+ 268:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! \param ui32Base specifies the SSI module base address.
+ 269:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //!
+ 270:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! This function will clear the handler to be called when a SSI
+ 271:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! interrupt occurs.  This will also mask off the interrupt in the interrupt
+ 272:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! controller so that the interrupt handler no longer is called.
+ 273:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //!
+ 274:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! \sa See IntRegister() for important information about registering interrupt
+ 275:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! handlers.
+ 276:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //!
+ 277:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! \return None
+ 278:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //
+ 279:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //*****************************************************************************
+ 280:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** void
+ 281:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** SSIIntUnregister(uint32_t ui32Base)
+ 282:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** {
+ 289              		.loc 1 282 0
+ 290              		.cfi_startproc
+ 291              		@ args = 0, pretend = 0, frame = 16
+ 292              		@ frame_needed = 1, uses_anonymous_args = 0
+ 293 0118 80B5     		push	{r7, lr}
+ 294              		.cfi_def_cfa_offset 8
+ 295              		.cfi_offset 7, -8
+ 296              		.cfi_offset 14, -4
+ 297 011a 84B0     		sub	sp, sp, #16
+ 298              		.cfi_def_cfa_offset 24
+ 299 011c 00AF     		add	r7, sp, #0
+ 300              		.cfi_def_cfa_register 7
+ 301 011e 7860     		str	r0, [r7, #4]
+ 283:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     uint32_t ui32Int;
+ 284:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** 
+ 285:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 286:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     // Check the arguments.
+ 287:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 288:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     ASSERT((ui32Base == SSI0_BASE) || (ui32Base == SSI1_BASE));
+ 289:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** 
+ 290:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 291:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     // Determine the interrupt number based on the SSI port.
+ 292:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 293:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     ui32Int = (ui32Base == SSI0_BASE) ? INT_SSI0 : INT_SSI1;
+ 302              		.loc 1 293 0
+ 303 0120 7B68     		ldr	r3, [r7, #4]
+ 304 0122 084A     		ldr	r2, .L17
+ 305 0124 9342     		cmp	r3, r2
+ 306 0126 01D1     		bne	.L15
+ 307              		.loc 1 293 0 is_stmt 0 discriminator 1
+ 308 0128 1723     		movs	r3, #23
+ 309 012a 00E0     		b	.L16
+ 310              	.L15:
+ 311              		.loc 1 293 0 discriminator 2
+ 312 012c 3223     		movs	r3, #50
+ 313              	.L16:
+ 314              		.loc 1 293 0 discriminator 4
+ 315 012e FB60     		str	r3, [r7, #12]
+ 294:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** 
+ 295:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 296:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     // Disable the interrupt.
+ 297:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 298:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     IntDisable(ui32Int);
+ 316              		.loc 1 298 0 is_stmt 1 discriminator 4
+ 317 0130 F868     		ldr	r0, [r7, #12]
+ 318 0132 FFF7FEFF 		bl	IntDisable
+ 299:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** 
+ 300:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 301:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     // Unregister the interrupt handler.
+ 302:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 303:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     IntUnregister(ui32Int);
+ 319              		.loc 1 303 0 discriminator 4
+ 320 0136 F868     		ldr	r0, [r7, #12]
+ 321 0138 FFF7FEFF 		bl	IntUnregister
+ 304:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** }
+ 322              		.loc 1 304 0 discriminator 4
+ 323 013c 1037     		adds	r7, r7, #16
+ 324              		.cfi_def_cfa_offset 8
+ 325 013e BD46     		mov	sp, r7
+ 326              		.cfi_def_cfa_register 13
+ 327              		@ sp needed
+ 328 0140 80BD     		pop	{r7, pc}
+ 329              	.L18:
+ 330 0142 00BF     		.align	2
+ 331              	.L17:
+ 332 0144 00800040 		.word	1073774592
+ 333              		.cfi_endproc
+ 334              	.LFE4:
+ 336              		.align	2
+ 337              		.global	SSIIntEnable
+ 338              		.thumb
+ 339              		.thumb_func
+ 341              	SSIIntEnable:
+ 342              	.LFB5:
+ 305:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** 
+ 306:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //*****************************************************************************
+ 307:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //
+ 308:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! Enables individual SSI interrupt sources
+ 309:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //!
+ 310:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! \param ui32Base specifies the SSI module base address.
+ 311:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! \param ui32IntFlags is a bit mask of the interrupt sources to be enabled.
+ 312:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //!
+ 313:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! Enables the indicated SSI interrupt sources.  Only the sources that are
+ 314:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! enabled can be reflected to the processor interrupt; disabled sources have
+ 315:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! no effect on the processor.  The \e ui32IntFlags parameter can be any of the
+ 316:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! \b SSI_TXFF, \b SSI_RXFF, \b SSI_RXTO, or \b SSI_RXOR values.
+ 317:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //!
+ 318:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! \return None
+ 319:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //
+ 320:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //*****************************************************************************
+ 321:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** void
+ 322:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** SSIIntEnable(uint32_t ui32Base, uint32_t ui32IntFlags)
+ 323:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** {
+ 343              		.loc 1 323 0
+ 344              		.cfi_startproc
+ 345              		@ args = 0, pretend = 0, frame = 8
+ 346              		@ frame_needed = 1, uses_anonymous_args = 0
+ 347              		@ link register save eliminated.
+ 348 0148 80B4     		push	{r7}
+ 349              		.cfi_def_cfa_offset 4
+ 350              		.cfi_offset 7, -4
+ 351 014a 83B0     		sub	sp, sp, #12
+ 352              		.cfi_def_cfa_offset 16
+ 353 014c 00AF     		add	r7, sp, #0
+ 354              		.cfi_def_cfa_register 7
+ 355 014e 7860     		str	r0, [r7, #4]
+ 356 0150 3960     		str	r1, [r7]
+ 324:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 325:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     // Check the arguments.
+ 326:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 327:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     ASSERT((ui32Base == SSI0_BASE) || (ui32Base == SSI1_BASE));
+ 328:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** 
+ 329:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 330:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     // Enable the specified interrupts.
+ 331:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 332:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     HWREG(ui32Base + SSI_O_IM) |= ui32IntFlags;
+ 357              		.loc 1 332 0
+ 358 0152 7B68     		ldr	r3, [r7, #4]
+ 359 0154 1433     		adds	r3, r3, #20
+ 360 0156 1946     		mov	r1, r3
+ 361 0158 7B68     		ldr	r3, [r7, #4]
+ 362 015a 1433     		adds	r3, r3, #20
+ 363 015c 1A68     		ldr	r2, [r3]
+ 364 015e 3B68     		ldr	r3, [r7]
+ 365 0160 1343     		orrs	r3, r3, r2
+ 366 0162 0B60     		str	r3, [r1]
+ 333:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** }
+ 367              		.loc 1 333 0
+ 368 0164 0C37     		adds	r7, r7, #12
+ 369              		.cfi_def_cfa_offset 4
+ 370 0166 BD46     		mov	sp, r7
+ 371              		.cfi_def_cfa_register 13
+ 372              		@ sp needed
+ 373 0168 5DF8047B 		ldr	r7, [sp], #4
+ 374              		.cfi_restore 7
+ 375              		.cfi_def_cfa_offset 0
+ 376 016c 7047     		bx	lr
+ 377              		.cfi_endproc
+ 378              	.LFE5:
+ 380 016e 00BF     		.align	2
+ 381              		.global	SSIIntDisable
+ 382              		.thumb
+ 383              		.thumb_func
+ 385              	SSIIntDisable:
+ 386              	.LFB6:
+ 334:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** 
+ 335:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //*****************************************************************************
+ 336:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //
+ 337:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! Disables individual SSI interrupt sources
+ 338:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //!
+ 339:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! \param ui32Base specifies the SSI module base address.
+ 340:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! \param ui32IntFlags is a bit mask of the interrupt sources to be disabled.
+ 341:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //!
+ 342:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! Disables the indicated SSI interrupt sources.  The \e ui32IntFlags parameter
+ 343:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! can be any of the \b SSI_TXFF, \b SSI_RXFF, \b SSI_RXTO, or \b SSI_RXOR
+ 344:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! values.
+ 345:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //!
+ 346:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! \return None
+ 347:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //
+ 348:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //*****************************************************************************
+ 349:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** void
+ 350:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** SSIIntDisable(uint32_t ui32Base, uint32_t ui32IntFlags)
+ 351:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** {
+ 387              		.loc 1 351 0
+ 388              		.cfi_startproc
+ 389              		@ args = 0, pretend = 0, frame = 8
+ 390              		@ frame_needed = 1, uses_anonymous_args = 0
+ 391              		@ link register save eliminated.
+ 392 0170 80B4     		push	{r7}
+ 393              		.cfi_def_cfa_offset 4
+ 394              		.cfi_offset 7, -4
+ 395 0172 83B0     		sub	sp, sp, #12
+ 396              		.cfi_def_cfa_offset 16
+ 397 0174 00AF     		add	r7, sp, #0
+ 398              		.cfi_def_cfa_register 7
+ 399 0176 7860     		str	r0, [r7, #4]
+ 400 0178 3960     		str	r1, [r7]
+ 352:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 353:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     // Check the arguments.
+ 354:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 355:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     ASSERT((ui32Base == SSI0_BASE) || (ui32Base == SSI1_BASE));
+ 356:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** 
+ 357:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 358:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     // Disable the specified interrupts.
+ 359:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 360:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     HWREG(ui32Base + SSI_O_IM) &= ~(ui32IntFlags);
+ 401              		.loc 1 360 0
+ 402 017a 7B68     		ldr	r3, [r7, #4]
+ 403 017c 1433     		adds	r3, r3, #20
+ 404 017e 1946     		mov	r1, r3
+ 405 0180 7B68     		ldr	r3, [r7, #4]
+ 406 0182 1433     		adds	r3, r3, #20
+ 407 0184 1A68     		ldr	r2, [r3]
+ 408 0186 3B68     		ldr	r3, [r7]
+ 409 0188 DB43     		mvns	r3, r3
+ 410 018a 1340     		ands	r3, r3, r2
+ 411 018c 0B60     		str	r3, [r1]
+ 361:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** }
+ 412              		.loc 1 361 0
+ 413 018e 0C37     		adds	r7, r7, #12
+ 414              		.cfi_def_cfa_offset 4
+ 415 0190 BD46     		mov	sp, r7
+ 416              		.cfi_def_cfa_register 13
+ 417              		@ sp needed
+ 418 0192 5DF8047B 		ldr	r7, [sp], #4
+ 419              		.cfi_restore 7
+ 420              		.cfi_def_cfa_offset 0
+ 421 0196 7047     		bx	lr
+ 422              		.cfi_endproc
+ 423              	.LFE6:
+ 425              		.align	2
+ 426              		.global	SSIIntStatus
+ 427              		.thumb
+ 428              		.thumb_func
+ 430              	SSIIntStatus:
+ 431              	.LFB7:
+ 362:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** 
+ 363:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //*****************************************************************************
+ 364:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //
+ 365:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! Gets the current interrupt status
+ 366:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //!
+ 367:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! \param ui32Base specifies the SSI module base address.
+ 368:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! \param bMasked is \b false if the raw interrupt status is required or
+ 369:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! \b true if the masked interrupt status is required.
+ 370:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //!
+ 371:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! This function returns the interrupt status for the SSI module.  Either the
+ 372:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! raw interrupt status or the status of interrupts that are allowed to
+ 373:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! reflect to the processor can be returned.
+ 374:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //!
+ 375:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! \return The current interrupt status, enumerated as a bit field of
+ 376:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! \b SSI_TXFF, \b SSI_RXFF, \b SSI_RXTO, and \b SSI_RXOR.
+ 377:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //
+ 378:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //*****************************************************************************
+ 379:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** uint32_t
+ 380:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** SSIIntStatus(uint32_t ui32Base, bool bMasked)
+ 381:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** {
+ 432              		.loc 1 381 0
+ 433              		.cfi_startproc
+ 434              		@ args = 0, pretend = 0, frame = 8
+ 435              		@ frame_needed = 1, uses_anonymous_args = 0
+ 436              		@ link register save eliminated.
+ 437 0198 80B4     		push	{r7}
+ 438              		.cfi_def_cfa_offset 4
+ 439              		.cfi_offset 7, -4
+ 440 019a 83B0     		sub	sp, sp, #12
+ 441              		.cfi_def_cfa_offset 16
+ 442 019c 00AF     		add	r7, sp, #0
+ 443              		.cfi_def_cfa_register 7
+ 444 019e 7860     		str	r0, [r7, #4]
+ 445 01a0 0B46     		mov	r3, r1
+ 446 01a2 FB70     		strb	r3, [r7, #3]
+ 382:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 383:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     // Check the arguments.
+ 384:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 385:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     ASSERT((ui32Base == SSI0_BASE) || (ui32Base == SSI1_BASE));
+ 386:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** 
+ 387:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 388:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     // Return either the interrupt status or the raw interrupt status as
+ 389:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     // requested.
+ 390:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 391:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     if(bMasked)
+ 447              		.loc 1 391 0
+ 448 01a4 FB78     		ldrb	r3, [r7, #3]	@ zero_extendqisi2
+ 449 01a6 002B     		cmp	r3, #0
+ 450 01a8 03D0     		beq	.L22
+ 392:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     {
+ 393:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****         return(HWREG(ui32Base + SSI_O_MIS));
+ 451              		.loc 1 393 0
+ 452 01aa 7B68     		ldr	r3, [r7, #4]
+ 453 01ac 1C33     		adds	r3, r3, #28
+ 454 01ae 1B68     		ldr	r3, [r3]
+ 455 01b0 02E0     		b	.L23
+ 456              	.L22:
+ 394:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     }
+ 395:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     else
+ 396:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     {
+ 397:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****         return(HWREG(ui32Base + SSI_O_RIS));
+ 457              		.loc 1 397 0
+ 458 01b2 7B68     		ldr	r3, [r7, #4]
+ 459 01b4 1833     		adds	r3, r3, #24
+ 460 01b6 1B68     		ldr	r3, [r3]
+ 461              	.L23:
+ 398:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     }
+ 399:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** }
+ 462              		.loc 1 399 0
+ 463 01b8 1846     		mov	r0, r3
+ 464 01ba 0C37     		adds	r7, r7, #12
+ 465              		.cfi_def_cfa_offset 4
+ 466 01bc BD46     		mov	sp, r7
+ 467              		.cfi_def_cfa_register 13
+ 468              		@ sp needed
+ 469 01be 5DF8047B 		ldr	r7, [sp], #4
+ 470              		.cfi_restore 7
+ 471              		.cfi_def_cfa_offset 0
+ 472 01c2 7047     		bx	lr
+ 473              		.cfi_endproc
+ 474              	.LFE7:
+ 476              		.align	2
+ 477              		.global	SSIIntClear
+ 478              		.thumb
+ 479              		.thumb_func
+ 481              	SSIIntClear:
+ 482              	.LFB8:
+ 400:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** 
+ 401:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //*****************************************************************************
+ 402:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //
+ 403:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! Clears SSI interrupt sources
+ 404:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //!
+ 405:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! \param ui32Base specifies the SSI module base address.
+ 406:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! \param ui32IntFlags is a bit mask of the interrupt sources to be cleared.
+ 407:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //!
+ 408:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! The specified SSI interrupt sources are cleared so that they no longer
+ 409:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! assert.  This function must be called in the interrupt handler to keep the
+ 410:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! interrupts from being recognized again immediately upon exit.  The
+ 411:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! \e ui32IntFlags parameter can consist of either or both the \b SSI_RXTO and
+ 412:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! \b SSI_RXOR values.
+ 413:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //!
+ 414:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! \note Because there is a write buffer in the Cortex-M3 processor, it may
+ 415:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! take several clock cycles before the interrupt source is actually cleared.
+ 416:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! Therefore, it is recommended that the interrupt source be cleared early in
+ 417:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! the interrupt handler (as opposed to the very last action) to avoid
+ 418:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! returning from the interrupt handler before the interrupt source is
+ 419:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! actually cleared.  Failure to do so may result in the interrupt handler
+ 420:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! being immediately reentered (because the interrupt controller still sees
+ 421:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! the interrupt source asserted).
+ 422:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //!
+ 423:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! \return None
+ 424:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //
+ 425:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //*****************************************************************************
+ 426:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** void
+ 427:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** SSIIntClear(uint32_t ui32Base, uint32_t ui32IntFlags)
+ 428:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** {
+ 483              		.loc 1 428 0
+ 484              		.cfi_startproc
+ 485              		@ args = 0, pretend = 0, frame = 8
+ 486              		@ frame_needed = 1, uses_anonymous_args = 0
+ 487              		@ link register save eliminated.
+ 488 01c4 80B4     		push	{r7}
+ 489              		.cfi_def_cfa_offset 4
+ 490              		.cfi_offset 7, -4
+ 491 01c6 83B0     		sub	sp, sp, #12
+ 492              		.cfi_def_cfa_offset 16
+ 493 01c8 00AF     		add	r7, sp, #0
+ 494              		.cfi_def_cfa_register 7
+ 495 01ca 7860     		str	r0, [r7, #4]
+ 496 01cc 3960     		str	r1, [r7]
+ 429:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 430:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     // Check the arguments.
+ 431:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 432:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     ASSERT((ui32Base == SSI0_BASE) || (ui32Base == SSI1_BASE));
+ 433:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** 
+ 434:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 435:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     // Clear the requested interrupt sources.
+ 436:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 437:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     HWREG(ui32Base + SSI_O_ICR) = ui32IntFlags;
+ 497              		.loc 1 437 0
+ 498 01ce 7B68     		ldr	r3, [r7, #4]
+ 499 01d0 2033     		adds	r3, r3, #32
+ 500 01d2 1A46     		mov	r2, r3
+ 501 01d4 3B68     		ldr	r3, [r7]
+ 502 01d6 1360     		str	r3, [r2]
+ 438:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** }
+ 503              		.loc 1 438 0
+ 504 01d8 0C37     		adds	r7, r7, #12
+ 505              		.cfi_def_cfa_offset 4
+ 506 01da BD46     		mov	sp, r7
+ 507              		.cfi_def_cfa_register 13
+ 508              		@ sp needed
+ 509 01dc 5DF8047B 		ldr	r7, [sp], #4
+ 510              		.cfi_restore 7
+ 511              		.cfi_def_cfa_offset 0
+ 512 01e0 7047     		bx	lr
+ 513              		.cfi_endproc
+ 514              	.LFE8:
+ 516 01e2 00BF     		.align	2
+ 517              		.global	SSIDataPut
+ 518              		.thumb
+ 519              		.thumb_func
+ 521              	SSIDataPut:
+ 522              	.LFB9:
+ 439:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** 
+ 440:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //*****************************************************************************
+ 441:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //
+ 442:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! Puts a data element into the SSI transmit FIFO
+ 443:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //!
+ 444:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! \param ui32Base specifies the SSI module base address.
+ 445:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! \param ui32Data is the data to be transmitted over the SSI interface.
+ 446:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //!
+ 447:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! This function places the supplied data into the transmit FIFO of the
+ 448:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! specified SSI module.
+ 449:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //!
+ 450:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! \note The upper 32 - N bits of the \e ui32Data are discarded by the hardware,
+ 451:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! where N is the data width as configured by SSIConfigSetExpClk().  For
+ 452:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! example, if the interface is configured for 8-bit data width, the upper 24
+ 453:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! bits of \e ui32Data are discarded.
+ 454:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //!
+ 455:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! \return None
+ 456:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //
+ 457:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //*****************************************************************************
+ 458:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** void
+ 459:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** SSIDataPut(uint32_t ui32Base, uint32_t ui32Data)
+ 460:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** {
+ 523              		.loc 1 460 0
+ 524              		.cfi_startproc
+ 525              		@ args = 0, pretend = 0, frame = 8
+ 526              		@ frame_needed = 1, uses_anonymous_args = 0
+ 527              		@ link register save eliminated.
+ 528 01e4 80B4     		push	{r7}
+ 529              		.cfi_def_cfa_offset 4
+ 530              		.cfi_offset 7, -4
+ 531 01e6 83B0     		sub	sp, sp, #12
+ 532              		.cfi_def_cfa_offset 16
+ 533 01e8 00AF     		add	r7, sp, #0
+ 534              		.cfi_def_cfa_register 7
+ 535 01ea 7860     		str	r0, [r7, #4]
+ 536 01ec 3960     		str	r1, [r7]
+ 461:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 462:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     // Check the arguments.
+ 463:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 464:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     ASSERT((ui32Base == SSI0_BASE) || (ui32Base == SSI1_BASE));
+ 465:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     ASSERT((ui32Data & (0xfffffffe << (HWREG(ui32Base + SSI_O_CR0) &
+ 466:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****                                        SSI_CR0_DSS_M))) == 0);
+ 467:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** 
+ 468:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 469:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     // Wait until there is space.
+ 470:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 471:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     while(!(HWREG(ui32Base + SSI_O_SR) & SSI_SR_TNF))
+ 537              		.loc 1 471 0
+ 538 01ee 00BF     		nop
+ 539              	.L26:
+ 540              		.loc 1 471 0 is_stmt 0 discriminator 1
+ 541 01f0 7B68     		ldr	r3, [r7, #4]
+ 542 01f2 0C33     		adds	r3, r3, #12
+ 543 01f4 1B68     		ldr	r3, [r3]
+ 544 01f6 03F00203 		and	r3, r3, #2
+ 545 01fa 002B     		cmp	r3, #0
+ 546 01fc F8D0     		beq	.L26
+ 472:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     {
+ 473:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     }
+ 474:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** 
+ 475:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 476:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     // Write the data to the SSI.
+ 477:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 478:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     HWREG(ui32Base + SSI_O_DR) = ui32Data;
+ 547              		.loc 1 478 0 is_stmt 1
+ 548 01fe 7B68     		ldr	r3, [r7, #4]
+ 549 0200 0833     		adds	r3, r3, #8
+ 550 0202 1A46     		mov	r2, r3
+ 551 0204 3B68     		ldr	r3, [r7]
+ 552 0206 1360     		str	r3, [r2]
+ 479:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** }
+ 553              		.loc 1 479 0
+ 554 0208 0C37     		adds	r7, r7, #12
+ 555              		.cfi_def_cfa_offset 4
+ 556 020a BD46     		mov	sp, r7
+ 557              		.cfi_def_cfa_register 13
+ 558              		@ sp needed
+ 559 020c 5DF8047B 		ldr	r7, [sp], #4
+ 560              		.cfi_restore 7
+ 561              		.cfi_def_cfa_offset 0
+ 562 0210 7047     		bx	lr
+ 563              		.cfi_endproc
+ 564              	.LFE9:
+ 566 0212 00BF     		.align	2
+ 567              		.global	SSIDataPutNonBlocking
+ 568              		.thumb
+ 569              		.thumb_func
+ 571              	SSIDataPutNonBlocking:
+ 572              	.LFB10:
+ 480:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** 
+ 481:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //*****************************************************************************
+ 482:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //
+ 483:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! Puts a data element into the SSI transmit FIFO
+ 484:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //!
+ 485:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! \param ui32Base specifies the SSI module base address.
+ 486:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! \param ui32Data is the data to be transmitted over the SSI interface.
+ 487:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //!
+ 488:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! This function places the supplied data into the transmit FIFO of the
+ 489:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! specified SSI module.  If there is no space in the FIFO, then this function
+ 490:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! returns a zero.
+ 491:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //!
+ 492:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! \note The upper 32 - N bits of the \e ui32Data are discarded by the hardware,
+ 493:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! where N is the data width as configured by SSIConfigSetExpClk().  For
+ 494:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! example, if the interface is configured for 8-bit data width, the upper 24
+ 495:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! bits of \e ui32Data are discarded.
+ 496:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //!
+ 497:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! \return Returns the number of elements written to the SSI transmit FIFO.
+ 498:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //
+ 499:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //*****************************************************************************
+ 500:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** int32_t
+ 501:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** SSIDataPutNonBlocking(uint32_t ui32Base, uint32_t ui32Data)
+ 502:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** {
+ 573              		.loc 1 502 0
+ 574              		.cfi_startproc
+ 575              		@ args = 0, pretend = 0, frame = 8
+ 576              		@ frame_needed = 1, uses_anonymous_args = 0
+ 577              		@ link register save eliminated.
+ 578 0214 80B4     		push	{r7}
+ 579              		.cfi_def_cfa_offset 4
+ 580              		.cfi_offset 7, -4
+ 581 0216 83B0     		sub	sp, sp, #12
+ 582              		.cfi_def_cfa_offset 16
+ 583 0218 00AF     		add	r7, sp, #0
+ 584              		.cfi_def_cfa_register 7
+ 585 021a 7860     		str	r0, [r7, #4]
+ 586 021c 3960     		str	r1, [r7]
+ 503:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 504:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     // Check the arguments.
+ 505:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 506:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     ASSERT((ui32Base == SSI0_BASE) || (ui32Base == SSI1_BASE));
+ 507:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     ASSERT((ui32Data & (0xfffffffe << (HWREG(ui32Base + SSI_O_CR0) &
+ 508:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****                                        SSI_CR0_DSS_M))) == 0);
+ 509:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** 
+ 510:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 511:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     // Check for space to write.
+ 512:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 513:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     if(HWREG(ui32Base + SSI_O_SR) & SSI_SR_TNF)
+ 587              		.loc 1 513 0
+ 588 021e 7B68     		ldr	r3, [r7, #4]
+ 589 0220 0C33     		adds	r3, r3, #12
+ 590 0222 1B68     		ldr	r3, [r3]
+ 591 0224 03F00203 		and	r3, r3, #2
+ 592 0228 002B     		cmp	r3, #0
+ 593 022a 06D0     		beq	.L28
+ 514:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     {
+ 515:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****         HWREG(ui32Base + SSI_O_DR) = ui32Data;
+ 594              		.loc 1 515 0
+ 595 022c 7B68     		ldr	r3, [r7, #4]
+ 596 022e 0833     		adds	r3, r3, #8
+ 597 0230 1A46     		mov	r2, r3
+ 598 0232 3B68     		ldr	r3, [r7]
+ 599 0234 1360     		str	r3, [r2]
+ 516:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****         return(1);
+ 600              		.loc 1 516 0
+ 601 0236 0123     		movs	r3, #1
+ 602 0238 00E0     		b	.L29
+ 603              	.L28:
+ 517:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     }
+ 518:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     else
+ 519:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     {
+ 520:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****         return(0);
+ 604              		.loc 1 520 0
+ 605 023a 0023     		movs	r3, #0
+ 606              	.L29:
+ 521:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     }
+ 522:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** }
+ 607              		.loc 1 522 0
+ 608 023c 1846     		mov	r0, r3
+ 609 023e 0C37     		adds	r7, r7, #12
+ 610              		.cfi_def_cfa_offset 4
+ 611 0240 BD46     		mov	sp, r7
+ 612              		.cfi_def_cfa_register 13
+ 613              		@ sp needed
+ 614 0242 5DF8047B 		ldr	r7, [sp], #4
+ 615              		.cfi_restore 7
+ 616              		.cfi_def_cfa_offset 0
+ 617 0246 7047     		bx	lr
+ 618              		.cfi_endproc
+ 619              	.LFE10:
+ 621              		.align	2
+ 622              		.global	SSIDataGet
+ 623              		.thumb
+ 624              		.thumb_func
+ 626              	SSIDataGet:
+ 627              	.LFB11:
+ 523:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** 
+ 524:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //*****************************************************************************
+ 525:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //
+ 526:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! Gets a data element from the SSI receive FIFO
+ 527:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //!
+ 528:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! \param ui32Base specifies the SSI module base address.
+ 529:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! \param pui32Data is a pointer to a storage location for data that was
+ 530:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! received over the SSI interface.
+ 531:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //!
+ 532:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! This function gets received data from the receive FIFO of the specified
+ 533:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! SSI module and places that data into the location specified by the
+ 534:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! \e pui32Data parameter.
+ 535:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //!
+ 536:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! \note Only the lower N bits of the value written to \e pui32Data contain
+ 537:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! valid data, where N is the data width as configured by
+ 538:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! SSIConfigSetExpClk().  For example, if the interface is configured for
+ 539:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! 8-bit data width, only the lower 8 bits of the value written to \e pui32Data
+ 540:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! contain valid data.
+ 541:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //!
+ 542:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! \return None
+ 543:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //
+ 544:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //*****************************************************************************
+ 545:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** void
+ 546:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** SSIDataGet(uint32_t ui32Base, uint32_t *pui32Data)
+ 547:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** {
+ 628              		.loc 1 547 0
+ 629              		.cfi_startproc
+ 630              		@ args = 0, pretend = 0, frame = 8
+ 631              		@ frame_needed = 1, uses_anonymous_args = 0
+ 632              		@ link register save eliminated.
+ 633 0248 80B4     		push	{r7}
+ 634              		.cfi_def_cfa_offset 4
+ 635              		.cfi_offset 7, -4
+ 636 024a 83B0     		sub	sp, sp, #12
+ 637              		.cfi_def_cfa_offset 16
+ 638 024c 00AF     		add	r7, sp, #0
+ 639              		.cfi_def_cfa_register 7
+ 640 024e 7860     		str	r0, [r7, #4]
+ 641 0250 3960     		str	r1, [r7]
+ 548:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 549:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     // Check the arguments.
+ 550:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 551:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     ASSERT((ui32Base == SSI0_BASE) || (ui32Base == SSI1_BASE));
+ 552:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** 
+ 553:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 554:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     // Wait until there is data to be read.
+ 555:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 556:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     while(!(HWREG(ui32Base + SSI_O_SR) & SSI_SR_RNE))
+ 642              		.loc 1 556 0
+ 643 0252 00BF     		nop
+ 644              	.L31:
+ 645              		.loc 1 556 0 is_stmt 0 discriminator 1
+ 646 0254 7B68     		ldr	r3, [r7, #4]
+ 647 0256 0C33     		adds	r3, r3, #12
+ 648 0258 1B68     		ldr	r3, [r3]
+ 649 025a 03F00403 		and	r3, r3, #4
+ 650 025e 002B     		cmp	r3, #0
+ 651 0260 F8D0     		beq	.L31
+ 557:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     {
+ 558:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     }
+ 559:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** 
+ 560:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 561:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     // Read data from SSI.
+ 562:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 563:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     *pui32Data = HWREG(ui32Base + SSI_O_DR);
+ 652              		.loc 1 563 0 is_stmt 1
+ 653 0262 7B68     		ldr	r3, [r7, #4]
+ 654 0264 0833     		adds	r3, r3, #8
+ 655 0266 1A68     		ldr	r2, [r3]
+ 656 0268 3B68     		ldr	r3, [r7]
+ 657 026a 1A60     		str	r2, [r3]
+ 564:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** }
+ 658              		.loc 1 564 0
+ 659 026c 0C37     		adds	r7, r7, #12
+ 660              		.cfi_def_cfa_offset 4
+ 661 026e BD46     		mov	sp, r7
+ 662              		.cfi_def_cfa_register 13
+ 663              		@ sp needed
+ 664 0270 5DF8047B 		ldr	r7, [sp], #4
+ 665              		.cfi_restore 7
+ 666              		.cfi_def_cfa_offset 0
+ 667 0274 7047     		bx	lr
+ 668              		.cfi_endproc
+ 669              	.LFE11:
+ 671 0276 00BF     		.align	2
+ 672              		.global	SSIDataGetNonBlocking
+ 673              		.thumb
+ 674              		.thumb_func
+ 676              	SSIDataGetNonBlocking:
+ 677              	.LFB12:
+ 565:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** 
+ 566:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //*****************************************************************************
+ 567:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //
+ 568:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! Gets a data element from the SSI receive FIFO
+ 569:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //!
+ 570:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! \param ui32Base specifies the SSI module base address.
+ 571:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! \param pui32Data is a pointer to a storage location for data that was
+ 572:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! received over the SSI interface.
+ 573:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //!
+ 574:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! This function gets received data from the receive FIFO of the specified SSI
+ 575:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! module and places that data into the location specified by the \e ui32Data
+ 576:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! parameter.  If there is no data in the FIFO, then this function returns a
+ 577:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! zero.
+ 578:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //!
+ 579:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! \note Only the lower N bits of the value written to \e pui32Data contain
+ 580:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! valid data, where N is the data width as configured by
+ 581:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! SSIConfigSetExpClk().  For example, if the interface is configured for
+ 582:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! 8-bit data width, only the lower 8 bits of the value written to \e pui32Data
+ 583:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! contain valid data.
+ 584:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //!
+ 585:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! \return Returns the number of elements read from the SSI receive FIFO.
+ 586:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //
+ 587:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //*****************************************************************************
+ 588:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** int32_t
+ 589:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** SSIDataGetNonBlocking(uint32_t ui32Base, uint32_t *pui32Data)
+ 590:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** {
+ 678              		.loc 1 590 0
+ 679              		.cfi_startproc
+ 680              		@ args = 0, pretend = 0, frame = 8
+ 681              		@ frame_needed = 1, uses_anonymous_args = 0
+ 682              		@ link register save eliminated.
+ 683 0278 80B4     		push	{r7}
+ 684              		.cfi_def_cfa_offset 4
+ 685              		.cfi_offset 7, -4
+ 686 027a 83B0     		sub	sp, sp, #12
+ 687              		.cfi_def_cfa_offset 16
+ 688 027c 00AF     		add	r7, sp, #0
+ 689              		.cfi_def_cfa_register 7
+ 690 027e 7860     		str	r0, [r7, #4]
+ 691 0280 3960     		str	r1, [r7]
+ 591:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 592:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     // Check the arguments.
+ 593:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 594:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     ASSERT((ui32Base == SSI0_BASE) || (ui32Base == SSI1_BASE));
+ 595:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** 
+ 596:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 597:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     // Check for data to read.
+ 598:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 599:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     if(HWREG(ui32Base + SSI_O_SR) & SSI_SR_RNE)
+ 692              		.loc 1 599 0
+ 693 0282 7B68     		ldr	r3, [r7, #4]
+ 694 0284 0C33     		adds	r3, r3, #12
+ 695 0286 1B68     		ldr	r3, [r3]
+ 696 0288 03F00403 		and	r3, r3, #4
+ 697 028c 002B     		cmp	r3, #0
+ 698 028e 06D0     		beq	.L33
+ 600:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     {
+ 601:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****         *pui32Data = HWREG(ui32Base + SSI_O_DR);
+ 699              		.loc 1 601 0
+ 700 0290 7B68     		ldr	r3, [r7, #4]
+ 701 0292 0833     		adds	r3, r3, #8
+ 702 0294 1A68     		ldr	r2, [r3]
+ 703 0296 3B68     		ldr	r3, [r7]
+ 704 0298 1A60     		str	r2, [r3]
+ 602:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****         return(1);
+ 705              		.loc 1 602 0
+ 706 029a 0123     		movs	r3, #1
+ 707 029c 00E0     		b	.L34
+ 708              	.L33:
+ 603:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     }
+ 604:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     else
+ 605:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     {
+ 606:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****         return(0);
+ 709              		.loc 1 606 0
+ 710 029e 0023     		movs	r3, #0
+ 711              	.L34:
+ 607:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     }
+ 608:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** }
+ 712              		.loc 1 608 0
+ 713 02a0 1846     		mov	r0, r3
+ 714 02a2 0C37     		adds	r7, r7, #12
+ 715              		.cfi_def_cfa_offset 4
+ 716 02a4 BD46     		mov	sp, r7
+ 717              		.cfi_def_cfa_register 13
+ 718              		@ sp needed
+ 719 02a6 5DF8047B 		ldr	r7, [sp], #4
+ 720              		.cfi_restore 7
+ 721              		.cfi_def_cfa_offset 0
+ 722 02aa 7047     		bx	lr
+ 723              		.cfi_endproc
+ 724              	.LFE12:
+ 726              		.align	2
+ 727              		.global	SSIDMAEnable
+ 728              		.thumb
+ 729              		.thumb_func
+ 731              	SSIDMAEnable:
+ 732              	.LFB13:
+ 609:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** 
+ 610:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //*****************************************************************************
+ 611:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //
+ 612:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! Enable SSI DMA operation
+ 613:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //!
+ 614:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! \param ui32Base is the base address of the SSI port.
+ 615:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! \param ui32DMAFlags is a bit mask of the DMA features to enable.
+ 616:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //!
+ 617:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! The specified SSI DMA features are enabled.  The SSI can be
+ 618:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! configured to use DMA for transmit and/or receive data transfers.
+ 619:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! The \e ui32DMAFlags parameter is the logical OR of any of the following
+ 620:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! values:
+ 621:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //!
+ 622:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! - SSI_DMA_RX - enable DMA for receive
+ 623:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! - SSI_DMA_TX - enable DMA for transmit
+ 624:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //!
+ 625:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! \note The uDMA controller must also be set up before DMA can be used
+ 626:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! with the SSI.
+ 627:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //!
+ 628:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! \return None
+ 629:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //
+ 630:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //*****************************************************************************
+ 631:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** void
+ 632:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** SSIDMAEnable(uint32_t ui32Base, uint32_t ui32DMAFlags)
+ 633:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** {
+ 733              		.loc 1 633 0
+ 734              		.cfi_startproc
+ 735              		@ args = 0, pretend = 0, frame = 8
+ 736              		@ frame_needed = 1, uses_anonymous_args = 0
+ 737              		@ link register save eliminated.
+ 738 02ac 80B4     		push	{r7}
+ 739              		.cfi_def_cfa_offset 4
+ 740              		.cfi_offset 7, -4
+ 741 02ae 83B0     		sub	sp, sp, #12
+ 742              		.cfi_def_cfa_offset 16
+ 743 02b0 00AF     		add	r7, sp, #0
+ 744              		.cfi_def_cfa_register 7
+ 745 02b2 7860     		str	r0, [r7, #4]
+ 746 02b4 3960     		str	r1, [r7]
+ 634:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 635:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     // Check the arguments.
+ 636:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 637:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     ASSERT((ui32Base == SSI0_BASE) || (ui32Base == SSI1_BASE));
+ 638:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** 
+ 639:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 640:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     // Set the requested bits in the SSI DMA control register.
+ 641:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 642:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     HWREG(ui32Base + SSI_O_DMACTL) |= ui32DMAFlags;
+ 747              		.loc 1 642 0
+ 748 02b6 7B68     		ldr	r3, [r7, #4]
+ 749 02b8 2433     		adds	r3, r3, #36
+ 750 02ba 1946     		mov	r1, r3
+ 751 02bc 7B68     		ldr	r3, [r7, #4]
+ 752 02be 2433     		adds	r3, r3, #36
+ 753 02c0 1A68     		ldr	r2, [r3]
+ 754 02c2 3B68     		ldr	r3, [r7]
+ 755 02c4 1343     		orrs	r3, r3, r2
+ 756 02c6 0B60     		str	r3, [r1]
+ 643:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** }
+ 757              		.loc 1 643 0
+ 758 02c8 0C37     		adds	r7, r7, #12
+ 759              		.cfi_def_cfa_offset 4
+ 760 02ca BD46     		mov	sp, r7
+ 761              		.cfi_def_cfa_register 13
+ 762              		@ sp needed
+ 763 02cc 5DF8047B 		ldr	r7, [sp], #4
+ 764              		.cfi_restore 7
+ 765              		.cfi_def_cfa_offset 0
+ 766 02d0 7047     		bx	lr
+ 767              		.cfi_endproc
+ 768              	.LFE13:
+ 770 02d2 00BF     		.align	2
+ 771              		.global	SSIDMADisable
+ 772              		.thumb
+ 773              		.thumb_func
+ 775              	SSIDMADisable:
+ 776              	.LFB14:
+ 644:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** 
+ 645:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //*****************************************************************************
+ 646:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //
+ 647:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! Disable SSI DMA operation
+ 648:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //!
+ 649:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! \param ui32Base is the base address of the SSI port.
+ 650:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! \param ui32DMAFlags is a bit mask of the DMA features to disable.
+ 651:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //!
+ 652:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! This function is used to disable SSI DMA features that were enabled
+ 653:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! by SSIDMAEnable().  The specified SSI DMA features are disabled.  The
+ 654:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! \e ui32DMAFlags parameter is the logical OR of any of the following values:
+ 655:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //!
+ 656:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! - SSI_DMA_RX - disable DMA for receive
+ 657:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! - SSI_DMA_TX - disable DMA for transmit
+ 658:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //!
+ 659:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! \return None
+ 660:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //
+ 661:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //*****************************************************************************
+ 662:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** void
+ 663:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** SSIDMADisable(uint32_t ui32Base, uint32_t ui32DMAFlags)
+ 664:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** {
+ 777              		.loc 1 664 0
+ 778              		.cfi_startproc
+ 779              		@ args = 0, pretend = 0, frame = 8
+ 780              		@ frame_needed = 1, uses_anonymous_args = 0
+ 781              		@ link register save eliminated.
+ 782 02d4 80B4     		push	{r7}
+ 783              		.cfi_def_cfa_offset 4
+ 784              		.cfi_offset 7, -4
+ 785 02d6 83B0     		sub	sp, sp, #12
+ 786              		.cfi_def_cfa_offset 16
+ 787 02d8 00AF     		add	r7, sp, #0
+ 788              		.cfi_def_cfa_register 7
+ 789 02da 7860     		str	r0, [r7, #4]
+ 790 02dc 3960     		str	r1, [r7]
+ 665:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 666:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     // Check the arguments.
+ 667:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 668:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     ASSERT((ui32Base == SSI0_BASE) || (ui32Base == SSI1_BASE));
+ 669:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** 
+ 670:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 671:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     // Clear the requested bits in the SSI DMA control register.
+ 672:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 673:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     HWREG(ui32Base + SSI_O_DMACTL) &= ~ui32DMAFlags;
+ 791              		.loc 1 673 0
+ 792 02de 7B68     		ldr	r3, [r7, #4]
+ 793 02e0 2433     		adds	r3, r3, #36
+ 794 02e2 1946     		mov	r1, r3
+ 795 02e4 7B68     		ldr	r3, [r7, #4]
+ 796 02e6 2433     		adds	r3, r3, #36
+ 797 02e8 1A68     		ldr	r2, [r3]
+ 798 02ea 3B68     		ldr	r3, [r7]
+ 799 02ec DB43     		mvns	r3, r3
+ 800 02ee 1340     		ands	r3, r3, r2
+ 801 02f0 0B60     		str	r3, [r1]
+ 674:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** }
+ 802              		.loc 1 674 0
+ 803 02f2 0C37     		adds	r7, r7, #12
+ 804              		.cfi_def_cfa_offset 4
+ 805 02f4 BD46     		mov	sp, r7
+ 806              		.cfi_def_cfa_register 13
+ 807              		@ sp needed
+ 808 02f6 5DF8047B 		ldr	r7, [sp], #4
+ 809              		.cfi_restore 7
+ 810              		.cfi_def_cfa_offset 0
+ 811 02fa 7047     		bx	lr
+ 812              		.cfi_endproc
+ 813              	.LFE14:
+ 815              		.align	2
+ 816              		.global	SSIBusy
+ 817              		.thumb
+ 818              		.thumb_func
+ 820              	SSIBusy:
+ 821              	.LFB15:
+ 675:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** 
+ 676:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //*****************************************************************************
+ 677:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //
+ 678:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! Determines whether the SSI transmitter is busy or not
+ 679:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //!
+ 680:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! \param ui32Base is the base address of the SSI port.
+ 681:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //!
+ 682:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! Allows the caller to determine whether all transmitted bytes have cleared
+ 683:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! the transmitter hardware.  If \b false is returned, then the transmit FIFO
+ 684:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! is empty and all bits of the last transmitted word have left the hardware
+ 685:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! shift register.
+ 686:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //!
+ 687:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! \return Returns \b true if the SSI is transmitting or \b false if all
+ 688:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! transmissions are complete.
+ 689:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //
+ 690:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //*****************************************************************************
+ 691:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** bool
+ 692:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** SSIBusy(uint32_t ui32Base)
+ 693:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** {
+ 822              		.loc 1 693 0
+ 823              		.cfi_startproc
+ 824              		@ args = 0, pretend = 0, frame = 8
+ 825              		@ frame_needed = 1, uses_anonymous_args = 0
+ 826              		@ link register save eliminated.
+ 827 02fc 80B4     		push	{r7}
+ 828              		.cfi_def_cfa_offset 4
+ 829              		.cfi_offset 7, -4
+ 830 02fe 83B0     		sub	sp, sp, #12
+ 831              		.cfi_def_cfa_offset 16
+ 832 0300 00AF     		add	r7, sp, #0
+ 833              		.cfi_def_cfa_register 7
+ 834 0302 7860     		str	r0, [r7, #4]
+ 694:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 695:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     // Check the arguments.
+ 696:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 697:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     ASSERT((ui32Base == SSI0_BASE) || (ui32Base == SSI1_BASE));
+ 698:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** 
+ 699:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 700:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     // Determine if the SSI is busy.
+ 701:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 702:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     return((HWREG(ui32Base + SSI_O_SR) & SSI_SR_BSY) ? true : false);
+ 835              		.loc 1 702 0
+ 836 0304 7B68     		ldr	r3, [r7, #4]
+ 837 0306 0C33     		adds	r3, r3, #12
+ 838 0308 1B68     		ldr	r3, [r3]
+ 839 030a 03F01003 		and	r3, r3, #16
+ 840 030e 002B     		cmp	r3, #0
+ 841 0310 14BF     		ite	ne
+ 842 0312 0123     		movne	r3, #1
+ 843 0314 0023     		moveq	r3, #0
+ 844 0316 DBB2     		uxtb	r3, r3
+ 703:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** }
+ 845              		.loc 1 703 0
+ 846 0318 1846     		mov	r0, r3
+ 847 031a 0C37     		adds	r7, r7, #12
+ 848              		.cfi_def_cfa_offset 4
+ 849 031c BD46     		mov	sp, r7
+ 850              		.cfi_def_cfa_register 13
+ 851              		@ sp needed
+ 852 031e 5DF8047B 		ldr	r7, [sp], #4
+ 853              		.cfi_restore 7
+ 854              		.cfi_def_cfa_offset 0
+ 855 0322 7047     		bx	lr
+ 856              		.cfi_endproc
+ 857              	.LFE15:
+ 859              		.align	2
+ 860              		.global	SSIClockSourceSet
+ 861              		.thumb
+ 862              		.thumb_func
+ 864              	SSIClockSourceSet:
+ 865              	.LFB16:
+ 704:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** 
+ 705:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //*****************************************************************************
+ 706:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //
+ 707:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! Sets the data clock source for the specified SSI peripheral
+ 708:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //!
+ 709:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! \param ui32Base is the base address of the SSI port.
+ 710:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! \param ui32Source is the baud clock source for the SSI.
+ 711:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //!
+ 712:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! This function allows the baud clock source for the SSI to be selected.
+ 713:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! The possible clock source are the system clock (\b SSI_CLOCK_SYSTEM) or
+ 714:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! the precision internal oscillator (\b SSI_CLOCK_PIOSC), i.e. the IO clock
+ 715:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! in the SysCtrl.
+ 716:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! If \b SSI_CLOCK_SYSTEM is chosen, the IO clock frequency must thus be
+ 717:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! queried by SysCtrlClockSet().
+ 718:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! If \b SSI_CLOCK_PIOSC the SysCtrlIOClockSet() function must be used.
+ 719:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //!
+ 720:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! Changing the baud clock source will change the data rate generated by the
+ 721:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! SSI.  Therefore, the data rate should be reconfigured after any change to
+ 722:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! the SSI clock source.
+ 723:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //!
+ 724:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! \return None
+ 725:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //
+ 726:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //*****************************************************************************
+ 727:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** void
+ 728:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** SSIClockSourceSet(uint32_t ui32Base, uint32_t ui32Source)
+ 729:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** {
+ 866              		.loc 1 729 0
+ 867              		.cfi_startproc
+ 868              		@ args = 0, pretend = 0, frame = 8
+ 869              		@ frame_needed = 1, uses_anonymous_args = 0
+ 870              		@ link register save eliminated.
+ 871 0324 80B4     		push	{r7}
+ 872              		.cfi_def_cfa_offset 4
+ 873              		.cfi_offset 7, -4
+ 874 0326 83B0     		sub	sp, sp, #12
+ 875              		.cfi_def_cfa_offset 16
+ 876 0328 00AF     		add	r7, sp, #0
+ 877              		.cfi_def_cfa_register 7
+ 878 032a 7860     		str	r0, [r7, #4]
+ 879 032c 3960     		str	r1, [r7]
+ 730:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 731:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     // Check the arguments.
+ 732:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 733:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     ASSERT((ui32Base == SSI0_BASE) || (ui32Base == SSI1_BASE));
+ 734:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     ASSERT((ui32Source == SSI_CLOCK_SYSTEM) || (ui32Source == SSI_CLOCK_PIOSC));
+ 735:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** 
+ 736:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 737:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     // Set the SSI clock source.
+ 738:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 739:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     HWREG(ui32Base + SSI_O_CC) = ui32Source;
+ 880              		.loc 1 739 0
+ 881 032e 7B68     		ldr	r3, [r7, #4]
+ 882 0330 03F6C873 		addw	r3, r3, #4040
+ 883 0334 1A46     		mov	r2, r3
+ 884 0336 3B68     		ldr	r3, [r7]
+ 885 0338 1360     		str	r3, [r2]
+ 740:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** }
+ 886              		.loc 1 740 0
+ 887 033a 0C37     		adds	r7, r7, #12
+ 888              		.cfi_def_cfa_offset 4
+ 889 033c BD46     		mov	sp, r7
+ 890              		.cfi_def_cfa_register 13
+ 891              		@ sp needed
+ 892 033e 5DF8047B 		ldr	r7, [sp], #4
+ 893              		.cfi_restore 7
+ 894              		.cfi_def_cfa_offset 0
+ 895 0342 7047     		bx	lr
+ 896              		.cfi_endproc
+ 897              	.LFE16:
+ 899              		.align	2
+ 900              		.global	SSIClockSourceGet
+ 901              		.thumb
+ 902              		.thumb_func
+ 904              	SSIClockSourceGet:
+ 905              	.LFB17:
+ 741:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** 
+ 742:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //*****************************************************************************
+ 743:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //
+ 744:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! Gets the data clock source for the specified SSI peripheral
+ 745:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //!
+ 746:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! \param ui32Base is the base address of the SSI port.
+ 747:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //!
+ 748:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! This function returns the data clock source for the specified SSI.  The
+ 749:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! possible data clock source are the system clock (\b SSI_CLOCK_SYSTEM) or
+ 750:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! the precision internal oscillator (\b SSI_CLOCK_PIOSC).
+ 751:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //!
+ 752:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //! \return None
+ 753:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //
+ 754:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** //*****************************************************************************
+ 755:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** uint32_t
+ 756:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** SSIClockSourceGet(uint32_t ui32Base)
+ 757:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** {
+ 906              		.loc 1 757 0
+ 907              		.cfi_startproc
+ 908              		@ args = 0, pretend = 0, frame = 8
+ 909              		@ frame_needed = 1, uses_anonymous_args = 0
+ 910              		@ link register save eliminated.
+ 911 0344 80B4     		push	{r7}
+ 912              		.cfi_def_cfa_offset 4
+ 913              		.cfi_offset 7, -4
+ 914 0346 83B0     		sub	sp, sp, #12
+ 915              		.cfi_def_cfa_offset 16
+ 916 0348 00AF     		add	r7, sp, #0
+ 917              		.cfi_def_cfa_register 7
+ 918 034a 7860     		str	r0, [r7, #4]
+ 758:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 759:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     // Check the arguments.
+ 760:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 761:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     ASSERT((ui32Base == SSI0_BASE) || (ui32Base == SSI1_BASE));
+ 762:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** 
+ 763:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 764:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     // Return the SSI clock source.
+ 765:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     //
+ 766:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c ****     return(HWREG(ui32Base + SSI_O_CC));
+ 919              		.loc 1 766 0
+ 920 034c 7B68     		ldr	r3, [r7, #4]
+ 921 034e 03F6C873 		addw	r3, r3, #4040
+ 922 0352 1B68     		ldr	r3, [r3]
+ 767:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/ssi.c **** }
+ 923              		.loc 1 767 0
+ 924 0354 1846     		mov	r0, r3
+ 925 0356 0C37     		adds	r7, r7, #12
+ 926              		.cfi_def_cfa_offset 4
+ 927 0358 BD46     		mov	sp, r7
+ 928              		.cfi_def_cfa_register 13
+ 929              		@ sp needed
+ 930 035a 5DF8047B 		ldr	r7, [sp], #4
+ 931              		.cfi_restore 7
+ 932              		.cfi_def_cfa_offset 0
+ 933 035e 7047     		bx	lr
+ 934              		.cfi_endproc
+ 935              	.LFE17:
+ 937              	.Letext0:
+ 938              		.file 2 "/usr/arm-none-eabi/include/machine/_default_types.h"
+ 939              		.file 3 "/usr/arm-none-eabi/include/sys/_stdint.h"
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 ssi.c
+     /tmp/cccWwGru.s:18     .text:0000000000000000 $t
+     /tmp/cccWwGru.s:23     .text:0000000000000000 SSIConfigSetExpClk
+     /tmp/cccWwGru.s:147    .text:000000000000009c SSIEnable
+     /tmp/cccWwGru.s:189    .text:00000000000000c0 SSIDisable
+     /tmp/cccWwGru.s:231    .text:00000000000000e4 SSIIntRegister
+     /tmp/cccWwGru.s:278    .text:0000000000000114 $d
+     /tmp/cccWwGru.s:282    .text:0000000000000118 $t
+     /tmp/cccWwGru.s:287    .text:0000000000000118 SSIIntUnregister
+     /tmp/cccWwGru.s:332    .text:0000000000000144 $d
+     /tmp/cccWwGru.s:336    .text:0000000000000148 $t
+     /tmp/cccWwGru.s:341    .text:0000000000000148 SSIIntEnable
+     /tmp/cccWwGru.s:385    .text:0000000000000170 SSIIntDisable
+     /tmp/cccWwGru.s:430    .text:0000000000000198 SSIIntStatus
+     /tmp/cccWwGru.s:481    .text:00000000000001c4 SSIIntClear
+     /tmp/cccWwGru.s:521    .text:00000000000001e4 SSIDataPut
+     /tmp/cccWwGru.s:571    .text:0000000000000214 SSIDataPutNonBlocking
+     /tmp/cccWwGru.s:626    .text:0000000000000248 SSIDataGet
+     /tmp/cccWwGru.s:676    .text:0000000000000278 SSIDataGetNonBlocking
+     /tmp/cccWwGru.s:731    .text:00000000000002ac SSIDMAEnable
+     /tmp/cccWwGru.s:775    .text:00000000000002d4 SSIDMADisable
+     /tmp/cccWwGru.s:820    .text:00000000000002fc SSIBusy
+     /tmp/cccWwGru.s:864    .text:0000000000000324 SSIClockSourceSet
+     /tmp/cccWwGru.s:904    .text:0000000000000344 SSIClockSourceGet
+                     .debug_frame:0000000000000010 $d
+                           .group:0000000000000000 wm4.0.59116071098782a37a9183a8102fe91b
+                           .group:0000000000000000 wm4.hw_ints.h.42.85b9479f2be35b086f1bb7cbb15bc097
+                           .group:0000000000000000 wm4.hw_memmap.h.39.19283c377d449c9bca5fdd8ccb62628c
+                           .group:0000000000000000 wm4.hw_ssi.h.39.9082f14e87d6077894a6e46eebe76d2f
+                           .group:0000000000000000 wm4.features.h.22.2e382148a0560adabf236cddd4e880f4
+                           .group:0000000000000000 wm4._default_types.h.15.933e8edd27a65e0b69af4a865eb623d2
+                           .group:0000000000000000 wm4._intsup.h.10.35a45952db64d30146faa63a55c20c1c
+                           .group:0000000000000000 wm4._stdint.h.10.f76354baea1c7088202064e6f3d4f5e3
+                           .group:0000000000000000 wm4.stdint.h.23.373a9d32a9e4c2e88fd347156532d281
+                           .group:0000000000000000 wm4.stdbool.h.29.1c9ee6859ce8145f7838a4f2549ccec2
+                           .group:0000000000000000 wm4.hw_types.h.67.b10589a0806dcc2d274d6fab6b736519
+                           .group:0000000000000000 wm4.interrupt.h.41.272fc4ec0e276feb439e7974d0f77eaf
+                           .group:0000000000000000 wm4.ssi.h.41.9d9fef101e9b51d683ad9b5927a1b748
+
+UNDEFINED SYMBOLS
+IntRegister
+IntEnable
+IntDisable
+IntUnregister

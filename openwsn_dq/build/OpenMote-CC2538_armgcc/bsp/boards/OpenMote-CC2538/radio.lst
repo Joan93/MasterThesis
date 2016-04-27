@@ -1,0 +1,2203 @@
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 6
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.file	"radio.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.section	.rodata
+  19              		.align	2
+  22              	rreg_uriquery:
+  23 0000 683D7563 		.ascii	"h=ucb\000"
+  23      6200
+  24 0006 0000     		.align	2
+  27              	infoBoardname:
+  28 0008 43433235 		.ascii	"CC2538\000"
+  28      333800
+  29 000f 00       		.align	2
+  32              	infouCName:
+  33 0010 43433235 		.ascii	"CC2538\000"
+  33      333800
+  34 0017 00       		.align	2
+  37              	infoRadioName:
+  38 0018 43433235 		.ascii	"CC2538 SoC\000"
+  38      33382053 
+  38      6F4300
+  39              		.comm	radio_vars,12,4
+  40              		.text
+  41              		.align	2
+  42              		.global	radio_init
+  43              		.thumb
+  44              		.thumb_func
+  46              	radio_init:
+  47              	.LFB0:
+  48              		.file 1 "build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c"
+   1:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** /**
+   2:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****  * Author: Xavier Vilajosana (xvilajosana@eecs.berkeley.edu)
+   3:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****  *         Pere Tuset (peretuset@openmote.com)
+   4:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****  * Date:   July 2013
+   5:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****  * Description: CC2538-specific definition of the "radio" bsp module.
+   6:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****  */
+   7:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** 
+   8:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** #include <headers/hw_ana_regs.h>
+   9:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** #include <headers/hw_ints.h>
+  10:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** #include <headers/hw_rfcore_sfr.h>
+  11:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** #include <headers/hw_rfcore_sfr.h>
+  12:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** #include <headers/hw_rfcore_xreg.h>
+  13:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** #include <headers/hw_types.h>
+  14:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** 
+  15:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** #include "board.h"
+  16:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** #include "radio.h"
+  17:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** #include "leds.h"
+  18:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** #include "stdio.h"
+  19:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** #include "string.h"
+  20:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** #include "radiotimer.h"
+  21:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** #include "debugpins.h"
+  22:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** #include "interrupt.h"
+  23:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** #include "sys_ctrl.h"
+  24:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** #include "sys_ctrl.h"
+  25:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** #include "cc2538rf.h"
+  26:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** 
+  27:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** //=========================== defines =========================================
+  28:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** 
+  29:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** /* Bit Masks for the last byte in the RX FIFO */
+  30:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** #define CRC_BIT_MASK 0x80
+  31:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** #define LQI_BIT_MASK 0x7F
+  32:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** 
+  33:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** /* RSSI Offset */
+  34:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** #define RSSI_OFFSET 73
+  35:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** #define CHECKSUM_LEN 2
+  36:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** 
+  37:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** //=========================== variables =======================================
+  38:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** 
+  39:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** typedef struct {
+  40:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    radiotimer_capture_cbt    startFrame_cb;
+  41:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    radiotimer_capture_cbt    endFrame_cb;
+  42:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    radio_state_t             state; 
+  43:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** } radio_vars_t;
+  44:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** 
+  45:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** radio_vars_t radio_vars;
+  46:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** 
+  47:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** //=========================== prototypes ======================================
+  48:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** 
+  49:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** void     enable_radio_interrupts(void);
+  50:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** void     disable_radio_interrupts(void);
+  51:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** 
+  52:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** void     radio_on(void);
+  53:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** void     radio_off(void);
+  54:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** 
+  55:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** void     radio_error_isr(void);
+  56:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** void     radio_isr_internal(void);
+  57:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** 
+  58:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** //=========================== public ==========================================
+  59:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** 
+  60:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** //===== admin
+  61:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** 
+  62:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** void radio_init() {
+  49              		.loc 1 62 0
+  50              		.cfi_startproc
+  51              		@ args = 0, pretend = 0, frame = 0
+  52              		@ frame_needed = 1, uses_anonymous_args = 0
+  53 0000 80B5     		push	{r7, lr}
+  54              		.cfi_def_cfa_offset 8
+  55              		.cfi_offset 7, -8
+  56              		.cfi_offset 14, -4
+  57 0002 00AF     		add	r7, sp, #0
+  58              		.cfi_def_cfa_register 7
+  63:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    
+  64:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    // clear variables
+  65:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    memset(&radio_vars,0,sizeof(radio_vars_t));
+  59              		.loc 1 65 0
+  60 0004 3948     		ldr	r0, .L2
+  61 0006 0021     		movs	r1, #0
+  62 0008 0C22     		movs	r2, #12
+  63 000a FFF7FEFF 		bl	memset
+  66:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    
+  67:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    // change state
+  68:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    radio_vars.state          = RADIOSTATE_STOPPED;
+  64              		.loc 1 68 0
+  65 000e 374B     		ldr	r3, .L2
+  66 0010 0022     		movs	r2, #0
+  67 0012 1A72     		strb	r2, [r3, #8]
+  69:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    //flush fifos
+  70:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    CC2538_RF_CSP_ISFLUSHRX();
+  68              		.loc 1 70 0
+  69 0014 364B     		ldr	r3, .L2+4
+  70 0016 ED22     		movs	r2, #237
+  71 0018 1A60     		str	r2, [r3]
+  72 001a 354B     		ldr	r3, .L2+4
+  73 001c ED22     		movs	r2, #237
+  74 001e 1A60     		str	r2, [r3]
+  71:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    CC2538_RF_CSP_ISFLUSHTX();
+  75              		.loc 1 71 0
+  76 0020 334B     		ldr	r3, .L2+4
+  77 0022 EE22     		movs	r2, #238
+  78 0024 1A60     		str	r2, [r3]
+  79 0026 324B     		ldr	r3, .L2+4
+  80 0028 EE22     		movs	r2, #238
+  81 002a 1A60     		str	r2, [r3]
+  72:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    
+  73:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    radio_off();
+  82              		.loc 1 73 0
+  83 002c FFF7FEFF 		bl	radio_off
+  74:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    
+  75:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    //disable radio interrupts
+  76:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    disable_radio_interrupts();
+  84              		.loc 1 76 0
+  85 0030 FFF7FEFF 		bl	disable_radio_interrupts
+  77:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    
+  78:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    /*
+  79:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    This CORR_THR value should be changed to 0x14 before attempting RX. Testing has shown that
+  80:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    too many false frames are received if the reset value is used. Make it more likely to detect
+  81:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    sync by removing the requirement that both symbols in the SFD must have a correlation value
+  82:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    above the correlation threshold, and make sync word detection less likely by raising the
+  83:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    correlation threshold.
+  84:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    */
+  85:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    HWREG(RFCORE_XREG_MDMCTRL1)    = 0x14;
+  86              		.loc 1 85 0
+  87 0034 2F4B     		ldr	r3, .L2+8
+  88 0036 1422     		movs	r2, #20
+  89 0038 1A60     		str	r2, [r3]
+  86:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    /* tuning adjustments for optimal radio performance; details available in datasheet */
+  87:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    
+  88:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    HWREG(RFCORE_XREG_RXCTRL)      = 0x3F;
+  90              		.loc 1 88 0
+  91 003a 2F4B     		ldr	r3, .L2+12
+  92 003c 3F22     		movs	r2, #63
+  93 003e 1A60     		str	r2, [r3]
+  89:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    /* Adjust current in synthesizer; details available in datasheet. */
+  90:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    HWREG(RFCORE_XREG_FSCTRL)      = 0x55;
+  94              		.loc 1 90 0
+  95 0040 2E4B     		ldr	r3, .L2+16
+  96 0042 5522     		movs	r2, #85
+  97 0044 1A60     		str	r2, [r3]
+  91:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    
+  92:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****      /* Makes sync word detection less likely by requiring two zero symbols before the sync word.
+  93:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****       * details available in datasheet.
+  94:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****       */
+  95:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    HWREG(RFCORE_XREG_MDMCTRL0)    = 0x85;
+  98              		.loc 1 95 0
+  99 0046 2E4B     		ldr	r3, .L2+20
+ 100 0048 8522     		movs	r2, #133
+ 101 004a 1A60     		str	r2, [r3]
+  96:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    
+  97:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    /* Adjust current in VCO; details available in datasheet. */
+  98:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    HWREG(RFCORE_XREG_FSCAL1)      = 0x01;
+ 102              		.loc 1 98 0
+ 103 004c 2D4B     		ldr	r3, .L2+24
+ 104 004e 0122     		movs	r2, #1
+ 105 0050 1A60     		str	r2, [r3]
+  99:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    /* Adjust target value for AGC control loop; details available in datasheet. */
+ 100:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    HWREG(RFCORE_XREG_AGCCTRL1)    = 0x15;
+ 106              		.loc 1 100 0
+ 107 0052 2D4B     		ldr	r3, .L2+28
+ 108 0054 1522     		movs	r2, #21
+ 109 0056 1A60     		str	r2, [r3]
+ 101:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    
+ 102:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    /* Tune ADC performance, details available in datasheet. */
+ 103:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    HWREG(RFCORE_XREG_ADCTEST0)    = 0x10;
+ 110              		.loc 1 103 0
+ 111 0058 2C4B     		ldr	r3, .L2+32
+ 112 005a 1022     		movs	r2, #16
+ 113 005c 1A60     		str	r2, [r3]
+ 104:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    HWREG(RFCORE_XREG_ADCTEST1)    = 0x0E;
+ 114              		.loc 1 104 0
+ 115 005e 2C4B     		ldr	r3, .L2+36
+ 116 0060 0E22     		movs	r2, #14
+ 117 0062 1A60     		str	r2, [r3]
+ 105:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    HWREG(RFCORE_XREG_ADCTEST2)    = 0x03;
+ 118              		.loc 1 105 0
+ 119 0064 2B4B     		ldr	r3, .L2+40
+ 120 0066 0322     		movs	r2, #3
+ 121 0068 1A60     		str	r2, [r3]
+ 106:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    
+ 107:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    //update CCA register to -81db as indicated by manual.. won't be used..
+ 108:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    HWREG(RFCORE_XREG_CCACTRL0)    = 0xF8;
+ 122              		.loc 1 108 0
+ 123 006a 2B4B     		ldr	r3, .L2+44
+ 124 006c F822     		movs	r2, #248
+ 125 006e 1A60     		str	r2, [r3]
+ 109:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    /*
+ 110:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****     * Changes from default values
+ 111:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****     * See User Guide, section "Register Settings Update"
+ 112:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****     */
+ 113:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    HWREG(RFCORE_XREG_TXFILTCFG)   = 0x09;    /** TX anti-aliasing filter bandwidth */
+ 126              		.loc 1 113 0
+ 127 0070 2A4B     		ldr	r3, .L2+48
+ 128 0072 0922     		movs	r2, #9
+ 129 0074 1A60     		str	r2, [r3]
+ 114:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    HWREG(RFCORE_XREG_AGCCTRL1)    = 0x15;     /** AGC target value */
+ 130              		.loc 1 114 0
+ 131 0076 244B     		ldr	r3, .L2+28
+ 132 0078 1522     		movs	r2, #21
+ 133 007a 1A60     		str	r2, [r3]
+ 115:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    HWREG(ANA_REGS_O_IVCTRL)       = 0x0B;        /** Bias currents */
+ 134              		.loc 1 115 0
+ 135 007c 0423     		movs	r3, #4
+ 136 007e 0B22     		movs	r2, #11
+ 137 0080 1A60     		str	r2, [r3]
+ 116:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    
+ 117:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    /* disable the CSPT register compare function */
+ 118:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    HWREG(RFCORE_XREG_CSPT)        = 0xFFUL;
+ 138              		.loc 1 118 0
+ 139 0082 274B     		ldr	r3, .L2+52
+ 140 0084 FF22     		movs	r2, #255
+ 141 0086 1A60     		str	r2, [r3]
+ 119:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    /*
+ 120:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****     * Defaults:
+ 121:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****     * Auto CRC; Append RSSI, CRC-OK and Corr. Val.; CRC calculation;
+ 122:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****     * RX and TX modes with FIFOs
+ 123:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****     */
+ 124:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    HWREG(RFCORE_XREG_FRMCTRL0)    = RFCORE_XREG_FRMCTRL0_AUTOCRC;
+ 142              		.loc 1 124 0
+ 143 0088 264B     		ldr	r3, .L2+56
+ 144 008a 4022     		movs	r2, #64
+ 145 008c 1A60     		str	r2, [r3]
+ 125:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    
+ 126:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    //poipoi disable frame filtering by now.. sniffer mode.
+ 127:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    HWREG(RFCORE_XREG_FRMFILT0)   &= ~RFCORE_XREG_FRMFILT0_FRAME_FILTER_EN;
+ 146              		.loc 1 127 0
+ 147 008e 264A     		ldr	r2, .L2+60
+ 148 0090 254B     		ldr	r3, .L2+60
+ 149 0092 1B68     		ldr	r3, [r3]
+ 150 0094 23F00103 		bic	r3, r3, #1
+ 151 0098 1360     		str	r3, [r2]
+ 128:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    
+ 129:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    /* Disable source address matching and autopend */
+ 130:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    HWREG(RFCORE_XREG_SRCMATCH)    = 0;
+ 152              		.loc 1 130 0
+ 153 009a 244B     		ldr	r3, .L2+64
+ 154 009c 0022     		movs	r2, #0
+ 155 009e 1A60     		str	r2, [r3]
+ 131:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    
+ 132:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    /* MAX FIFOP threshold */
+ 133:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    HWREG(RFCORE_XREG_FIFOPCTRL)   = CC2538_RF_MAX_PACKET_LEN;
+ 156              		.loc 1 133 0
+ 157 00a0 234B     		ldr	r3, .L2+68
+ 158 00a2 7F22     		movs	r2, #127
+ 159 00a4 1A60     		str	r2, [r3]
+ 134:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    
+ 135:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    HWREG(RFCORE_XREG_TXPOWER)     = CC2538_RF_TX_POWER;
+ 160              		.loc 1 135 0
+ 161 00a6 234B     		ldr	r3, .L2+72
+ 162 00a8 D522     		movs	r2, #213
+ 163 00aa 1A60     		str	r2, [r3]
+ 136:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    HWREG(RFCORE_XREG_FREQCTRL)    = CC2538_RF_CHANNEL_MIN;
+ 164              		.loc 1 136 0
+ 165 00ac 224B     		ldr	r3, .L2+76
+ 166 00ae 0B22     		movs	r2, #11
+ 167 00b0 1A60     		str	r2, [r3]
+ 137:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    
+ 138:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    /* Enable RF interrupts  see page 751  */
+ 139:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    // enable_radio_interrupts();
+ 140:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    
+ 141:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    //register interrupt
+ 142:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    IntRegister(INT_RFCORERTX, radio_isr_internal);
+ 168              		.loc 1 142 0
+ 169 00b2 9D20     		movs	r0, #157
+ 170 00b4 2149     		ldr	r1, .L2+80
+ 171 00b6 FFF7FEFF 		bl	IntRegister
+ 143:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    IntRegister(INT_RFCOREERR, radio_error_isr);
+ 172              		.loc 1 143 0
+ 173 00ba 9E20     		movs	r0, #158
+ 174 00bc 2049     		ldr	r1, .L2+84
+ 175 00be FFF7FEFF 		bl	IntRegister
+ 144:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    
+ 145:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    IntPrioritySet(INT_RFCORERTX, HAL_INT_PRIOR_MAC);
+ 176              		.loc 1 145 0
+ 177 00c2 9D20     		movs	r0, #157
+ 178 00c4 8021     		movs	r1, #128
+ 179 00c6 FFF7FEFF 		bl	IntPrioritySet
+ 146:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    IntPrioritySet(INT_RFCOREERR, HAL_INT_PRIOR_MAC);
+ 180              		.loc 1 146 0
+ 181 00ca 9E20     		movs	r0, #158
+ 182 00cc 8021     		movs	r1, #128
+ 183 00ce FFF7FEFF 		bl	IntPrioritySet
+ 147:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    
+ 148:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    IntEnable(INT_RFCORERTX);
+ 184              		.loc 1 148 0
+ 185 00d2 9D20     		movs	r0, #157
+ 186 00d4 FFF7FEFF 		bl	IntEnable
+ 149:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    
+ 150:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    /* Enable all RF Error interrupts */
+ 151:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    HWREG(RFCORE_XREG_RFERRM)      = RFCORE_XREG_RFERRM_RFERRM_M; //all errors
+ 187              		.loc 1 151 0
+ 188 00d8 1A4B     		ldr	r3, .L2+88
+ 189 00da 7F22     		movs	r2, #127
+ 190 00dc 1A60     		str	r2, [r3]
+ 152:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    IntEnable(INT_RFCOREERR);
+ 191              		.loc 1 152 0
+ 192 00de 9E20     		movs	r0, #158
+ 193 00e0 FFF7FEFF 		bl	IntEnable
+ 153:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    //radio_on();
+ 154:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    
+ 155:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    // change state
+ 156:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    radio_vars.state               = RADIOSTATE_RFOFF;
+ 194              		.loc 1 156 0
+ 195 00e4 014B     		ldr	r3, .L2
+ 196 00e6 0122     		movs	r2, #1
+ 197 00e8 1A72     		strb	r2, [r3, #8]
+ 157:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** }
+ 198              		.loc 1 157 0
+ 199 00ea 80BD     		pop	{r7, pc}
+ 200              	.L3:
+ 201              		.align	2
+ 202              	.L2:
+ 203 00ec 00000000 		.word	radio_vars
+ 204 00f0 38880840 		.word	1074300984
+ 205 00f4 A4860840 		.word	1074300580
+ 206 00f8 AC860840 		.word	1074300588
+ 207 00fc B0860840 		.word	1074300592
+ 208 0100 A0860840 		.word	1074300576
+ 209 0104 B8860840 		.word	1074300600
+ 210 0108 C8860840 		.word	1074300616
+ 211 010c D4860840 		.word	1074300628
+ 212 0110 D8860840 		.word	1074300632
+ 213 0114 DC860840 		.word	1074300636
+ 214 0118 58860840 		.word	1074300504
+ 215 011c E8870840 		.word	1074300904
+ 216 0120 94870840 		.word	1074300820
+ 217 0124 24860840 		.word	1074300452
+ 218 0128 00860840 		.word	1074300416
+ 219 012c 08860840 		.word	1074300424
+ 220 0130 50860840 		.word	1074300496
+ 221 0134 40860840 		.word	1074300480
+ 222 0138 3C860840 		.word	1074300476
+ 223 013c 00000000 		.word	radio_isr_internal
+ 224 0140 00000000 		.word	radio_error_isr
+ 225 0144 94860840 		.word	1074300564
+ 226              		.cfi_endproc
+ 227              	.LFE0:
+ 229              		.align	2
+ 230              		.global	radio_setOverflowCb
+ 231              		.thumb
+ 232              		.thumb_func
+ 234              	radio_setOverflowCb:
+ 235              	.LFB1:
+ 158:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** 
+ 159:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** void radio_setOverflowCb(radiotimer_compare_cbt cb) {
+ 236              		.loc 1 159 0
+ 237              		.cfi_startproc
+ 238              		@ args = 0, pretend = 0, frame = 8
+ 239              		@ frame_needed = 1, uses_anonymous_args = 0
+ 240 0148 80B5     		push	{r7, lr}
+ 241              		.cfi_def_cfa_offset 8
+ 242              		.cfi_offset 7, -8
+ 243              		.cfi_offset 14, -4
+ 244 014a 82B0     		sub	sp, sp, #8
+ 245              		.cfi_def_cfa_offset 16
+ 246 014c 00AF     		add	r7, sp, #0
+ 247              		.cfi_def_cfa_register 7
+ 248 014e 7860     		str	r0, [r7, #4]
+ 160:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    radiotimer_setOverflowCb(cb);
+ 249              		.loc 1 160 0
+ 250 0150 7868     		ldr	r0, [r7, #4]
+ 251 0152 FFF7FEFF 		bl	radiotimer_setOverflowCb
+ 161:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** }
+ 252              		.loc 1 161 0
+ 253 0156 0837     		adds	r7, r7, #8
+ 254              		.cfi_def_cfa_offset 8
+ 255 0158 BD46     		mov	sp, r7
+ 256              		.cfi_def_cfa_register 13
+ 257              		@ sp needed
+ 258 015a 80BD     		pop	{r7, pc}
+ 259              		.cfi_endproc
+ 260              	.LFE1:
+ 262              		.align	2
+ 263              		.global	radio_setCompareCb
+ 264              		.thumb
+ 265              		.thumb_func
+ 267              	radio_setCompareCb:
+ 268              	.LFB2:
+ 162:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** 
+ 163:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** void radio_setCompareCb(radiotimer_compare_cbt cb) {
+ 269              		.loc 1 163 0
+ 270              		.cfi_startproc
+ 271              		@ args = 0, pretend = 0, frame = 8
+ 272              		@ frame_needed = 1, uses_anonymous_args = 0
+ 273 015c 80B5     		push	{r7, lr}
+ 274              		.cfi_def_cfa_offset 8
+ 275              		.cfi_offset 7, -8
+ 276              		.cfi_offset 14, -4
+ 277 015e 82B0     		sub	sp, sp, #8
+ 278              		.cfi_def_cfa_offset 16
+ 279 0160 00AF     		add	r7, sp, #0
+ 280              		.cfi_def_cfa_register 7
+ 281 0162 7860     		str	r0, [r7, #4]
+ 164:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    radiotimer_setCompareCb(cb);
+ 282              		.loc 1 164 0
+ 283 0164 7868     		ldr	r0, [r7, #4]
+ 284 0166 FFF7FEFF 		bl	radiotimer_setCompareCb
+ 165:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** }
+ 285              		.loc 1 165 0
+ 286 016a 0837     		adds	r7, r7, #8
+ 287              		.cfi_def_cfa_offset 8
+ 288 016c BD46     		mov	sp, r7
+ 289              		.cfi_def_cfa_register 13
+ 290              		@ sp needed
+ 291 016e 80BD     		pop	{r7, pc}
+ 292              		.cfi_endproc
+ 293              	.LFE2:
+ 295              		.align	2
+ 296              		.global	radio_setStartFrameCb
+ 297              		.thumb
+ 298              		.thumb_func
+ 300              	radio_setStartFrameCb:
+ 301              	.LFB3:
+ 166:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** 
+ 167:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** void radio_setStartFrameCb(radiotimer_capture_cbt cb) {
+ 302              		.loc 1 167 0
+ 303              		.cfi_startproc
+ 304              		@ args = 0, pretend = 0, frame = 8
+ 305              		@ frame_needed = 1, uses_anonymous_args = 0
+ 306              		@ link register save eliminated.
+ 307 0170 80B4     		push	{r7}
+ 308              		.cfi_def_cfa_offset 4
+ 309              		.cfi_offset 7, -4
+ 310 0172 83B0     		sub	sp, sp, #12
+ 311              		.cfi_def_cfa_offset 16
+ 312 0174 00AF     		add	r7, sp, #0
+ 313              		.cfi_def_cfa_register 7
+ 314 0176 7860     		str	r0, [r7, #4]
+ 168:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    radio_vars.startFrame_cb  = cb;
+ 315              		.loc 1 168 0
+ 316 0178 034A     		ldr	r2, .L7
+ 317 017a 7B68     		ldr	r3, [r7, #4]
+ 318 017c 1360     		str	r3, [r2]
+ 169:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** }
+ 319              		.loc 1 169 0
+ 320 017e 0C37     		adds	r7, r7, #12
+ 321              		.cfi_def_cfa_offset 4
+ 322 0180 BD46     		mov	sp, r7
+ 323              		.cfi_def_cfa_register 13
+ 324              		@ sp needed
+ 325 0182 5DF8047B 		ldr	r7, [sp], #4
+ 326              		.cfi_restore 7
+ 327              		.cfi_def_cfa_offset 0
+ 328 0186 7047     		bx	lr
+ 329              	.L8:
+ 330              		.align	2
+ 331              	.L7:
+ 332 0188 00000000 		.word	radio_vars
+ 333              		.cfi_endproc
+ 334              	.LFE3:
+ 336              		.align	2
+ 337              		.global	radio_setEndFrameCb
+ 338              		.thumb
+ 339              		.thumb_func
+ 341              	radio_setEndFrameCb:
+ 342              	.LFB4:
+ 170:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** 
+ 171:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** void radio_setEndFrameCb(radiotimer_capture_cbt cb) {
+ 343              		.loc 1 171 0
+ 344              		.cfi_startproc
+ 345              		@ args = 0, pretend = 0, frame = 8
+ 346              		@ frame_needed = 1, uses_anonymous_args = 0
+ 347              		@ link register save eliminated.
+ 348 018c 80B4     		push	{r7}
+ 349              		.cfi_def_cfa_offset 4
+ 350              		.cfi_offset 7, -4
+ 351 018e 83B0     		sub	sp, sp, #12
+ 352              		.cfi_def_cfa_offset 16
+ 353 0190 00AF     		add	r7, sp, #0
+ 354              		.cfi_def_cfa_register 7
+ 355 0192 7860     		str	r0, [r7, #4]
+ 172:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    radio_vars.endFrame_cb    = cb;
+ 356              		.loc 1 172 0
+ 357 0194 034A     		ldr	r2, .L10
+ 358 0196 7B68     		ldr	r3, [r7, #4]
+ 359 0198 5360     		str	r3, [r2, #4]
+ 173:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** }
+ 360              		.loc 1 173 0
+ 361 019a 0C37     		adds	r7, r7, #12
+ 362              		.cfi_def_cfa_offset 4
+ 363 019c BD46     		mov	sp, r7
+ 364              		.cfi_def_cfa_register 13
+ 365              		@ sp needed
+ 366 019e 5DF8047B 		ldr	r7, [sp], #4
+ 367              		.cfi_restore 7
+ 368              		.cfi_def_cfa_offset 0
+ 369 01a2 7047     		bx	lr
+ 370              	.L11:
+ 371              		.align	2
+ 372              	.L10:
+ 373 01a4 00000000 		.word	radio_vars
+ 374              		.cfi_endproc
+ 375              	.LFE4:
+ 377              		.align	2
+ 378              		.global	radio_reset
+ 379              		.thumb
+ 380              		.thumb_func
+ 382              	radio_reset:
+ 383              	.LFB5:
+ 174:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** 
+ 175:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** //===== reset
+ 176:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** 
+ 177:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** void radio_reset() {
+ 384              		.loc 1 177 0
+ 385              		.cfi_startproc
+ 386              		@ args = 0, pretend = 0, frame = 0
+ 387              		@ frame_needed = 1, uses_anonymous_args = 0
+ 388 01a8 80B5     		push	{r7, lr}
+ 389              		.cfi_def_cfa_offset 8
+ 390              		.cfi_offset 7, -8
+ 391              		.cfi_offset 14, -4
+ 392 01aa 00AF     		add	r7, sp, #0
+ 393              		.cfi_def_cfa_register 7
+ 178:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    /* Wait for ongoing TX to complete (e.g. this could be an outgoing ACK) */
+ 179:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    while(HWREG(RFCORE_XREG_FSMSTAT1) & RFCORE_XREG_FSMSTAT1_TX_ACTIVE);
+ 394              		.loc 1 179 0
+ 395 01ac 00BF     		nop
+ 396              	.L13:
+ 397              		.loc 1 179 0 is_stmt 0 discriminator 1
+ 398 01ae 0E4B     		ldr	r3, .L15
+ 399 01b0 1B68     		ldr	r3, [r3]
+ 400 01b2 03F00203 		and	r3, r3, #2
+ 401 01b6 002B     		cmp	r3, #0
+ 402 01b8 F9D1     		bne	.L13
+ 180:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    
+ 181:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    //flush fifos
+ 182:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    CC2538_RF_CSP_ISFLUSHRX();
+ 403              		.loc 1 182 0 is_stmt 1
+ 404 01ba 0C4B     		ldr	r3, .L15+4
+ 405 01bc ED22     		movs	r2, #237
+ 406 01be 1A60     		str	r2, [r3]
+ 407 01c0 0A4B     		ldr	r3, .L15+4
+ 408 01c2 ED22     		movs	r2, #237
+ 409 01c4 1A60     		str	r2, [r3]
+ 183:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    CC2538_RF_CSP_ISFLUSHTX();
+ 410              		.loc 1 183 0
+ 411 01c6 094B     		ldr	r3, .L15+4
+ 412 01c8 EE22     		movs	r2, #238
+ 413 01ca 1A60     		str	r2, [r3]
+ 414 01cc 074B     		ldr	r3, .L15+4
+ 415 01ce EE22     		movs	r2, #238
+ 416 01d0 1A60     		str	r2, [r3]
+ 184:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    
+ 185:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    /* Don't turn off if we are off as this will trigger a Strobe Error */
+ 186:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    if(HWREG(RFCORE_XREG_RXENABLE) != 0) {
+ 417              		.loc 1 186 0
+ 418 01d2 074B     		ldr	r3, .L15+8
+ 419 01d4 1B68     		ldr	r3, [r3]
+ 420 01d6 002B     		cmp	r3, #0
+ 421 01d8 02D0     		beq	.L14
+ 187:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****       CC2538_RF_CSP_ISRFOFF();
+ 422              		.loc 1 187 0
+ 423 01da 044B     		ldr	r3, .L15+4
+ 424 01dc EF22     		movs	r2, #239
+ 425 01de 1A60     		str	r2, [r3]
+ 426              	.L14:
+ 188:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    }
+ 189:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    radio_init();
+ 427              		.loc 1 189 0
+ 428 01e0 FFF7FEFF 		bl	radio_init
+ 190:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** }
+ 429              		.loc 1 190 0
+ 430 01e4 80BD     		pop	{r7, pc}
+ 431              	.L16:
+ 432 01e6 00BF     		.align	2
+ 433              	.L15:
+ 434 01e8 4C860840 		.word	1074300492
+ 435 01ec 38880840 		.word	1074300984
+ 436 01f0 2C860840 		.word	1074300460
+ 437              		.cfi_endproc
+ 438              	.LFE5:
+ 440              		.align	2
+ 441              		.global	radio_startTimer
+ 442              		.thumb
+ 443              		.thumb_func
+ 445              	radio_startTimer:
+ 446              	.LFB6:
+ 191:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** 
+ 192:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** //===== timer
+ 193:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** 
+ 194:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** void radio_startTimer(PORT_TIMER_WIDTH period) {
+ 447              		.loc 1 194 0
+ 448              		.cfi_startproc
+ 449              		@ args = 0, pretend = 0, frame = 8
+ 450              		@ frame_needed = 1, uses_anonymous_args = 0
+ 451 01f4 80B5     		push	{r7, lr}
+ 452              		.cfi_def_cfa_offset 8
+ 453              		.cfi_offset 7, -8
+ 454              		.cfi_offset 14, -4
+ 455 01f6 82B0     		sub	sp, sp, #8
+ 456              		.cfi_def_cfa_offset 16
+ 457 01f8 00AF     		add	r7, sp, #0
+ 458              		.cfi_def_cfa_register 7
+ 459 01fa 7860     		str	r0, [r7, #4]
+ 195:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    radiotimer_start(period);
+ 460              		.loc 1 195 0
+ 461 01fc 7868     		ldr	r0, [r7, #4]
+ 462 01fe FFF7FEFF 		bl	radiotimer_start
+ 196:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** }
+ 463              		.loc 1 196 0
+ 464 0202 0837     		adds	r7, r7, #8
+ 465              		.cfi_def_cfa_offset 8
+ 466 0204 BD46     		mov	sp, r7
+ 467              		.cfi_def_cfa_register 13
+ 468              		@ sp needed
+ 469 0206 80BD     		pop	{r7, pc}
+ 470              		.cfi_endproc
+ 471              	.LFE6:
+ 473              		.align	2
+ 474              		.global	radio_getTimerValue
+ 475              		.thumb
+ 476              		.thumb_func
+ 478              	radio_getTimerValue:
+ 479              	.LFB7:
+ 197:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** 
+ 198:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** PORT_TIMER_WIDTH radio_getTimerValue() {
+ 480              		.loc 1 198 0
+ 481              		.cfi_startproc
+ 482              		@ args = 0, pretend = 0, frame = 0
+ 483              		@ frame_needed = 1, uses_anonymous_args = 0
+ 484 0208 80B5     		push	{r7, lr}
+ 485              		.cfi_def_cfa_offset 8
+ 486              		.cfi_offset 7, -8
+ 487              		.cfi_offset 14, -4
+ 488 020a 00AF     		add	r7, sp, #0
+ 489              		.cfi_def_cfa_register 7
+ 199:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    return radiotimer_getValue();
+ 490              		.loc 1 199 0
+ 491 020c FFF7FEFF 		bl	radiotimer_getValue
+ 492 0210 0346     		mov	r3, r0
+ 200:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** }
+ 493              		.loc 1 200 0
+ 494 0212 1846     		mov	r0, r3
+ 495 0214 80BD     		pop	{r7, pc}
+ 496              		.cfi_endproc
+ 497              	.LFE7:
+ 499 0216 00BF     		.align	2
+ 500              		.global	radio_setTimerPeriod
+ 501              		.thumb
+ 502              		.thumb_func
+ 504              	radio_setTimerPeriod:
+ 505              	.LFB8:
+ 201:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** 
+ 202:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** void radio_setTimerPeriod(PORT_TIMER_WIDTH period) {
+ 506              		.loc 1 202 0
+ 507              		.cfi_startproc
+ 508              		@ args = 0, pretend = 0, frame = 8
+ 509              		@ frame_needed = 1, uses_anonymous_args = 0
+ 510 0218 80B5     		push	{r7, lr}
+ 511              		.cfi_def_cfa_offset 8
+ 512              		.cfi_offset 7, -8
+ 513              		.cfi_offset 14, -4
+ 514 021a 82B0     		sub	sp, sp, #8
+ 515              		.cfi_def_cfa_offset 16
+ 516 021c 00AF     		add	r7, sp, #0
+ 517              		.cfi_def_cfa_register 7
+ 518 021e 7860     		str	r0, [r7, #4]
+ 203:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    radiotimer_setPeriod(period);
+ 519              		.loc 1 203 0
+ 520 0220 7868     		ldr	r0, [r7, #4]
+ 521 0222 FFF7FEFF 		bl	radiotimer_setPeriod
+ 204:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** }
+ 522              		.loc 1 204 0
+ 523 0226 0837     		adds	r7, r7, #8
+ 524              		.cfi_def_cfa_offset 8
+ 525 0228 BD46     		mov	sp, r7
+ 526              		.cfi_def_cfa_register 13
+ 527              		@ sp needed
+ 528 022a 80BD     		pop	{r7, pc}
+ 529              		.cfi_endproc
+ 530              	.LFE8:
+ 532              		.align	2
+ 533              		.global	radio_getTimerPeriod
+ 534              		.thumb
+ 535              		.thumb_func
+ 537              	radio_getTimerPeriod:
+ 538              	.LFB9:
+ 205:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** 
+ 206:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** PORT_TIMER_WIDTH radio_getTimerPeriod() {
+ 539              		.loc 1 206 0
+ 540              		.cfi_startproc
+ 541              		@ args = 0, pretend = 0, frame = 0
+ 542              		@ frame_needed = 1, uses_anonymous_args = 0
+ 543 022c 80B5     		push	{r7, lr}
+ 544              		.cfi_def_cfa_offset 8
+ 545              		.cfi_offset 7, -8
+ 546              		.cfi_offset 14, -4
+ 547 022e 00AF     		add	r7, sp, #0
+ 548              		.cfi_def_cfa_register 7
+ 207:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    return radiotimer_getPeriod();
+ 549              		.loc 1 207 0
+ 550 0230 FFF7FEFF 		bl	radiotimer_getPeriod
+ 551 0234 0346     		mov	r3, r0
+ 208:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** }
+ 552              		.loc 1 208 0
+ 553 0236 1846     		mov	r0, r3
+ 554 0238 80BD     		pop	{r7, pc}
+ 555              		.cfi_endproc
+ 556              	.LFE9:
+ 558 023a 00BF     		.align	2
+ 559              		.global	radio_setFrequency
+ 560              		.thumb
+ 561              		.thumb_func
+ 563              	radio_setFrequency:
+ 564              	.LFB10:
+ 209:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** 
+ 210:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** //===== RF admin
+ 211:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** 
+ 212:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** void radio_setFrequency(uint8_t frequency) {
+ 565              		.loc 1 212 0
+ 566              		.cfi_startproc
+ 567              		@ args = 0, pretend = 0, frame = 8
+ 568              		@ frame_needed = 1, uses_anonymous_args = 0
+ 569 023c 80B5     		push	{r7, lr}
+ 570              		.cfi_def_cfa_offset 8
+ 571              		.cfi_offset 7, -8
+ 572              		.cfi_offset 14, -4
+ 573 023e 82B0     		sub	sp, sp, #8
+ 574              		.cfi_def_cfa_offset 16
+ 575 0240 00AF     		add	r7, sp, #0
+ 576              		.cfi_def_cfa_register 7
+ 577 0242 0346     		mov	r3, r0
+ 578 0244 FB71     		strb	r3, [r7, #7]
+ 213:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** 
+ 214:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    // change state
+ 215:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    radio_vars.state = RADIOSTATE_SETTING_FREQUENCY;
+ 579              		.loc 1 215 0
+ 580 0246 0D4B     		ldr	r3, .L26
+ 581 0248 0222     		movs	r2, #2
+ 582 024a 1A72     		strb	r2, [r3, #8]
+ 216:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** 
+ 217:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    radio_off();
+ 583              		.loc 1 217 0
+ 584 024c FFF7FEFF 		bl	radio_off
+ 218:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    // configure the radio to the right frequecy
+ 219:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    if((frequency < CC2538_RF_CHANNEL_MIN) || (frequency > CC2538_RF_CHANNEL_MAX)) {
+ 585              		.loc 1 219 0
+ 586 0250 FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 587 0252 0A2B     		cmp	r3, #10
+ 588 0254 02D9     		bls	.L24
+ 589              		.loc 1 219 0 is_stmt 0 discriminator 1
+ 590 0256 FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 591 0258 1A2B     		cmp	r3, #26
+ 592 025a 00D9     		bls	.L25
+ 593              	.L24:
+ 220:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****       while(1);
+ 594              		.loc 1 220 0 is_stmt 1 discriminator 1
+ 595 025c FEE7     		b	.L24
+ 596              	.L25:
+ 221:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    }
+ 222:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    
+ 223:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    /* Changes to FREQCTRL take effect after the next recalibration */
+ 224:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    HWREG(RFCORE_XREG_FREQCTRL) = (CC2538_RF_CHANNEL_MIN
+ 597              		.loc 1 224 0
+ 598 025e 0849     		ldr	r1, .L26+4
+ 225:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****       + (frequency - CC2538_RF_CHANNEL_MIN) * CC2538_RF_CHANNEL_SPACING);
+ 599              		.loc 1 225 0
+ 600 0260 FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 601 0262 A3F10B02 		sub	r2, r3, #11
+ 602 0266 1346     		mov	r3, r2
+ 603 0268 9B00     		lsls	r3, r3, #2
+ 604 026a 1344     		add	r3, r3, r2
+ 605 026c 0B33     		adds	r3, r3, #11
+ 224:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****       + (frequency - CC2538_RF_CHANNEL_MIN) * CC2538_RF_CHANNEL_SPACING);
+ 606              		.loc 1 224 0
+ 607 026e 0B60     		str	r3, [r1]
+ 226:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    
+ 227:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    //radio_on();
+ 228:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    
+ 229:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    // change state
+ 230:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    radio_vars.state = RADIOSTATE_FREQUENCY_SET;
+ 608              		.loc 1 230 0
+ 609 0270 024B     		ldr	r3, .L26
+ 610 0272 0322     		movs	r2, #3
+ 611 0274 1A72     		strb	r2, [r3, #8]
+ 231:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** }
+ 612              		.loc 1 231 0
+ 613 0276 0837     		adds	r7, r7, #8
+ 614              		.cfi_def_cfa_offset 8
+ 615 0278 BD46     		mov	sp, r7
+ 616              		.cfi_def_cfa_register 13
+ 617              		@ sp needed
+ 618 027a 80BD     		pop	{r7, pc}
+ 619              	.L27:
+ 620              		.align	2
+ 621              	.L26:
+ 622 027c 00000000 		.word	radio_vars
+ 623 0280 3C860840 		.word	1074300476
+ 624              		.cfi_endproc
+ 625              	.LFE10:
+ 627              		.align	2
+ 628              		.global	radio_rfOn
+ 629              		.thumb
+ 630              		.thumb_func
+ 632              	radio_rfOn:
+ 633              	.LFB11:
+ 232:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** 
+ 233:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** void radio_rfOn() {
+ 634              		.loc 1 233 0
+ 635              		.cfi_startproc
+ 636              		@ args = 0, pretend = 0, frame = 0
+ 637              		@ frame_needed = 1, uses_anonymous_args = 0
+ 638              		@ link register save eliminated.
+ 639 0284 80B4     		push	{r7}
+ 640              		.cfi_def_cfa_offset 4
+ 641              		.cfi_offset 7, -4
+ 642 0286 00AF     		add	r7, sp, #0
+ 643              		.cfi_def_cfa_register 7
+ 234:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    //radio_on();
+ 235:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** }
+ 644              		.loc 1 235 0
+ 645 0288 BD46     		mov	sp, r7
+ 646              		.cfi_def_cfa_register 13
+ 647              		@ sp needed
+ 648 028a 5DF8047B 		ldr	r7, [sp], #4
+ 649              		.cfi_restore 7
+ 650              		.cfi_def_cfa_offset 0
+ 651 028e 7047     		bx	lr
+ 652              		.cfi_endproc
+ 653              	.LFE11:
+ 655              		.align	2
+ 656              		.global	radio_rfOff
+ 657              		.thumb
+ 658              		.thumb_func
+ 660              	radio_rfOff:
+ 661              	.LFB12:
+ 236:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** 
+ 237:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** void radio_rfOff() {
+ 662              		.loc 1 237 0
+ 663              		.cfi_startproc
+ 664              		@ args = 0, pretend = 0, frame = 0
+ 665              		@ frame_needed = 1, uses_anonymous_args = 0
+ 666 0290 80B5     		push	{r7, lr}
+ 667              		.cfi_def_cfa_offset 8
+ 668              		.cfi_offset 7, -8
+ 669              		.cfi_offset 14, -4
+ 670 0292 00AF     		add	r7, sp, #0
+ 671              		.cfi_def_cfa_register 7
+ 238:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    
+ 239:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    // change state
+ 240:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    radio_vars.state = RADIOSTATE_TURNING_OFF;
+ 672              		.loc 1 240 0
+ 673 0294 074B     		ldr	r3, .L30
+ 674 0296 0D22     		movs	r2, #13
+ 675 0298 1A72     		strb	r2, [r3, #8]
+ 241:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    radio_off();
+ 676              		.loc 1 241 0
+ 677 029a FFF7FEFF 		bl	radio_off
+ 242:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    // wiggle debug pin
+ 243:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    debugpins_radio_clr();
+ 678              		.loc 1 243 0
+ 679 029e FFF7FEFF 		bl	debugpins_radio_clr
+ 244:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    leds_radio_off();
+ 680              		.loc 1 244 0
+ 681 02a2 FFF7FEFF 		bl	leds_radio_off
+ 245:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    //enable radio interrupts
+ 246:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    disable_radio_interrupts();
+ 682              		.loc 1 246 0
+ 683 02a6 FFF7FEFF 		bl	disable_radio_interrupts
+ 247:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    
+ 248:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    // change state
+ 249:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    radio_vars.state = RADIOSTATE_RFOFF;
+ 684              		.loc 1 249 0
+ 685 02aa 024B     		ldr	r3, .L30
+ 686 02ac 0122     		movs	r2, #1
+ 687 02ae 1A72     		strb	r2, [r3, #8]
+ 250:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** }
+ 688              		.loc 1 250 0
+ 689 02b0 80BD     		pop	{r7, pc}
+ 690              	.L31:
+ 691 02b2 00BF     		.align	2
+ 692              	.L30:
+ 693 02b4 00000000 		.word	radio_vars
+ 694              		.cfi_endproc
+ 695              	.LFE12:
+ 697              		.align	2
+ 698              		.global	radio_loadPacket
+ 699              		.thumb
+ 700              		.thumb_func
+ 702              	radio_loadPacket:
+ 703              	.LFB13:
+ 251:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** 
+ 252:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** //===== TX
+ 253:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** 
+ 254:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** void radio_loadPacket(uint8_t* packet, uint8_t len) {
+ 704              		.loc 1 254 0
+ 705              		.cfi_startproc
+ 706              		@ args = 0, pretend = 0, frame = 16
+ 707              		@ frame_needed = 1, uses_anonymous_args = 0
+ 708              		@ link register save eliminated.
+ 709 02b8 80B4     		push	{r7}
+ 710              		.cfi_def_cfa_offset 4
+ 711              		.cfi_offset 7, -4
+ 712 02ba 85B0     		sub	sp, sp, #20
+ 713              		.cfi_def_cfa_offset 24
+ 714 02bc 00AF     		add	r7, sp, #0
+ 715              		.cfi_def_cfa_register 7
+ 716 02be 7860     		str	r0, [r7, #4]
+ 717 02c0 0B46     		mov	r3, r1
+ 718 02c2 FB70     		strb	r3, [r7, #3]
+ 255:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    uint8_t i=0;
+ 719              		.loc 1 255 0
+ 720 02c4 0023     		movs	r3, #0
+ 721 02c6 FB73     		strb	r3, [r7, #15]
+ 256:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    
+ 257:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    // change state
+ 258:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    radio_vars.state = RADIOSTATE_LOADING_PACKET;
+ 722              		.loc 1 258 0
+ 723 02c8 154B     		ldr	r3, .L36
+ 724 02ca 0422     		movs	r2, #4
+ 725 02cc 1A72     		strb	r2, [r3, #8]
+ 259:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    
+ 260:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    // load packet in TXFIFO
+ 261:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    /*
+ 262:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    When we transmit in very quick bursts, make sure previous transmission
+ 263:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    is not still in progress before re-writing to the TX FIFO
+ 264:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    */
+ 265:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    while(HWREG(RFCORE_XREG_FSMSTAT1) & RFCORE_XREG_FSMSTAT1_TX_ACTIVE);
+ 726              		.loc 1 265 0
+ 727 02ce 00BF     		nop
+ 728              	.L33:
+ 729              		.loc 1 265 0 is_stmt 0 discriminator 1
+ 730 02d0 144B     		ldr	r3, .L36+4
+ 731 02d2 1B68     		ldr	r3, [r3]
+ 732 02d4 03F00203 		and	r3, r3, #2
+ 733 02d8 002B     		cmp	r3, #0
+ 734 02da F9D1     		bne	.L33
+ 266:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    
+ 267:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    CC2538_RF_CSP_ISFLUSHTX();
+ 735              		.loc 1 267 0 is_stmt 1
+ 736 02dc 124B     		ldr	r3, .L36+8
+ 737 02de EE22     		movs	r2, #238
+ 738 02e0 1A60     		str	r2, [r3]
+ 739 02e2 114B     		ldr	r3, .L36+8
+ 740 02e4 EE22     		movs	r2, #238
+ 741 02e6 1A60     		str	r2, [r3]
+ 268:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    
+ 269:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    /* Send the phy length byte first */
+ 270:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****     HWREG(RFCORE_SFR_RFDATA) = len; //crc len is included
+ 742              		.loc 1 270 0
+ 743 02e8 104A     		ldr	r2, .L36+12
+ 744 02ea FB78     		ldrb	r3, [r7, #3]	@ zero_extendqisi2
+ 745 02ec 1360     		str	r3, [r2]
+ 271:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    
+ 272:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    for(i = 0; i < len; i++) {
+ 746              		.loc 1 272 0
+ 747 02ee 0023     		movs	r3, #0
+ 748 02f0 FB73     		strb	r3, [r7, #15]
+ 749 02f2 08E0     		b	.L34
+ 750              	.L35:
+ 273:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****       HWREG(RFCORE_SFR_RFDATA) = packet[i];
+ 751              		.loc 1 273 0 discriminator 3
+ 752 02f4 0D49     		ldr	r1, .L36+12
+ 753 02f6 FB7B     		ldrb	r3, [r7, #15]	@ zero_extendqisi2
+ 754 02f8 7A68     		ldr	r2, [r7, #4]
+ 755 02fa 1344     		add	r3, r3, r2
+ 756 02fc 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 757 02fe 0B60     		str	r3, [r1]
+ 272:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****       HWREG(RFCORE_SFR_RFDATA) = packet[i];
+ 758              		.loc 1 272 0 discriminator 3
+ 759 0300 FB7B     		ldrb	r3, [r7, #15]	@ zero_extendqisi2
+ 760 0302 0133     		adds	r3, r3, #1
+ 761 0304 FB73     		strb	r3, [r7, #15]
+ 762              	.L34:
+ 272:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****       HWREG(RFCORE_SFR_RFDATA) = packet[i];
+ 763              		.loc 1 272 0 is_stmt 0 discriminator 1
+ 764 0306 FA7B     		ldrb	r2, [r7, #15]	@ zero_extendqisi2
+ 765 0308 FB78     		ldrb	r3, [r7, #3]	@ zero_extendqisi2
+ 766 030a 9A42     		cmp	r2, r3
+ 767 030c F2D3     		bcc	.L35
+ 274:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    }
+ 275:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    
+ 276:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    // change state
+ 277:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    radio_vars.state = RADIOSTATE_PACKET_LOADED;
+ 768              		.loc 1 277 0 is_stmt 1
+ 769 030e 044B     		ldr	r3, .L36
+ 770 0310 0522     		movs	r2, #5
+ 771 0312 1A72     		strb	r2, [r3, #8]
+ 278:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** }
+ 772              		.loc 1 278 0
+ 773 0314 1437     		adds	r7, r7, #20
+ 774              		.cfi_def_cfa_offset 4
+ 775 0316 BD46     		mov	sp, r7
+ 776              		.cfi_def_cfa_register 13
+ 777              		@ sp needed
+ 778 0318 5DF8047B 		ldr	r7, [sp], #4
+ 779              		.cfi_restore 7
+ 780              		.cfi_def_cfa_offset 0
+ 781 031c 7047     		bx	lr
+ 782              	.L37:
+ 783 031e 00BF     		.align	2
+ 784              	.L36:
+ 785 0320 00000000 		.word	radio_vars
+ 786 0324 4C860840 		.word	1074300492
+ 787 0328 38880840 		.word	1074300984
+ 788 032c 28880840 		.word	1074300968
+ 789              		.cfi_endproc
+ 790              	.LFE13:
+ 792              		.align	2
+ 793              		.global	radio_txEnable
+ 794              		.thumb
+ 795              		.thumb_func
+ 797              	radio_txEnable:
+ 798              	.LFB14:
+ 279:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** 
+ 280:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** void radio_txEnable() {
+ 799              		.loc 1 280 0
+ 800              		.cfi_startproc
+ 801              		@ args = 0, pretend = 0, frame = 0
+ 802              		@ frame_needed = 1, uses_anonymous_args = 0
+ 803 0330 80B5     		push	{r7, lr}
+ 804              		.cfi_def_cfa_offset 8
+ 805              		.cfi_offset 7, -8
+ 806              		.cfi_offset 14, -4
+ 807 0332 00AF     		add	r7, sp, #0
+ 808              		.cfi_def_cfa_register 7
+ 281:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    
+ 282:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    // change state
+ 283:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    radio_vars.state = RADIOSTATE_ENABLING_TX;
+ 809              		.loc 1 283 0
+ 810 0334 054B     		ldr	r3, .L39
+ 811 0336 0622     		movs	r2, #6
+ 812 0338 1A72     		strb	r2, [r3, #8]
+ 284:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    
+ 285:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    // wiggle debug pin
+ 286:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    debugpins_radio_set();
+ 813              		.loc 1 286 0
+ 814 033a FFF7FEFF 		bl	debugpins_radio_set
+ 287:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    leds_radio_on();
+ 815              		.loc 1 287 0
+ 816 033e FFF7FEFF 		bl	leds_radio_on
+ 288:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    
+ 289:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    //do nothing -- radio is activated by the strobe on rx or tx
+ 290:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    //radio_rfOn();
+ 291:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    
+ 292:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    // change state
+ 293:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    radio_vars.state = RADIOSTATE_TX_ENABLED;
+ 817              		.loc 1 293 0
+ 818 0342 024B     		ldr	r3, .L39
+ 819 0344 0722     		movs	r2, #7
+ 820 0346 1A72     		strb	r2, [r3, #8]
+ 294:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** }
+ 821              		.loc 1 294 0
+ 822 0348 80BD     		pop	{r7, pc}
+ 823              	.L40:
+ 824 034a 00BF     		.align	2
+ 825              	.L39:
+ 826 034c 00000000 		.word	radio_vars
+ 827              		.cfi_endproc
+ 828              	.LFE14:
+ 830              		.align	2
+ 831              		.global	radio_txNow
+ 832              		.thumb
+ 833              		.thumb_func
+ 835              	radio_txNow:
+ 836              	.LFB15:
+ 295:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** 
+ 296:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** void radio_txNow() {
+ 837              		.loc 1 296 0
+ 838              		.cfi_startproc
+ 839              		@ args = 0, pretend = 0, frame = 8
+ 840              		@ frame_needed = 1, uses_anonymous_args = 0
+ 841 0350 80B5     		push	{r7, lr}
+ 842              		.cfi_def_cfa_offset 8
+ 843              		.cfi_offset 7, -8
+ 844              		.cfi_offset 14, -4
+ 845 0352 82B0     		sub	sp, sp, #8
+ 846              		.cfi_def_cfa_offset 16
+ 847 0354 00AF     		add	r7, sp, #0
+ 848              		.cfi_def_cfa_register 7
+ 297:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    PORT_TIMER_WIDTH count;
+ 298:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    
+ 299:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    // change state
+ 300:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    radio_vars.state = RADIOSTATE_TRANSMITTING;
+ 849              		.loc 1 300 0
+ 850 0356 0F4B     		ldr	r3, .L45
+ 851 0358 0822     		movs	r2, #8
+ 852 035a 1A72     		strb	r2, [r3, #8]
+ 301:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** 
+ 302:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    //enable radio interrupts
+ 303:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    enable_radio_interrupts();
+ 853              		.loc 1 303 0
+ 854 035c FFF7FEFF 		bl	enable_radio_interrupts
+ 304:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** 
+ 305:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    //make sure we are not transmitting already
+ 306:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    while(HWREG(RFCORE_XREG_FSMSTAT1) & RFCORE_XREG_FSMSTAT1_TX_ACTIVE);
+ 855              		.loc 1 306 0
+ 856 0360 00BF     		nop
+ 857              	.L42:
+ 858              		.loc 1 306 0 is_stmt 0 discriminator 1
+ 859 0362 0D4B     		ldr	r3, .L45+4
+ 860 0364 1B68     		ldr	r3, [r3]
+ 861 0366 03F00203 		and	r3, r3, #2
+ 862 036a 002B     		cmp	r3, #0
+ 863 036c F9D1     		bne	.L42
+ 307:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** 
+ 308:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    // send packet by STON strobe see pag 669
+ 309:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** 
+ 310:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    CC2538_RF_CSP_ISTXON();
+ 864              		.loc 1 310 0 is_stmt 1
+ 865 036e 0B4B     		ldr	r3, .L45+8
+ 866 0370 E922     		movs	r2, #233
+ 867 0372 1A60     		str	r2, [r3]
+ 311:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    //wait 192uS
+ 312:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    count=0;
+ 868              		.loc 1 312 0
+ 869 0374 0023     		movs	r3, #0
+ 870 0376 7B60     		str	r3, [r7, #4]
+ 313:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    while(!((HWREG(RFCORE_XREG_FSMSTAT1) & RFCORE_XREG_FSMSTAT1_TX_ACTIVE))){
+ 871              		.loc 1 313 0
+ 872 0378 02E0     		b	.L43
+ 873              	.L44:
+ 314:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****       count++; //debug
+ 874              		.loc 1 314 0
+ 875 037a 7B68     		ldr	r3, [r7, #4]
+ 876 037c 0133     		adds	r3, r3, #1
+ 877 037e 7B60     		str	r3, [r7, #4]
+ 878              	.L43:
+ 313:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    while(!((HWREG(RFCORE_XREG_FSMSTAT1) & RFCORE_XREG_FSMSTAT1_TX_ACTIVE))){
+ 879              		.loc 1 313 0
+ 880 0380 054B     		ldr	r3, .L45+4
+ 881 0382 1B68     		ldr	r3, [r3]
+ 882 0384 03F00203 		and	r3, r3, #2
+ 883 0388 002B     		cmp	r3, #0
+ 884 038a F6D0     		beq	.L44
+ 315:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    }
+ 316:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** }
+ 885              		.loc 1 316 0
+ 886 038c 0837     		adds	r7, r7, #8
+ 887              		.cfi_def_cfa_offset 8
+ 888 038e BD46     		mov	sp, r7
+ 889              		.cfi_def_cfa_register 13
+ 890              		@ sp needed
+ 891 0390 80BD     		pop	{r7, pc}
+ 892              	.L46:
+ 893 0392 00BF     		.align	2
+ 894              	.L45:
+ 895 0394 00000000 		.word	radio_vars
+ 896 0398 4C860840 		.word	1074300492
+ 897 039c 38880840 		.word	1074300984
+ 898              		.cfi_endproc
+ 899              	.LFE15:
+ 901              		.align	2
+ 902              		.global	radio_rxEnable
+ 903              		.thumb
+ 904              		.thumb_func
+ 906              	radio_rxEnable:
+ 907              	.LFB16:
+ 317:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** 
+ 318:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** //===== RX
+ 319:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** 
+ 320:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** void radio_rxEnable() {
+ 908              		.loc 1 320 0
+ 909              		.cfi_startproc
+ 910              		@ args = 0, pretend = 0, frame = 0
+ 911              		@ frame_needed = 1, uses_anonymous_args = 0
+ 912 03a0 80B5     		push	{r7, lr}
+ 913              		.cfi_def_cfa_offset 8
+ 914              		.cfi_offset 7, -8
+ 915              		.cfi_offset 14, -4
+ 916 03a2 00AF     		add	r7, sp, #0
+ 917              		.cfi_def_cfa_register 7
+ 321:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    
+ 322:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    // change state
+ 323:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    radio_vars.state = RADIOSTATE_ENABLING_RX;
+ 918              		.loc 1 323 0
+ 919 03a4 054B     		ldr	r3, .L48
+ 920 03a6 0922     		movs	r2, #9
+ 921 03a8 1A72     		strb	r2, [r3, #8]
+ 324:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    
+ 325:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    //enable radio interrupts
+ 326:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    
+ 327:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    // do nothing as we do not want to receive anything yet.
+ 328:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    // wiggle debug pin
+ 329:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    debugpins_radio_set();
+ 922              		.loc 1 329 0
+ 923 03aa FFF7FEFF 		bl	debugpins_radio_set
+ 330:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    leds_radio_on();
+ 924              		.loc 1 330 0
+ 925 03ae FFF7FEFF 		bl	leds_radio_on
+ 331:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    
+ 332:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    // change state
+ 333:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    radio_vars.state = RADIOSTATE_LISTENING;
+ 926              		.loc 1 333 0
+ 927 03b2 024B     		ldr	r3, .L48
+ 928 03b4 0A22     		movs	r2, #10
+ 929 03b6 1A72     		strb	r2, [r3, #8]
+ 334:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** }
+ 930              		.loc 1 334 0
+ 931 03b8 80BD     		pop	{r7, pc}
+ 932              	.L49:
+ 933 03ba 00BF     		.align	2
+ 934              	.L48:
+ 935 03bc 00000000 		.word	radio_vars
+ 936              		.cfi_endproc
+ 937              	.LFE16:
+ 939              		.align	2
+ 940              		.global	radio_rxNow
+ 941              		.thumb
+ 942              		.thumb_func
+ 944              	radio_rxNow:
+ 945              	.LFB17:
+ 335:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** 
+ 336:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** void radio_rxNow() {
+ 946              		.loc 1 336 0
+ 947              		.cfi_startproc
+ 948              		@ args = 0, pretend = 0, frame = 0
+ 949              		@ frame_needed = 1, uses_anonymous_args = 0
+ 950 03c0 80B5     		push	{r7, lr}
+ 951              		.cfi_def_cfa_offset 8
+ 952              		.cfi_offset 7, -8
+ 953              		.cfi_offset 14, -4
+ 954 03c2 00AF     		add	r7, sp, #0
+ 955              		.cfi_def_cfa_register 7
+ 337:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    //empty buffer before receiving
+ 338:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    //CC2538_RF_CSP_ISFLUSHRX();
+ 339:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    
+ 340:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    //enable radio interrupts
+ 341:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    CC2538_RF_CSP_ISFLUSHRX();
+ 956              		.loc 1 341 0
+ 957 03c4 094B     		ldr	r3, .L52
+ 958 03c6 ED22     		movs	r2, #237
+ 959 03c8 1A60     		str	r2, [r3]
+ 960 03ca 084B     		ldr	r3, .L52
+ 961 03cc ED22     		movs	r2, #237
+ 962 03ce 1A60     		str	r2, [r3]
+ 342:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    enable_radio_interrupts();
+ 963              		.loc 1 342 0
+ 964 03d0 FFF7FEFF 		bl	enable_radio_interrupts
+ 343:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    
+ 344:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    CC2538_RF_CSP_ISRXON();
+ 965              		.loc 1 344 0
+ 966 03d4 054B     		ldr	r3, .L52
+ 967 03d6 E322     		movs	r2, #227
+ 968 03d8 1A60     		str	r2, [r3]
+ 345:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    // busy wait until radio really listening
+ 346:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    while(!((HWREG(RFCORE_XREG_FSMSTAT1) & RFCORE_XREG_FSMSTAT1_RX_ACTIVE)));
+ 969              		.loc 1 346 0
+ 970 03da 00BF     		nop
+ 971              	.L51:
+ 972              		.loc 1 346 0 is_stmt 0 discriminator 1
+ 973 03dc 044B     		ldr	r3, .L52+4
+ 974 03de 1B68     		ldr	r3, [r3]
+ 975 03e0 03F00103 		and	r3, r3, #1
+ 976 03e4 002B     		cmp	r3, #0
+ 977 03e6 F9D0     		beq	.L51
+ 347:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** }
+ 978              		.loc 1 347 0 is_stmt 1
+ 979 03e8 80BD     		pop	{r7, pc}
+ 980              	.L53:
+ 981 03ea 00BF     		.align	2
+ 982              	.L52:
+ 983 03ec 38880840 		.word	1074300984
+ 984 03f0 4C860840 		.word	1074300492
+ 985              		.cfi_endproc
+ 986              	.LFE17:
+ 988              		.align	2
+ 989              		.global	radio_getReceivedFrame
+ 990              		.thumb
+ 991              		.thumb_func
+ 993              	radio_getReceivedFrame:
+ 994              	.LFB18:
+ 348:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** 
+ 349:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** void radio_getReceivedFrame(uint8_t* pBufRead,
+ 350:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****                             uint8_t* pLenRead,
+ 351:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****                             uint8_t  maxBufLen,
+ 352:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****                              int8_t* pRssi,
+ 353:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****                             uint8_t* pLqi,
+ 354:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****                                bool* pCrc) {
+ 995              		.loc 1 354 0
+ 996              		.cfi_startproc
+ 997              		@ args = 8, pretend = 0, frame = 24
+ 998              		@ frame_needed = 1, uses_anonymous_args = 0
+ 999              		@ link register save eliminated.
+ 1000 03f4 80B4     		push	{r7}
+ 1001              		.cfi_def_cfa_offset 4
+ 1002              		.cfi_offset 7, -4
+ 1003 03f6 87B0     		sub	sp, sp, #28
+ 1004              		.cfi_def_cfa_offset 32
+ 1005 03f8 00AF     		add	r7, sp, #0
+ 1006              		.cfi_def_cfa_register 7
+ 1007 03fa F860     		str	r0, [r7, #12]
+ 1008 03fc B960     		str	r1, [r7, #8]
+ 1009 03fe 3B60     		str	r3, [r7]
+ 1010 0400 1346     		mov	r3, r2
+ 1011 0402 FB71     		strb	r3, [r7, #7]
+ 355:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    uint8_t crc_corr,i;
+ 356:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    
+ 357:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    uint8_t len=0;
+ 1012              		.loc 1 357 0
+ 1013 0404 0023     		movs	r3, #0
+ 1014 0406 BB75     		strb	r3, [r7, #22]
+ 358:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    
+ 359:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    /* Check the length */
+ 360:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    len = HWREG(RFCORE_SFR_RFDATA); //first byte is len
+ 1015              		.loc 1 360 0
+ 1016 0408 2B4B     		ldr	r3, .L61
+ 1017 040a 1B68     		ldr	r3, [r3]
+ 1018 040c BB75     		strb	r3, [r7, #22]
+ 361:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    
+ 362:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    
+ 363:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    /* Check for validity */
+ 364:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    if(len > CC2538_RF_MAX_PACKET_LEN) {
+ 1019              		.loc 1 364 0
+ 1020 040e BB7D     		ldrb	r3, [r7, #22]	@ zero_extendqisi2
+ 1021 0410 5BB2     		sxtb	r3, r3
+ 1022 0412 002B     		cmp	r3, #0
+ 1023 0414 06DA     		bge	.L55
+ 365:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****       /* wrong len */
+ 366:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****       CC2538_RF_CSP_ISFLUSHRX();
+ 1024              		.loc 1 366 0
+ 1025 0416 294B     		ldr	r3, .L61+4
+ 1026 0418 ED22     		movs	r2, #237
+ 1027 041a 1A60     		str	r2, [r3]
+ 1028 041c 274B     		ldr	r3, .L61+4
+ 1029 041e ED22     		movs	r2, #237
+ 1030 0420 1A60     		str	r2, [r3]
+ 367:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****       return;
+ 1031              		.loc 1 367 0
+ 1032 0422 44E0     		b	.L54
+ 1033              	.L55:
+ 368:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    }
+ 369:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    
+ 370:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    
+ 371:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    if(len <= CC2538_RF_MIN_PACKET_LEN) {
+ 1034              		.loc 1 371 0
+ 1035 0424 BB7D     		ldrb	r3, [r7, #22]	@ zero_extendqisi2
+ 1036 0426 042B     		cmp	r3, #4
+ 1037 0428 06D8     		bhi	.L57
+ 372:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****       //too short
+ 373:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****       CC2538_RF_CSP_ISFLUSHRX();
+ 1038              		.loc 1 373 0
+ 1039 042a 244B     		ldr	r3, .L61+4
+ 1040 042c ED22     		movs	r2, #237
+ 1041 042e 1A60     		str	r2, [r3]
+ 1042 0430 224B     		ldr	r3, .L61+4
+ 1043 0432 ED22     		movs	r2, #237
+ 1044 0434 1A60     		str	r2, [r3]
+ 374:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****       return;
+ 1045              		.loc 1 374 0
+ 1046 0436 3AE0     		b	.L54
+ 1047              	.L57:
+ 375:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    }
+ 376:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    
+ 377:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    //check if this fits to the buffer
+ 378:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    if(len > maxBufLen) {
+ 1048              		.loc 1 378 0
+ 1049 0438 BA7D     		ldrb	r2, [r7, #22]	@ zero_extendqisi2
+ 1050 043a FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 1051 043c 9A42     		cmp	r2, r3
+ 1052 043e 06D9     		bls	.L58
+ 379:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****       CC2538_RF_CSP_ISFLUSHRX();
+ 1053              		.loc 1 379 0
+ 1054 0440 1E4B     		ldr	r3, .L61+4
+ 1055 0442 ED22     		movs	r2, #237
+ 1056 0444 1A60     		str	r2, [r3]
+ 1057 0446 1D4B     		ldr	r3, .L61+4
+ 1058 0448 ED22     		movs	r2, #237
+ 1059 044a 1A60     		str	r2, [r3]
+ 380:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****       return;
+ 1060              		.loc 1 380 0
+ 1061 044c 2FE0     		b	.L54
+ 1062              	.L58:
+ 381:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    }
+ 382:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    
+ 383:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    // when reading the packet from the RX buffer, you get the following:
+ 384:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    // - *[1B]     length byte
+ 385:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    // -  [0-125B] packet (excluding CRC)
+ 386:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    // -  [1B]     RSSI
+ 387:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    // - *[2B]     CRC
+ 388:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    
+ 389:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    //skip first byte is len
+ 390:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    for(i = 0; i < len - 2; i++) {
+ 1063              		.loc 1 390 0
+ 1064 044e 0023     		movs	r3, #0
+ 1065 0450 FB75     		strb	r3, [r7, #23]
+ 1066 0452 09E0     		b	.L59
+ 1067              	.L60:
+ 391:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****       pBufRead[i] = HWREG(RFCORE_SFR_RFDATA);
+ 1068              		.loc 1 391 0 discriminator 3
+ 1069 0454 FB7D     		ldrb	r3, [r7, #23]	@ zero_extendqisi2
+ 1070 0456 FA68     		ldr	r2, [r7, #12]
+ 1071 0458 1344     		add	r3, r3, r2
+ 1072 045a 174A     		ldr	r2, .L61
+ 1073 045c 1268     		ldr	r2, [r2]
+ 1074 045e D2B2     		uxtb	r2, r2
+ 1075 0460 1A70     		strb	r2, [r3]
+ 390:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****       pBufRead[i] = HWREG(RFCORE_SFR_RFDATA);
+ 1076              		.loc 1 390 0 discriminator 3
+ 1077 0462 FB7D     		ldrb	r3, [r7, #23]	@ zero_extendqisi2
+ 1078 0464 0133     		adds	r3, r3, #1
+ 1079 0466 FB75     		strb	r3, [r7, #23]
+ 1080              	.L59:
+ 390:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****       pBufRead[i] = HWREG(RFCORE_SFR_RFDATA);
+ 1081              		.loc 1 390 0 is_stmt 0 discriminator 1
+ 1082 0468 FA7D     		ldrb	r2, [r7, #23]	@ zero_extendqisi2
+ 1083 046a BB7D     		ldrb	r3, [r7, #22]	@ zero_extendqisi2
+ 1084 046c 023B     		subs	r3, r3, #2
+ 1085 046e 9A42     		cmp	r2, r3
+ 1086 0470 F0DB     		blt	.L60
+ 392:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    }
+ 393:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    
+ 394:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    *pRssi     = ((int8_t)(HWREG(RFCORE_SFR_RFDATA)) - RSSI_OFFSET);
+ 1087              		.loc 1 394 0 is_stmt 1
+ 1088 0472 114B     		ldr	r3, .L61
+ 1089 0474 1B68     		ldr	r3, [r3]
+ 1090 0476 DBB2     		uxtb	r3, r3
+ 1091 0478 493B     		subs	r3, r3, #73
+ 1092 047a DBB2     		uxtb	r3, r3
+ 1093 047c DAB2     		uxtb	r2, r3
+ 1094 047e 3B68     		ldr	r3, [r7]
+ 1095 0480 1A70     		strb	r2, [r3]
+ 395:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    crc_corr   = HWREG(RFCORE_SFR_RFDATA);
+ 1096              		.loc 1 395 0
+ 1097 0482 0D4B     		ldr	r3, .L61
+ 1098 0484 1B68     		ldr	r3, [r3]
+ 1099 0486 7B75     		strb	r3, [r7, #21]
+ 396:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    *pCrc      = crc_corr & CRC_BIT_MASK;
+ 1100              		.loc 1 396 0
+ 1101 0488 7B7D     		ldrb	r3, [r7, #21]	@ zero_extendqisi2
+ 1102 048a 03F08003 		and	r3, r3, #128
+ 1103 048e 002B     		cmp	r3, #0
+ 1104 0490 14BF     		ite	ne
+ 1105 0492 0123     		movne	r3, #1
+ 1106 0494 0023     		moveq	r3, #0
+ 1107 0496 DAB2     		uxtb	r2, r3
+ 1108 0498 7B6A     		ldr	r3, [r7, #36]
+ 1109 049a 1A70     		strb	r2, [r3]
+ 397:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    *pLenRead  = len;
+ 1110              		.loc 1 397 0
+ 1111 049c BB68     		ldr	r3, [r7, #8]
+ 1112 049e BA7D     		ldrb	r2, [r7, #22]
+ 1113 04a0 1A70     		strb	r2, [r3]
+ 398:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    
+ 399:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    //flush it
+ 400:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    CC2538_RF_CSP_ISFLUSHRX();
+ 1114              		.loc 1 400 0
+ 1115 04a2 064B     		ldr	r3, .L61+4
+ 1116 04a4 ED22     		movs	r2, #237
+ 1117 04a6 1A60     		str	r2, [r3]
+ 1118 04a8 044B     		ldr	r3, .L61+4
+ 1119 04aa ED22     		movs	r2, #237
+ 1120 04ac 1A60     		str	r2, [r3]
+ 1121              	.L54:
+ 401:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** }
+ 1122              		.loc 1 401 0
+ 1123 04ae 1C37     		adds	r7, r7, #28
+ 1124              		.cfi_def_cfa_offset 4
+ 1125 04b0 BD46     		mov	sp, r7
+ 1126              		.cfi_def_cfa_register 13
+ 1127              		@ sp needed
+ 1128 04b2 5DF8047B 		ldr	r7, [sp], #4
+ 1129              		.cfi_restore 7
+ 1130              		.cfi_def_cfa_offset 0
+ 1131 04b6 7047     		bx	lr
+ 1132              	.L62:
+ 1133              		.align	2
+ 1134              	.L61:
+ 1135 04b8 28880840 		.word	1074300968
+ 1136 04bc 38880840 		.word	1074300984
+ 1137              		.cfi_endproc
+ 1138              	.LFE18:
+ 1140              		.align	2
+ 1141              		.global	enable_radio_interrupts
+ 1142              		.thumb
+ 1143              		.thumb_func
+ 1145              	enable_radio_interrupts:
+ 1146              	.LFB19:
+ 402:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** 
+ 403:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** //=========================== private =========================================
+ 404:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** 
+ 405:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** void enable_radio_interrupts(void){
+ 1147              		.loc 1 405 0
+ 1148              		.cfi_startproc
+ 1149              		@ args = 0, pretend = 0, frame = 0
+ 1150              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1151              		@ link register save eliminated.
+ 1152 04c0 80B4     		push	{r7}
+ 1153              		.cfi_def_cfa_offset 4
+ 1154              		.cfi_offset 7, -4
+ 1155 04c2 00AF     		add	r7, sp, #0
+ 1156              		.cfi_def_cfa_register 7
+ 406:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    /* Enable RF interrupts 0, RXPKTDONE,SFD,FIFOP only -- see page 751  */
+ 407:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    HWREG(RFCORE_XREG_RFIRQM0) |= ((0x06|0x02|0x01) << RFCORE_XREG_RFIRQM0_RFIRQM_S) & RFCORE_XREG_R
+ 1157              		.loc 1 407 0
+ 1158 04c4 074A     		ldr	r2, .L64
+ 1159 04c6 074B     		ldr	r3, .L64
+ 1160 04c8 1B68     		ldr	r3, [r3]
+ 1161 04ca 43F00703 		orr	r3, r3, #7
+ 1162 04ce 1360     		str	r3, [r2]
+ 408:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** 
+ 409:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    /* Enable RF interrupts 1, TXDONE only */
+ 410:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    HWREG(RFCORE_XREG_RFIRQM1) |= ((0x02) << RFCORE_XREG_RFIRQM1_RFIRQM_S) & RFCORE_XREG_RFIRQM1_RFI
+ 1163              		.loc 1 410 0
+ 1164 04d0 054A     		ldr	r2, .L64+4
+ 1165 04d2 054B     		ldr	r3, .L64+4
+ 1166 04d4 1B68     		ldr	r3, [r3]
+ 1167 04d6 43F00203 		orr	r3, r3, #2
+ 1168 04da 1360     		str	r3, [r2]
+ 411:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** }
+ 1169              		.loc 1 411 0
+ 1170 04dc BD46     		mov	sp, r7
+ 1171              		.cfi_def_cfa_register 13
+ 1172              		@ sp needed
+ 1173 04de 5DF8047B 		ldr	r7, [sp], #4
+ 1174              		.cfi_restore 7
+ 1175              		.cfi_def_cfa_offset 0
+ 1176 04e2 7047     		bx	lr
+ 1177              	.L65:
+ 1178              		.align	2
+ 1179              	.L64:
+ 1180 04e4 8C860840 		.word	1074300556
+ 1181 04e8 90860840 		.word	1074300560
+ 1182              		.cfi_endproc
+ 1183              	.LFE19:
+ 1185              		.align	2
+ 1186              		.global	disable_radio_interrupts
+ 1187              		.thumb
+ 1188              		.thumb_func
+ 1190              	disable_radio_interrupts:
+ 1191              	.LFB20:
+ 412:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** 
+ 413:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** void disable_radio_interrupts(void){
+ 1192              		.loc 1 413 0
+ 1193              		.cfi_startproc
+ 1194              		@ args = 0, pretend = 0, frame = 0
+ 1195              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1196              		@ link register save eliminated.
+ 1197 04ec 80B4     		push	{r7}
+ 1198              		.cfi_def_cfa_offset 4
+ 1199              		.cfi_offset 7, -4
+ 1200 04ee 00AF     		add	r7, sp, #0
+ 1201              		.cfi_def_cfa_register 7
+ 414:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    /* Enable RF interrupts 0, RXPKTDONE,SFD,FIFOP only -- see page 751  */
+ 415:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    HWREG(RFCORE_XREG_RFIRQM0) = 0;
+ 1202              		.loc 1 415 0
+ 1203 04f0 044B     		ldr	r3, .L67
+ 1204 04f2 0022     		movs	r2, #0
+ 1205 04f4 1A60     		str	r2, [r3]
+ 416:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    /* Enable RF interrupts 1, TXDONE only */
+ 417:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    HWREG(RFCORE_XREG_RFIRQM1) = 0;
+ 1206              		.loc 1 417 0
+ 1207 04f6 044B     		ldr	r3, .L67+4
+ 1208 04f8 0022     		movs	r2, #0
+ 1209 04fa 1A60     		str	r2, [r3]
+ 418:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** }
+ 1210              		.loc 1 418 0
+ 1211 04fc BD46     		mov	sp, r7
+ 1212              		.cfi_def_cfa_register 13
+ 1213              		@ sp needed
+ 1214 04fe 5DF8047B 		ldr	r7, [sp], #4
+ 1215              		.cfi_restore 7
+ 1216              		.cfi_def_cfa_offset 0
+ 1217 0502 7047     		bx	lr
+ 1218              	.L68:
+ 1219              		.align	2
+ 1220              	.L67:
+ 1221 0504 8C860840 		.word	1074300556
+ 1222 0508 90860840 		.word	1074300560
+ 1223              		.cfi_endproc
+ 1224              	.LFE20:
+ 1226              		.align	2
+ 1227              		.global	radio_on
+ 1228              		.thumb
+ 1229              		.thumb_func
+ 1231              	radio_on:
+ 1232              	.LFB21:
+ 419:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** 
+ 420:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** void radio_on(void){
+ 1233              		.loc 1 420 0
+ 1234              		.cfi_startproc
+ 1235              		@ args = 0, pretend = 0, frame = 0
+ 1236              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1237              		@ link register save eliminated.
+ 1238 050c 80B4     		push	{r7}
+ 1239              		.cfi_def_cfa_offset 4
+ 1240              		.cfi_offset 7, -4
+ 1241 050e 00AF     		add	r7, sp, #0
+ 1242              		.cfi_def_cfa_register 7
+ 421:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    // CC2538_RF_CSP_ISFLUSHRX();
+ 422:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****     CC2538_RF_CSP_ISRXON();
+ 1243              		.loc 1 422 0
+ 1244 0510 034B     		ldr	r3, .L70
+ 1245 0512 E322     		movs	r2, #227
+ 1246 0514 1A60     		str	r2, [r3]
+ 423:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** }
+ 1247              		.loc 1 423 0
+ 1248 0516 BD46     		mov	sp, r7
+ 1249              		.cfi_def_cfa_register 13
+ 1250              		@ sp needed
+ 1251 0518 5DF8047B 		ldr	r7, [sp], #4
+ 1252              		.cfi_restore 7
+ 1253              		.cfi_def_cfa_offset 0
+ 1254 051c 7047     		bx	lr
+ 1255              	.L71:
+ 1256 051e 00BF     		.align	2
+ 1257              	.L70:
+ 1258 0520 38880840 		.word	1074300984
+ 1259              		.cfi_endproc
+ 1260              	.LFE21:
+ 1262              		.align	2
+ 1263              		.global	radio_off
+ 1264              		.thumb
+ 1265              		.thumb_func
+ 1267              	radio_off:
+ 1268              	.LFB22:
+ 424:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** 
+ 425:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** void radio_off(void){
+ 1269              		.loc 1 425 0
+ 1270              		.cfi_startproc
+ 1271              		@ args = 0, pretend = 0, frame = 0
+ 1272              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1273              		@ link register save eliminated.
+ 1274 0524 80B4     		push	{r7}
+ 1275              		.cfi_def_cfa_offset 4
+ 1276              		.cfi_offset 7, -4
+ 1277 0526 00AF     		add	r7, sp, #0
+ 1278              		.cfi_def_cfa_register 7
+ 426:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    /* Wait for ongoing TX to complete (e.g. this could be an outgoing ACK) */
+ 427:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    while(HWREG(RFCORE_XREG_FSMSTAT1) & RFCORE_XREG_FSMSTAT1_TX_ACTIVE);
+ 1279              		.loc 1 427 0
+ 1280 0528 00BF     		nop
+ 1281              	.L73:
+ 1282              		.loc 1 427 0 is_stmt 0 discriminator 1
+ 1283 052a 0A4B     		ldr	r3, .L75
+ 1284 052c 1B68     		ldr	r3, [r3]
+ 1285 052e 03F00203 		and	r3, r3, #2
+ 1286 0532 002B     		cmp	r3, #0
+ 1287 0534 F9D1     		bne	.L73
+ 428:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    //CC2538_RF_CSP_ISFLUSHRX();
+ 429:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    
+ 430:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    /* Don't turn off if we are off as this will trigger a Strobe Error */
+ 431:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    if(HWREG(RFCORE_XREG_RXENABLE) != 0) {
+ 1288              		.loc 1 431 0 is_stmt 1
+ 1289 0536 084B     		ldr	r3, .L75+4
+ 1290 0538 1B68     		ldr	r3, [r3]
+ 1291 053a 002B     		cmp	r3, #0
+ 1292 053c 06D0     		beq	.L72
+ 432:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****       CC2538_RF_CSP_ISRFOFF();
+ 1293              		.loc 1 432 0
+ 1294 053e 074B     		ldr	r3, .L75+8
+ 1295 0540 EF22     		movs	r2, #239
+ 1296 0542 1A60     		str	r2, [r3]
+ 433:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****       //clear fifo isr flag
+ 434:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****       HWREG(RFCORE_SFR_RFIRQF0) = ~(RFCORE_SFR_RFIRQF0_FIFOP|RFCORE_SFR_RFIRQF0_RXPKTDONE);
+ 1297              		.loc 1 434 0
+ 1298 0544 064B     		ldr	r3, .L75+12
+ 1299 0546 6FF04402 		mvn	r2, #68
+ 1300 054a 1A60     		str	r2, [r3]
+ 1301              	.L72:
+ 435:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    }
+ 436:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** }
+ 1302              		.loc 1 436 0
+ 1303 054c BD46     		mov	sp, r7
+ 1304              		.cfi_def_cfa_register 13
+ 1305              		@ sp needed
+ 1306 054e 5DF8047B 		ldr	r7, [sp], #4
+ 1307              		.cfi_restore 7
+ 1308              		.cfi_def_cfa_offset 0
+ 1309 0552 7047     		bx	lr
+ 1310              	.L76:
+ 1311              		.align	2
+ 1312              	.L75:
+ 1313 0554 4C860840 		.word	1074300492
+ 1314 0558 2C860840 		.word	1074300460
+ 1315 055c 38880840 		.word	1074300984
+ 1316 0560 34880840 		.word	1074300980
+ 1317              		.cfi_endproc
+ 1318              	.LFE22:
+ 1320              		.align	2
+ 1321              		.global	radio_isr
+ 1322              		.thumb
+ 1323              		.thumb_func
+ 1325              	radio_isr:
+ 1326              	.LFB23:
+ 437:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** 
+ 438:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** //=========================== callbacks =======================================
+ 439:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** 
+ 440:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** //=========================== interrupt handlers ==============================
+ 441:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** 
+ 442:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** /**
+ 443:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** \brief Stub function for the CC2538.
+ 444:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** 
+ 445:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** In MSP430 platforms the CPU status after servicing an interrupt can be managed
+ 446:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** toggling some bits in a special register, e.g. CPUOFF, LPM1, etc, within the
+ 447:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** interrupt context itself. By default, after servicing an interrupt the CPU will
+ 448:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** be off so it makes sense to return a value and enable it if something has
+ 449:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** happened that needs the scheduler to run (a packet has been received that needs
+ 450:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** to be processed). Otherwise, the CPU is kept in sleep mode without even
+ 451:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** reaching the main loop.
+ 452:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** 
+ 453:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** In the CC2538, however, the default behaviour is the contrary. After servicing
+ 454:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** an interrupt the CPU will be on by default and it is the responsability of the
+ 455:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** main thread to put it back to sleep (which is already done). This means that
+ 456:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** the scheduler will always be kicked in after servicing an interrupt. This
+ 457:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** behaviour can be changed by modifying the SLEEPEXIT field in the SYSCTRL
+ 458:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** regiser (see page 131 of the CC2538 manual).
+ 459:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** */
+ 460:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** kick_scheduler_t radio_isr() {
+ 1327              		.loc 1 460 0
+ 1328              		.cfi_startproc
+ 1329              		@ args = 0, pretend = 0, frame = 0
+ 1330              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1331              		@ link register save eliminated.
+ 1332 0564 80B4     		push	{r7}
+ 1333              		.cfi_def_cfa_offset 4
+ 1334              		.cfi_offset 7, -4
+ 1335 0566 00AF     		add	r7, sp, #0
+ 1336              		.cfi_def_cfa_register 7
+ 461:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    return DO_NOT_KICK_SCHEDULER;
+ 1337              		.loc 1 461 0
+ 1338 0568 0023     		movs	r3, #0
+ 462:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** }
+ 1339              		.loc 1 462 0
+ 1340 056a 1846     		mov	r0, r3
+ 1341 056c BD46     		mov	sp, r7
+ 1342              		.cfi_def_cfa_register 13
+ 1343              		@ sp needed
+ 1344 056e 5DF8047B 		ldr	r7, [sp], #4
+ 1345              		.cfi_restore 7
+ 1346              		.cfi_def_cfa_offset 0
+ 1347 0572 7047     		bx	lr
+ 1348              		.cfi_endproc
+ 1349              	.LFE23:
+ 1351              		.align	2
+ 1352              		.global	radio_isr_internal
+ 1353              		.thumb
+ 1354              		.thumb_func
+ 1356              	radio_isr_internal:
+ 1357              	.LFB24:
+ 463:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** 
+ 464:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** void radio_isr_internal(void) {
+ 1358              		.loc 1 464 0
+ 1359              		.cfi_startproc
+ 1360              		@ args = 0, pretend = 0, frame = 8
+ 1361              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1362 0574 80B5     		push	{r7, lr}
+ 1363              		.cfi_def_cfa_offset 8
+ 1364              		.cfi_offset 7, -8
+ 1365              		.cfi_offset 14, -4
+ 1366 0576 82B0     		sub	sp, sp, #8
+ 1367              		.cfi_def_cfa_offset 16
+ 1368 0578 00AF     		add	r7, sp, #0
+ 1369              		.cfi_def_cfa_register 7
+ 465:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    volatile PORT_TIMER_WIDTH capturedTime;
+ 466:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    uint8_t  irq_status0,irq_status1;
+ 467:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    
+ 468:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    // capture the time
+ 469:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    capturedTime = radiotimer_getCapturedTime();
+ 1370              		.loc 1 469 0
+ 1371 057a FFF7FEFF 		bl	radiotimer_getCapturedTime
+ 1372 057e 0346     		mov	r3, r0
+ 1373 0580 3B60     		str	r3, [r7]
+ 470:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    
+ 471:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    // reading IRQ_STATUS
+ 472:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    irq_status0 = HWREG(RFCORE_SFR_RFIRQF0);
+ 1374              		.loc 1 472 0
+ 1375 0582 2F4B     		ldr	r3, .L89
+ 1376 0584 1B68     		ldr	r3, [r3]
+ 1377 0586 FB71     		strb	r3, [r7, #7]
+ 473:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    irq_status1 = HWREG(RFCORE_SFR_RFIRQF1);
+ 1378              		.loc 1 473 0
+ 1379 0588 2E4B     		ldr	r3, .L89+4
+ 1380 058a 1B68     		ldr	r3, [r3]
+ 1381 058c BB71     		strb	r3, [r7, #6]
+ 474:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    
+ 475:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    IntPendClear(INT_RFCORERTX);
+ 1382              		.loc 1 475 0
+ 1383 058e 9D20     		movs	r0, #157
+ 1384 0590 FFF7FEFF 		bl	IntPendClear
+ 476:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    
+ 477:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    //clear interrupt
+ 478:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    HWREG(RFCORE_SFR_RFIRQF0) = 0;
+ 1385              		.loc 1 478 0
+ 1386 0594 2A4B     		ldr	r3, .L89
+ 1387 0596 0022     		movs	r2, #0
+ 1388 0598 1A60     		str	r2, [r3]
+ 479:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    HWREG(RFCORE_SFR_RFIRQF1) = 0;
+ 1389              		.loc 1 479 0
+ 1390 059a 2A4B     		ldr	r3, .L89+4
+ 1391 059c 0022     		movs	r2, #0
+ 1392 059e 1A60     		str	r2, [r3]
+ 480:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    
+ 481:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    //STATUS0 Register
+ 482:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    // start of frame event
+ 483:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    if ((irq_status0 & RFCORE_SFR_RFIRQF0_SFD) == RFCORE_SFR_RFIRQF0_SFD) {
+ 1393              		.loc 1 483 0
+ 1394 05a0 FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 1395 05a2 03F00203 		and	r3, r3, #2
+ 1396 05a6 002B     		cmp	r3, #0
+ 1397 05a8 0DD0     		beq	.L80
+ 484:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****       // change state
+ 485:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****       radio_vars.state = RADIOSTATE_RECEIVING;
+ 1398              		.loc 1 485 0
+ 1399 05aa 274B     		ldr	r3, .L89+8
+ 1400 05ac 0B22     		movs	r2, #11
+ 1401 05ae 1A72     		strb	r2, [r3, #8]
+ 486:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****       if (radio_vars.startFrame_cb!=NULL) {
+ 1402              		.loc 1 486 0
+ 1403 05b0 254B     		ldr	r3, .L89+8
+ 1404 05b2 1B68     		ldr	r3, [r3]
+ 1405 05b4 002B     		cmp	r3, #0
+ 1406 05b6 05D0     		beq	.L81
+ 487:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****          // call the callback
+ 488:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****          radio_vars.startFrame_cb(capturedTime);
+ 1407              		.loc 1 488 0
+ 1408 05b8 234B     		ldr	r3, .L89+8
+ 1409 05ba 1B68     		ldr	r3, [r3]
+ 1410 05bc 3A68     		ldr	r2, [r7]
+ 1411 05be 1046     		mov	r0, r2
+ 1412 05c0 9847     		blx	r3
+ 489:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****          // kick the OS
+ 490:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****          return;
+ 1413              		.loc 1 490 0
+ 1414 05c2 3AE0     		b	.L79
+ 1415              	.L81:
+ 491:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****       } else {
+ 492:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****          while(1);
+ 1416              		.loc 1 492 0 discriminator 1
+ 1417 05c4 FEE7     		b	.L81
+ 1418              	.L80:
+ 493:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****       }
+ 494:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    }
+ 495:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    
+ 496:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    //or RXDONE is full -- we have a packet.
+ 497:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    if (((irq_status0 & RFCORE_SFR_RFIRQF0_RXPKTDONE) ==  RFCORE_SFR_RFIRQF0_RXPKTDONE)) {
+ 1419              		.loc 1 497 0
+ 1420 05c6 FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 1421 05c8 03F04003 		and	r3, r3, #64
+ 1422 05cc 002B     		cmp	r3, #0
+ 1423 05ce 0DD0     		beq	.L83
+ 498:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****       // change state
+ 499:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****       radio_vars.state = RADIOSTATE_TXRX_DONE;
+ 1424              		.loc 1 499 0
+ 1425 05d0 1D4B     		ldr	r3, .L89+8
+ 1426 05d2 0C22     		movs	r2, #12
+ 1427 05d4 1A72     		strb	r2, [r3, #8]
+ 500:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****       if (radio_vars.endFrame_cb!=NULL) {
+ 1428              		.loc 1 500 0
+ 1429 05d6 1C4B     		ldr	r3, .L89+8
+ 1430 05d8 5B68     		ldr	r3, [r3, #4]
+ 1431 05da 002B     		cmp	r3, #0
+ 1432 05dc 05D0     		beq	.L84
+ 501:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****          // call the callback
+ 502:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****          radio_vars.endFrame_cb(capturedTime);
+ 1433              		.loc 1 502 0
+ 1434 05de 1A4B     		ldr	r3, .L89+8
+ 1435 05e0 5B68     		ldr	r3, [r3, #4]
+ 1436 05e2 3A68     		ldr	r2, [r7]
+ 1437 05e4 1046     		mov	r0, r2
+ 1438 05e6 9847     		blx	r3
+ 503:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****          // kick the OS
+ 504:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****          return;
+ 1439              		.loc 1 504 0
+ 1440 05e8 27E0     		b	.L79
+ 1441              	.L84:
+ 505:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****       } else {
+ 506:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****          while(1);
+ 1442              		.loc 1 506 0 discriminator 2
+ 1443 05ea FEE7     		b	.L84
+ 1444              	.L83:
+ 507:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****       }
+ 508:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    }
+ 509:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    
+ 510:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    // or FIFOP is full -- we have a packet.
+ 511:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    if (((irq_status0 & RFCORE_SFR_RFIRQF0_FIFOP) ==  RFCORE_SFR_RFIRQF0_FIFOP)) {
+ 1445              		.loc 1 511 0
+ 1446 05ec FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 1447 05ee 03F00403 		and	r3, r3, #4
+ 1448 05f2 002B     		cmp	r3, #0
+ 1449 05f4 0DD0     		beq	.L85
+ 512:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****       // change state
+ 513:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****       radio_vars.state = RADIOSTATE_TXRX_DONE;
+ 1450              		.loc 1 513 0
+ 1451 05f6 144B     		ldr	r3, .L89+8
+ 1452 05f8 0C22     		movs	r2, #12
+ 1453 05fa 1A72     		strb	r2, [r3, #8]
+ 514:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****       if (radio_vars.endFrame_cb!=NULL) {
+ 1454              		.loc 1 514 0
+ 1455 05fc 124B     		ldr	r3, .L89+8
+ 1456 05fe 5B68     		ldr	r3, [r3, #4]
+ 1457 0600 002B     		cmp	r3, #0
+ 1458 0602 05D0     		beq	.L86
+ 515:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****          // call the callback
+ 516:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****          radio_vars.endFrame_cb(capturedTime);
+ 1459              		.loc 1 516 0
+ 1460 0604 104B     		ldr	r3, .L89+8
+ 1461 0606 5B68     		ldr	r3, [r3, #4]
+ 1462 0608 3A68     		ldr	r2, [r7]
+ 1463 060a 1046     		mov	r0, r2
+ 1464 060c 9847     		blx	r3
+ 517:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****          // kick the OS
+ 518:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****          return;
+ 1465              		.loc 1 518 0
+ 1466 060e 14E0     		b	.L79
+ 1467              	.L86:
+ 519:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****       } else {
+ 520:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****          while(1);
+ 1468              		.loc 1 520 0 discriminator 3
+ 1469 0610 FEE7     		b	.L86
+ 1470              	.L85:
+ 521:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****       }
+ 522:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    }
+ 523:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    
+ 524:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    //STATUS1 Register
+ 525:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    // end of frame event --either end of tx .
+ 526:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    if (((irq_status1 & RFCORE_SFR_RFIRQF1_TXDONE) == RFCORE_SFR_RFIRQF1_TXDONE)) {
+ 1471              		.loc 1 526 0
+ 1472 0612 BB79     		ldrb	r3, [r7, #6]	@ zero_extendqisi2
+ 1473 0614 03F00203 		and	r3, r3, #2
+ 1474 0618 002B     		cmp	r3, #0
+ 1475 061a 0DD0     		beq	.L87
+ 527:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****       // change state
+ 528:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****       radio_vars.state = RADIOSTATE_TXRX_DONE;
+ 1476              		.loc 1 528 0
+ 1477 061c 0A4B     		ldr	r3, .L89+8
+ 1478 061e 0C22     		movs	r2, #12
+ 1479 0620 1A72     		strb	r2, [r3, #8]
+ 529:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****       if (radio_vars.endFrame_cb!=NULL) {
+ 1480              		.loc 1 529 0
+ 1481 0622 094B     		ldr	r3, .L89+8
+ 1482 0624 5B68     		ldr	r3, [r3, #4]
+ 1483 0626 002B     		cmp	r3, #0
+ 1484 0628 05D0     		beq	.L88
+ 530:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****          // call the callback
+ 531:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****          radio_vars.endFrame_cb(capturedTime);
+ 1485              		.loc 1 531 0
+ 1486 062a 074B     		ldr	r3, .L89+8
+ 1487 062c 5B68     		ldr	r3, [r3, #4]
+ 1488 062e 3A68     		ldr	r2, [r7]
+ 1489 0630 1046     		mov	r0, r2
+ 1490 0632 9847     		blx	r3
+ 532:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****          // kick the OS
+ 533:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****          return;
+ 1491              		.loc 1 533 0
+ 1492 0634 01E0     		b	.L79
+ 1493              	.L88:
+ 534:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****       } else {
+ 535:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****          while(1);
+ 1494              		.loc 1 535 0 discriminator 4
+ 1495 0636 FEE7     		b	.L88
+ 1496              	.L87:
+ 536:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****       }
+ 537:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    }
+ 538:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    
+ 539:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    return;
+ 1497              		.loc 1 539 0
+ 1498 0638 00BF     		nop
+ 1499              	.L79:
+ 540:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** }
+ 1500              		.loc 1 540 0
+ 1501 063a 0837     		adds	r7, r7, #8
+ 1502              		.cfi_def_cfa_offset 8
+ 1503 063c BD46     		mov	sp, r7
+ 1504              		.cfi_def_cfa_register 13
+ 1505              		@ sp needed
+ 1506 063e 80BD     		pop	{r7, pc}
+ 1507              	.L90:
+ 1508              		.align	2
+ 1509              	.L89:
+ 1510 0640 34880840 		.word	1074300980
+ 1511 0644 30880840 		.word	1074300976
+ 1512 0648 00000000 		.word	radio_vars
+ 1513              		.cfi_endproc
+ 1514              	.LFE24:
+ 1516              		.align	2
+ 1517              		.global	radio_error_isr
+ 1518              		.thumb
+ 1519              		.thumb_func
+ 1521              	radio_error_isr:
+ 1522              	.LFB25:
+ 541:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** 
+ 542:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** void radio_error_isr(void){
+ 1523              		.loc 1 542 0
+ 1524              		.cfi_startproc
+ 1525              		@ args = 0, pretend = 0, frame = 8
+ 1526              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1527              		@ link register save eliminated.
+ 1528 064c 80B4     		push	{r7}
+ 1529              		.cfi_def_cfa_offset 4
+ 1530              		.cfi_offset 7, -4
+ 1531 064e 83B0     		sub	sp, sp, #12
+ 1532              		.cfi_def_cfa_offset 16
+ 1533 0650 00AF     		add	r7, sp, #0
+ 1534              		.cfi_def_cfa_register 7
+ 543:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    uint8_t rferrm;
+ 544:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    
+ 545:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    rferrm = (uint8_t)HWREG(RFCORE_XREG_RFERRM);
+ 1535              		.loc 1 545 0
+ 1536 0652 0A4B     		ldr	r3, .L93
+ 1537 0654 1B68     		ldr	r3, [r3]
+ 1538 0656 FB71     		strb	r3, [r7, #7]
+ 546:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    
+ 547:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    if ((HWREG(RFCORE_XREG_RFERRM) & (((0x02)<<RFCORE_XREG_RFERRM_RFERRM_S)&RFCORE_XREG_RFERRM_RFERR
+ 1539              		.loc 1 547 0
+ 1540 0658 084B     		ldr	r3, .L93
+ 1541 065a 1A68     		ldr	r2, [r3]
+ 1542 065c FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 1543 065e 1340     		ands	r3, r3, r2
+ 1544 0660 03F00203 		and	r3, r3, #2
+ 1545 0664 002B     		cmp	r3, #0
+ 1546 0666 03D0     		beq	.L91
+ 548:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    {
+ 549:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****       HWREG(RFCORE_XREG_RFERRM) = ~(((0x02)<<RFCORE_XREG_RFERRM_RFERRM_S)&RFCORE_XREG_RFERRM_RFERRM
+ 1547              		.loc 1 549 0
+ 1548 0668 044B     		ldr	r3, .L93
+ 1549 066a 6FF00202 		mvn	r2, #2
+ 1550 066e 1A60     		str	r2, [r3]
+ 1551              	.L91:
+ 550:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****       //poipoi  -- todo handle error
+ 551:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c ****    }
+ 552:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/radio.c **** }
+ 1552              		.loc 1 552 0
+ 1553 0670 0C37     		adds	r7, r7, #12
+ 1554              		.cfi_def_cfa_offset 4
+ 1555 0672 BD46     		mov	sp, r7
+ 1556              		.cfi_def_cfa_register 13
+ 1557              		@ sp needed
+ 1558 0674 5DF8047B 		ldr	r7, [sp], #4
+ 1559              		.cfi_restore 7
+ 1560              		.cfi_def_cfa_offset 0
+ 1561 0678 7047     		bx	lr
+ 1562              	.L94:
+ 1563 067a 00BF     		.align	2
+ 1564              	.L93:
+ 1565 067c 94860840 		.word	1074300564
+ 1566              		.cfi_endproc
+ 1567              	.LFE25:
+ 1569              	.Letext0:
+ 1570              		.file 2 "/usr/arm-none-eabi/include/machine/_default_types.h"
+ 1571              		.file 3 "/usr/arm-none-eabi/include/sys/_stdint.h"
+ 1572              		.file 4 "bsp/boards/board.h"
+ 1573              		.file 5 "bsp/boards/radiotimer.h"
+ 1574              		.file 6 "bsp/boards/radio.h"
+ 1575              		.file 7 "bsp/boards/OpenMote-CC2538/board_info.h"
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 radio.c
+     /tmp/ccNGmGuo.s:19     .rodata:0000000000000000 $d
+     /tmp/ccNGmGuo.s:22     .rodata:0000000000000000 rreg_uriquery
+     /tmp/ccNGmGuo.s:27     .rodata:0000000000000008 infoBoardname
+     /tmp/ccNGmGuo.s:32     .rodata:0000000000000010 infouCName
+     /tmp/ccNGmGuo.s:37     .rodata:0000000000000018 infoRadioName
+                            *COM*:000000000000000c radio_vars
+     /tmp/ccNGmGuo.s:41     .text:0000000000000000 $t
+     /tmp/ccNGmGuo.s:46     .text:0000000000000000 radio_init
+     /tmp/ccNGmGuo.s:1267   .text:0000000000000524 radio_off
+     /tmp/ccNGmGuo.s:1190   .text:00000000000004ec disable_radio_interrupts
+     /tmp/ccNGmGuo.s:203    .text:00000000000000ec $d
+     /tmp/ccNGmGuo.s:1356   .text:0000000000000574 radio_isr_internal
+     /tmp/ccNGmGuo.s:1521   .text:000000000000064c radio_error_isr
+     /tmp/ccNGmGuo.s:229    .text:0000000000000148 $t
+     /tmp/ccNGmGuo.s:234    .text:0000000000000148 radio_setOverflowCb
+     /tmp/ccNGmGuo.s:267    .text:000000000000015c radio_setCompareCb
+     /tmp/ccNGmGuo.s:300    .text:0000000000000170 radio_setStartFrameCb
+     /tmp/ccNGmGuo.s:332    .text:0000000000000188 $d
+     /tmp/ccNGmGuo.s:336    .text:000000000000018c $t
+     /tmp/ccNGmGuo.s:341    .text:000000000000018c radio_setEndFrameCb
+     /tmp/ccNGmGuo.s:373    .text:00000000000001a4 $d
+     /tmp/ccNGmGuo.s:377    .text:00000000000001a8 $t
+     /tmp/ccNGmGuo.s:382    .text:00000000000001a8 radio_reset
+     /tmp/ccNGmGuo.s:434    .text:00000000000001e8 $d
+     /tmp/ccNGmGuo.s:440    .text:00000000000001f4 $t
+     /tmp/ccNGmGuo.s:445    .text:00000000000001f4 radio_startTimer
+     /tmp/ccNGmGuo.s:478    .text:0000000000000208 radio_getTimerValue
+     /tmp/ccNGmGuo.s:504    .text:0000000000000218 radio_setTimerPeriod
+     /tmp/ccNGmGuo.s:537    .text:000000000000022c radio_getTimerPeriod
+     /tmp/ccNGmGuo.s:563    .text:000000000000023c radio_setFrequency
+     /tmp/ccNGmGuo.s:622    .text:000000000000027c $d
+     /tmp/ccNGmGuo.s:627    .text:0000000000000284 $t
+     /tmp/ccNGmGuo.s:632    .text:0000000000000284 radio_rfOn
+     /tmp/ccNGmGuo.s:660    .text:0000000000000290 radio_rfOff
+     /tmp/ccNGmGuo.s:693    .text:00000000000002b4 $d
+     /tmp/ccNGmGuo.s:697    .text:00000000000002b8 $t
+     /tmp/ccNGmGuo.s:702    .text:00000000000002b8 radio_loadPacket
+     /tmp/ccNGmGuo.s:785    .text:0000000000000320 $d
+     /tmp/ccNGmGuo.s:792    .text:0000000000000330 $t
+     /tmp/ccNGmGuo.s:797    .text:0000000000000330 radio_txEnable
+     /tmp/ccNGmGuo.s:826    .text:000000000000034c $d
+     /tmp/ccNGmGuo.s:830    .text:0000000000000350 $t
+     /tmp/ccNGmGuo.s:835    .text:0000000000000350 radio_txNow
+     /tmp/ccNGmGuo.s:1145   .text:00000000000004c0 enable_radio_interrupts
+     /tmp/ccNGmGuo.s:895    .text:0000000000000394 $d
+     /tmp/ccNGmGuo.s:901    .text:00000000000003a0 $t
+     /tmp/ccNGmGuo.s:906    .text:00000000000003a0 radio_rxEnable
+     /tmp/ccNGmGuo.s:935    .text:00000000000003bc $d
+     /tmp/ccNGmGuo.s:939    .text:00000000000003c0 $t
+     /tmp/ccNGmGuo.s:944    .text:00000000000003c0 radio_rxNow
+     /tmp/ccNGmGuo.s:983    .text:00000000000003ec $d
+     /tmp/ccNGmGuo.s:988    .text:00000000000003f4 $t
+     /tmp/ccNGmGuo.s:993    .text:00000000000003f4 radio_getReceivedFrame
+     /tmp/ccNGmGuo.s:1135   .text:00000000000004b8 $d
+     /tmp/ccNGmGuo.s:1140   .text:00000000000004c0 $t
+     /tmp/ccNGmGuo.s:1180   .text:00000000000004e4 $d
+     /tmp/ccNGmGuo.s:1185   .text:00000000000004ec $t
+     /tmp/ccNGmGuo.s:1221   .text:0000000000000504 $d
+     /tmp/ccNGmGuo.s:1226   .text:000000000000050c $t
+     /tmp/ccNGmGuo.s:1231   .text:000000000000050c radio_on
+     /tmp/ccNGmGuo.s:1258   .text:0000000000000520 $d
+     /tmp/ccNGmGuo.s:1262   .text:0000000000000524 $t
+     /tmp/ccNGmGuo.s:1313   .text:0000000000000554 $d
+     /tmp/ccNGmGuo.s:1320   .text:0000000000000564 $t
+     /tmp/ccNGmGuo.s:1325   .text:0000000000000564 radio_isr
+     /tmp/ccNGmGuo.s:1510   .text:0000000000000640 $d
+     /tmp/ccNGmGuo.s:1516   .text:000000000000064c $t
+     /tmp/ccNGmGuo.s:1565   .text:000000000000067c $d
+                     .debug_frame:0000000000000010 $d
+                           .group:0000000000000000 wm4.0.59116071098782a37a9183a8102fe91b
+                           .group:0000000000000000 wm4.hw_ana_regs.h.39.b3fa3d347eb2140d9de10a0f7cf25603
+                           .group:0000000000000000 wm4.hw_ints.h.42.85b9479f2be35b086f1bb7cbb15bc097
+                           .group:0000000000000000 wm4.hw_rfcore_sfr.h.39.02e95b929110002747bf7464de694b0d
+                           .group:0000000000000000 wm4.hw_rfcore_xreg.h.39.6b38b9cec070780b17fcef77b2e7e09d
+                           .group:0000000000000000 wm4.features.h.22.2e382148a0560adabf236cddd4e880f4
+                           .group:0000000000000000 wm4._default_types.h.15.933e8edd27a65e0b69af4a865eb623d2
+                           .group:0000000000000000 wm4._intsup.h.10.35a45952db64d30146faa63a55c20c1c
+                           .group:0000000000000000 wm4._stdint.h.10.f76354baea1c7088202064e6f3d4f5e3
+                           .group:0000000000000000 wm4.stdint.h.23.373a9d32a9e4c2e88fd347156532d281
+                           .group:0000000000000000 wm4.stdbool.h.29.1c9ee6859ce8145f7838a4f2549ccec2
+                           .group:0000000000000000 wm4.hw_types.h.67.b10589a0806dcc2d274d6fab6b736519
+                           .group:0000000000000000 wm4.newlib.h.8.2702bca278809460f0af6fba1d84eb68
+                           .group:0000000000000000 wm4.config.h.220.a09b0b0de3c25be3f39d71990e617bff
+                           .group:0000000000000000 wm4._ansi.h.23.84af8eb8cd468d25cc5f45f5eb13ec51
+                           .group:0000000000000000 wm4.stddef.h.39.daafd3d79fe2f3a84d2d73d7d4e706f8
+                           .group:0000000000000000 wm4.lock.h.2.9bc98482741e5e2a9450b12934a684ea
+                           .group:0000000000000000 wm4._types.h.54.d3d34a3b7f3cc230cd159baf022b4b08
+                           .group:0000000000000000 wm4.stddef.h.158.61317cdbfb4026324507d123a50b0fd6
+                           .group:0000000000000000 wm4.reent.h.17.8bd9e4098e0428508c282cad794fae43
+                           .group:0000000000000000 wm4.cdefs.h.47.e6563c1c3863188ba4ac4eaa2c85b6f1
+                           .group:0000000000000000 wm4.string.h.15.dab3980bf35408a4c507182805e2de3a
+                           .group:0000000000000000 wm4.stddef.h.158.a7efb00f6cbc6f43213b50e183c9830c
+                           .group:0000000000000000 wm4.interrupt.h.41.272fc4ec0e276feb439e7974d0f77eaf
+                           .group:0000000000000000 wm4.board_info.h.22.aeb00002354a4949fff54190040e37af
+                           .group:0000000000000000 wm4.toolchain_defs.h.2.59a5259f74cb714abc17e042354ff20f
+                           .group:0000000000000000 wm4.leds.h.2.746f2c4bd224f28046dfa242de7e3f3d
+                           .group:0000000000000000 wm4.stdio.h.27.3fc80220048df77954e38daec3bb9670
+                           .group:0000000000000000 wm4.stdarg.h.34.3a23a216c0c293b3d2ea2e89281481e6
+                           .group:0000000000000000 wm4.types.h.24.b2be5f53932a9c9d07787288b29b6d75
+                           .group:0000000000000000 wm4.types.h.2.e9cec8c90ab35f77d9f499e06ae02400
+                           .group:0000000000000000 wm4.types.h.82.82b71f3f44c70e3a459d0f66642b05eb
+                           .group:0000000000000000 wm4.stdio.h.2.4aa87247282eca6c8f36f9de33d8df1a
+                           .group:0000000000000000 wm4.stdio.h.68.a99a2db1e55915cfd1b035cc1e9fcff1
+                           .group:0000000000000000 wm4.sys_ctrl.h.41.c6bbd4dace326d685c1afa45bc1ba1e2
+                           .group:0000000000000000 wm4.cc2538rf.h.9.fc1db9bbad352be0f6b5acc93e2eb657
+
+UNDEFINED SYMBOLS
+memset
+IntRegister
+IntPrioritySet
+IntEnable
+radiotimer_setOverflowCb
+radiotimer_setCompareCb
+radiotimer_start
+radiotimer_getValue
+radiotimer_setPeriod
+radiotimer_getPeriod
+debugpins_radio_clr
+leds_radio_off
+debugpins_radio_set
+leds_radio_on
+radiotimer_getCapturedTime
+IntPendClear

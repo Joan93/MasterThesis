@@ -1,0 +1,398 @@
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 6
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.file	"opensensors.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.section	.rodata
+  19              		.align	2
+  22              	rreg_uriquery:
+  23 0000 683D7563 		.ascii	"h=ucb\000"
+  23      6200
+  24 0006 0000     		.align	2
+  27              	infoBoardname:
+  28 0008 43433235 		.ascii	"CC2538\000"
+  28      333800
+  29 000f 00       		.align	2
+  32              	infouCName:
+  33 0010 43433235 		.ascii	"CC2538\000"
+  33      333800
+  34 0017 00       		.align	2
+  37              	infoRadioName:
+  38 0018 43433235 		.ascii	"CC2538 SoC\000"
+  38      33382053 
+  38      6F4300
+  39 0023 00       		.align	2
+  42              	infoStackName:
+  43 0024 4F70656E 		.ascii	"OpenWSN \000"
+  43      57534E20 
+  43      00
+  44              		.comm	opensensors_vars,88,4
+  45              		.text
+  46              		.align	2
+  47              		.global	opensensors_init
+  48              		.thumb
+  49              		.thumb_func
+  51              	opensensors_init:
+  52              	.LFB0:
+  53              		.file 1 "build/OpenMote-CC2538_armgcc/drivers/common/opensensors.c"
+   1:build/OpenMote-CC2538_armgcc/drivers/common/opensensors.c **** /**
+   2:build/OpenMote-CC2538_armgcc/drivers/common/opensensors.c **** \brief Definition of the "opensensors" driver.
+   3:build/OpenMote-CC2538_armgcc/drivers/common/opensensors.c **** 
+   4:build/OpenMote-CC2538_armgcc/drivers/common/opensensors.c **** \author Nicola Accettura <nicola.accettura@eecs.berkeley.edu>, March 2015.
+   5:build/OpenMote-CC2538_armgcc/drivers/common/opensensors.c **** */
+   6:build/OpenMote-CC2538_armgcc/drivers/common/opensensors.c **** 
+   7:build/OpenMote-CC2538_armgcc/drivers/common/opensensors.c **** #include "opendefs.h"
+   8:build/OpenMote-CC2538_armgcc/drivers/common/opensensors.c **** #include "opensensors.h"
+   9:build/OpenMote-CC2538_armgcc/drivers/common/opensensors.c **** #include "sensors.h"
+  10:build/OpenMote-CC2538_armgcc/drivers/common/opensensors.c **** 
+  11:build/OpenMote-CC2538_armgcc/drivers/common/opensensors.c **** //=========================== defines =========================================
+  12:build/OpenMote-CC2538_armgcc/drivers/common/opensensors.c **** 
+  13:build/OpenMote-CC2538_armgcc/drivers/common/opensensors.c **** //=========================== variables =======================================
+  14:build/OpenMote-CC2538_armgcc/drivers/common/opensensors.c **** 
+  15:build/OpenMote-CC2538_armgcc/drivers/common/opensensors.c **** opensensors_vars_t opensensors_vars;
+  16:build/OpenMote-CC2538_armgcc/drivers/common/opensensors.c **** 
+  17:build/OpenMote-CC2538_armgcc/drivers/common/opensensors.c **** //=========================== prototypes ======================================
+  18:build/OpenMote-CC2538_armgcc/drivers/common/opensensors.c **** 
+  19:build/OpenMote-CC2538_armgcc/drivers/common/opensensors.c **** void opensensors_register(
+  20:build/OpenMote-CC2538_armgcc/drivers/common/opensensors.c ****    uint8_t sensorType
+  21:build/OpenMote-CC2538_armgcc/drivers/common/opensensors.c **** );
+  22:build/OpenMote-CC2538_armgcc/drivers/common/opensensors.c **** 
+  23:build/OpenMote-CC2538_armgcc/drivers/common/opensensors.c **** //=========================== public ==========================================
+  24:build/OpenMote-CC2538_armgcc/drivers/common/opensensors.c **** 
+  25:build/OpenMote-CC2538_armgcc/drivers/common/opensensors.c **** /**
+  26:build/OpenMote-CC2538_armgcc/drivers/common/opensensors.c ****    \brief Initialize OpenSensors
+  27:build/OpenMote-CC2538_armgcc/drivers/common/opensensors.c **** */
+  28:build/OpenMote-CC2538_armgcc/drivers/common/opensensors.c **** void opensensors_init(void) {
+  54              		.loc 1 28 0
+  55              		.cfi_startproc
+  56              		@ args = 0, pretend = 0, frame = 8
+  57              		@ frame_needed = 1, uses_anonymous_args = 0
+  58 0000 80B5     		push	{r7, lr}
+  59              		.cfi_def_cfa_offset 8
+  60              		.cfi_offset 7, -8
+  61              		.cfi_offset 14, -4
+  62 0002 82B0     		sub	sp, sp, #8
+  63              		.cfi_def_cfa_offset 16
+  64 0004 00AF     		add	r7, sp, #0
+  65              		.cfi_def_cfa_register 7
+  29:build/OpenMote-CC2538_armgcc/drivers/common/opensensors.c ****    uint8_t sensorType;
+  30:build/OpenMote-CC2538_armgcc/drivers/common/opensensors.c ****    
+  31:build/OpenMote-CC2538_armgcc/drivers/common/opensensors.c ****    memset(&opensensors_vars,0,sizeof(opensensors_vars_t));
+  66              		.loc 1 31 0
+  67 0006 0A48     		ldr	r0, .L4
+  68 0008 0021     		movs	r1, #0
+  69 000a 5822     		movs	r2, #88
+  70 000c FFF7FEFF 		bl	memset
+  32:build/OpenMote-CC2538_armgcc/drivers/common/opensensors.c ****    for (sensorType=SENSOR_ZERO+1;sensorType<SENSOR_LAST;sensorType++) {
+  71              		.loc 1 32 0
+  72 0010 0123     		movs	r3, #1
+  73 0012 FB71     		strb	r3, [r7, #7]
+  74 0014 06E0     		b	.L2
+  75              	.L3:
+  33:build/OpenMote-CC2538_armgcc/drivers/common/opensensors.c ****       opensensors_register(sensorType);
+  76              		.loc 1 33 0 discriminator 3
+  77 0016 FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+  78 0018 1846     		mov	r0, r3
+  79 001a FFF7FEFF 		bl	opensensors_register
+  32:build/OpenMote-CC2538_armgcc/drivers/common/opensensors.c ****    for (sensorType=SENSOR_ZERO+1;sensorType<SENSOR_LAST;sensorType++) {
+  80              		.loc 1 32 0 discriminator 3
+  81 001e FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+  82 0020 0133     		adds	r3, r3, #1
+  83 0022 FB71     		strb	r3, [r7, #7]
+  84              	.L2:
+  32:build/OpenMote-CC2538_armgcc/drivers/common/opensensors.c ****    for (sensorType=SENSOR_ZERO+1;sensorType<SENSOR_LAST;sensorType++) {
+  85              		.loc 1 32 0 is_stmt 0 discriminator 1
+  86 0024 FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+  87 0026 082B     		cmp	r3, #8
+  88 0028 F5D9     		bls	.L3
+  34:build/OpenMote-CC2538_armgcc/drivers/common/opensensors.c ****    }
+  35:build/OpenMote-CC2538_armgcc/drivers/common/opensensors.c **** }
+  89              		.loc 1 35 0 is_stmt 1
+  90 002a 0837     		adds	r7, r7, #8
+  91              		.cfi_def_cfa_offset 8
+  92 002c BD46     		mov	sp, r7
+  93              		.cfi_def_cfa_register 13
+  94              		@ sp needed
+  95 002e 80BD     		pop	{r7, pc}
+  96              	.L5:
+  97              		.align	2
+  98              	.L4:
+  99 0030 00000000 		.word	opensensors_vars
+ 100              		.cfi_endproc
+ 101              	.LFE0:
+ 103              		.align	2
+ 104              		.global	opensensors_getNumSensors
+ 105              		.thumb
+ 106              		.thumb_func
+ 108              	opensensors_getNumSensors:
+ 109              	.LFB1:
+  36:build/OpenMote-CC2538_armgcc/drivers/common/opensensors.c **** 
+  37:build/OpenMote-CC2538_armgcc/drivers/common/opensensors.c **** /**
+  38:build/OpenMote-CC2538_armgcc/drivers/common/opensensors.c ****    \brief Return the number of registered OpenSensors
+  39:build/OpenMote-CC2538_armgcc/drivers/common/opensensors.c ****    \param[out] the number of registered OpenSensors.
+  40:build/OpenMote-CC2538_armgcc/drivers/common/opensensors.c **** */
+  41:build/OpenMote-CC2538_armgcc/drivers/common/opensensors.c **** uint8_t opensensors_getNumSensors(void) {
+ 110              		.loc 1 41 0
+ 111              		.cfi_startproc
+ 112              		@ args = 0, pretend = 0, frame = 0
+ 113              		@ frame_needed = 1, uses_anonymous_args = 0
+ 114              		@ link register save eliminated.
+ 115 0034 80B4     		push	{r7}
+ 116              		.cfi_def_cfa_offset 4
+ 117              		.cfi_offset 7, -4
+ 118 0036 00AF     		add	r7, sp, #0
+ 119              		.cfi_def_cfa_register 7
+  42:build/OpenMote-CC2538_armgcc/drivers/common/opensensors.c ****    return opensensors_vars.numSensors;
+ 120              		.loc 1 42 0
+ 121 0038 034B     		ldr	r3, .L8
+ 122 003a 93F85430 		ldrb	r3, [r3, #84]	@ zero_extendqisi2
+  43:build/OpenMote-CC2538_armgcc/drivers/common/opensensors.c **** }
+ 123              		.loc 1 43 0
+ 124 003e 1846     		mov	r0, r3
+ 125 0040 BD46     		mov	sp, r7
+ 126              		.cfi_def_cfa_register 13
+ 127              		@ sp needed
+ 128 0042 5DF8047B 		ldr	r7, [sp], #4
+ 129              		.cfi_restore 7
+ 130              		.cfi_def_cfa_offset 0
+ 131 0046 7047     		bx	lr
+ 132              	.L9:
+ 133              		.align	2
+ 134              	.L8:
+ 135 0048 00000000 		.word	opensensors_vars
+ 136              		.cfi_endproc
+ 137              	.LFE1:
+ 139              		.align	2
+ 140              		.global	opensensors_getResource
+ 141              		.thumb
+ 142              		.thumb_func
+ 144              	opensensors_getResource:
+ 145              	.LFB2:
+  44:build/OpenMote-CC2538_armgcc/drivers/common/opensensors.c **** 
+  45:build/OpenMote-CC2538_armgcc/drivers/common/opensensors.c **** /**
+  46:build/OpenMote-CC2538_armgcc/drivers/common/opensensors.c ****    \brief Return an OpenSensors resource structure
+  47:build/OpenMote-CC2538_armgcc/drivers/common/opensensors.c ****    \param[in] index Index of the OpenSensors resource within Opensensors vars.
+  48:build/OpenMote-CC2538_armgcc/drivers/common/opensensors.c ****    \param[out] the OpenSensors resource within Opensensors vars.
+  49:build/OpenMote-CC2538_armgcc/drivers/common/opensensors.c **** */
+  50:build/OpenMote-CC2538_armgcc/drivers/common/opensensors.c **** opensensors_resource_desc_t* opensensors_getResource(uint8_t index) {
+ 146              		.loc 1 50 0
+ 147              		.cfi_startproc
+ 148              		@ args = 0, pretend = 0, frame = 8
+ 149              		@ frame_needed = 1, uses_anonymous_args = 0
+ 150              		@ link register save eliminated.
+ 151 004c 80B4     		push	{r7}
+ 152              		.cfi_def_cfa_offset 4
+ 153              		.cfi_offset 7, -4
+ 154 004e 83B0     		sub	sp, sp, #12
+ 155              		.cfi_def_cfa_offset 16
+ 156 0050 00AF     		add	r7, sp, #0
+ 157              		.cfi_def_cfa_register 7
+ 158 0052 0346     		mov	r3, r0
+ 159 0054 FB71     		strb	r3, [r7, #7]
+  51:build/OpenMote-CC2538_armgcc/drivers/common/opensensors.c ****    return &(opensensors_vars.opensensors_resource[index]);
+ 160              		.loc 1 51 0
+ 161 0056 FA79     		ldrb	r2, [r7, #7]	@ zero_extendqisi2
+ 162 0058 1346     		mov	r3, r2
+ 163 005a 5B00     		lsls	r3, r3, #1
+ 164 005c 1344     		add	r3, r3, r2
+ 165 005e 9B00     		lsls	r3, r3, #2
+ 166 0060 034A     		ldr	r2, .L12
+ 167 0062 1344     		add	r3, r3, r2
+  52:build/OpenMote-CC2538_armgcc/drivers/common/opensensors.c **** }
+ 168              		.loc 1 52 0
+ 169 0064 1846     		mov	r0, r3
+ 170 0066 0C37     		adds	r7, r7, #12
+ 171              		.cfi_def_cfa_offset 4
+ 172 0068 BD46     		mov	sp, r7
+ 173              		.cfi_def_cfa_register 13
+ 174              		@ sp needed
+ 175 006a 5DF8047B 		ldr	r7, [sp], #4
+ 176              		.cfi_restore 7
+ 177              		.cfi_def_cfa_offset 0
+ 178 006e 7047     		bx	lr
+ 179              	.L13:
+ 180              		.align	2
+ 181              	.L12:
+ 182 0070 00000000 		.word	opensensors_vars
+ 183              		.cfi_endproc
+ 184              	.LFE2:
+ 186              		.align	2
+ 187              		.global	opensensors_register
+ 188              		.thumb
+ 189              		.thumb_func
+ 191              	opensensors_register:
+ 192              	.LFB3:
+  53:build/OpenMote-CC2538_armgcc/drivers/common/opensensors.c **** 
+  54:build/OpenMote-CC2538_armgcc/drivers/common/opensensors.c **** //=========================== private =========================================
+  55:build/OpenMote-CC2538_armgcc/drivers/common/opensensors.c **** 
+  56:build/OpenMote-CC2538_armgcc/drivers/common/opensensors.c **** /**
+  57:build/OpenMote-CC2538_armgcc/drivers/common/opensensors.c ****    \brief Register a OpenSensors resource
+  58:build/OpenMote-CC2538_armgcc/drivers/common/opensensors.c **** 
+  59:build/OpenMote-CC2538_armgcc/drivers/common/opensensors.c ****    \param[in] sensorType the sensor type representation.
+  60:build/OpenMote-CC2538_armgcc/drivers/common/opensensors.c ****    \param[in] callbackRead callback to read rough sensor data.
+  61:build/OpenMote-CC2538_armgcc/drivers/common/opensensors.c ****    \param[in] callbackConvert callback to convert rough sensor data to human understandable.
+  62:build/OpenMote-CC2538_armgcc/drivers/common/opensensors.c **** */
+  63:build/OpenMote-CC2538_armgcc/drivers/common/opensensors.c **** void opensensors_register(uint8_t sensorType) {
+ 193              		.loc 1 63 0
+ 194              		.cfi_startproc
+ 195              		@ args = 0, pretend = 0, frame = 8
+ 196              		@ frame_needed = 1, uses_anonymous_args = 0
+ 197 0074 90B5     		push	{r4, r7, lr}
+ 198              		.cfi_def_cfa_offset 12
+ 199              		.cfi_offset 4, -12
+ 200              		.cfi_offset 7, -8
+ 201              		.cfi_offset 14, -4
+ 202 0076 83B0     		sub	sp, sp, #12
+ 203              		.cfi_def_cfa_offset 24
+ 204 0078 00AF     		add	r7, sp, #0
+ 205              		.cfi_def_cfa_register 7
+ 206 007a 0346     		mov	r3, r0
+ 207 007c FB71     		strb	r3, [r7, #7]
+  64:build/OpenMote-CC2538_armgcc/drivers/common/opensensors.c ****    if (sensors_is_present(sensorType)) {
+ 208              		.loc 1 64 0
+ 209 007e FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 210 0080 1846     		mov	r0, r3
+ 211 0082 FFF7FEFF 		bl	sensors_is_present
+ 212 0086 0346     		mov	r3, r0
+ 213 0088 002B     		cmp	r3, #0
+ 214 008a 34D0     		beq	.L14
+  65:build/OpenMote-CC2538_armgcc/drivers/common/opensensors.c ****       opensensors_vars.opensensors_resource[opensensors_vars.numSensors].sensorType      = sensorTy
+ 215              		.loc 1 65 0
+ 216 008c 1B4B     		ldr	r3, .L16
+ 217 008e 93F85430 		ldrb	r3, [r3, #84]	@ zero_extendqisi2
+ 218 0092 1946     		mov	r1, r3
+ 219 0094 194A     		ldr	r2, .L16
+ 220 0096 0B46     		mov	r3, r1
+ 221 0098 5B00     		lsls	r3, r3, #1
+ 222 009a 0B44     		add	r3, r3, r1
+ 223 009c 9B00     		lsls	r3, r3, #2
+ 224 009e 1344     		add	r3, r3, r2
+ 225 00a0 FA79     		ldrb	r2, [r7, #7]
+ 226 00a2 1A70     		strb	r2, [r3]
+  66:build/OpenMote-CC2538_armgcc/drivers/common/opensensors.c ****       opensensors_vars.opensensors_resource[opensensors_vars.numSensors].callbackRead    = sensors_
+ 227              		.loc 1 66 0
+ 228 00a4 154B     		ldr	r3, .L16
+ 229 00a6 93F85430 		ldrb	r3, [r3, #84]	@ zero_extendqisi2
+ 230 00aa 1C46     		mov	r4, r3
+ 231 00ac FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 232 00ae 1846     		mov	r0, r3
+ 233 00b0 FFF7FEFF 		bl	sensors_getCallbackRead
+ 234 00b4 0146     		mov	r1, r0
+ 235 00b6 114A     		ldr	r2, .L16
+ 236 00b8 2346     		mov	r3, r4
+ 237 00ba 5B00     		lsls	r3, r3, #1
+ 238 00bc 2344     		add	r3, r3, r4
+ 239 00be 9B00     		lsls	r3, r3, #2
+ 240 00c0 1344     		add	r3, r3, r2
+ 241 00c2 5960     		str	r1, [r3, #4]
+  67:build/OpenMote-CC2538_armgcc/drivers/common/opensensors.c ****       opensensors_vars.opensensors_resource[opensensors_vars.numSensors].callbackConvert = sensors_
+ 242              		.loc 1 67 0
+ 243 00c4 0D4B     		ldr	r3, .L16
+ 244 00c6 93F85430 		ldrb	r3, [r3, #84]	@ zero_extendqisi2
+ 245 00ca 1C46     		mov	r4, r3
+ 246 00cc FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 247 00ce 1846     		mov	r0, r3
+ 248 00d0 FFF7FEFF 		bl	sensors_getCallbackConvert
+ 249 00d4 0146     		mov	r1, r0
+ 250 00d6 094A     		ldr	r2, .L16
+ 251 00d8 2346     		mov	r3, r4
+ 252 00da 5B00     		lsls	r3, r3, #1
+ 253 00dc 2344     		add	r3, r3, r4
+ 254 00de 9B00     		lsls	r3, r3, #2
+ 255 00e0 1344     		add	r3, r3, r2
+ 256 00e2 0833     		adds	r3, r3, #8
+ 257 00e4 1960     		str	r1, [r3]
+  68:build/OpenMote-CC2538_armgcc/drivers/common/opensensors.c ****       opensensors_vars.numSensors++;
+ 258              		.loc 1 68 0
+ 259 00e6 054B     		ldr	r3, .L16
+ 260 00e8 93F85430 		ldrb	r3, [r3, #84]	@ zero_extendqisi2
+ 261 00ec 0133     		adds	r3, r3, #1
+ 262 00ee DAB2     		uxtb	r2, r3
+ 263 00f0 024B     		ldr	r3, .L16
+ 264 00f2 83F85420 		strb	r2, [r3, #84]
+ 265              	.L14:
+  69:build/OpenMote-CC2538_armgcc/drivers/common/opensensors.c ****    }
+  70:build/OpenMote-CC2538_armgcc/drivers/common/opensensors.c **** }...
+ 266              		.loc 1 70 0
+ 267 00f6 0C37     		adds	r7, r7, #12
+ 268              		.cfi_def_cfa_offset 12
+ 269 00f8 BD46     		mov	sp, r7
+ 270              		.cfi_def_cfa_register 13
+ 271              		@ sp needed
+ 272 00fa 90BD     		pop	{r4, r7, pc}
+ 273              	.L17:
+ 274              		.align	2
+ 275              	.L16:
+ 276 00fc 00000000 		.word	opensensors_vars
+ 277              		.cfi_endproc
+ 278              	.LFE3:
+ 280              	.Letext0:
+ 281              		.file 2 "/usr/arm-none-eabi/include/machine/_default_types.h"
+ 282              		.file 3 "/usr/arm-none-eabi/include/sys/_stdint.h"
+ 283              		.file 4 "bsp/boards/sensors.h"
+ 284              		.file 5 "build/OpenMote-CC2538_armgcc/drivers/common/opensensors.h"
+ 285              		.file 6 "bsp/boards/OpenMote-CC2538/board_info.h"
+ 286              		.file 7 "inc/opendefs.h"
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 opensensors.c
+     /tmp/ccGtllBf.s:19     .rodata:0000000000000000 $d
+     /tmp/ccGtllBf.s:22     .rodata:0000000000000000 rreg_uriquery
+     /tmp/ccGtllBf.s:27     .rodata:0000000000000008 infoBoardname
+     /tmp/ccGtllBf.s:32     .rodata:0000000000000010 infouCName
+     /tmp/ccGtllBf.s:37     .rodata:0000000000000018 infoRadioName
+     /tmp/ccGtllBf.s:42     .rodata:0000000000000024 infoStackName
+                            *COM*:0000000000000058 opensensors_vars
+     /tmp/ccGtllBf.s:46     .text:0000000000000000 $t
+     /tmp/ccGtllBf.s:51     .text:0000000000000000 opensensors_init
+     /tmp/ccGtllBf.s:191    .text:0000000000000074 opensensors_register
+     /tmp/ccGtllBf.s:99     .text:0000000000000030 $d
+     /tmp/ccGtllBf.s:103    .text:0000000000000034 $t
+     /tmp/ccGtllBf.s:108    .text:0000000000000034 opensensors_getNumSensors
+     /tmp/ccGtllBf.s:135    .text:0000000000000048 $d
+     /tmp/ccGtllBf.s:139    .text:000000000000004c $t
+     /tmp/ccGtllBf.s:144    .text:000000000000004c opensensors_getResource
+     /tmp/ccGtllBf.s:182    .text:0000000000000070 $d
+     /tmp/ccGtllBf.s:186    .text:0000000000000074 $t
+     /tmp/ccGtllBf.s:276    .text:00000000000000fc $d
+                     .debug_frame:0000000000000010 $d
+                           .group:0000000000000000 wm4.0.59116071098782a37a9183a8102fe91b
+                           .group:0000000000000000 wm4.features.h.22.2e382148a0560adabf236cddd4e880f4
+                           .group:0000000000000000 wm4._default_types.h.15.933e8edd27a65e0b69af4a865eb623d2
+                           .group:0000000000000000 wm4._intsup.h.10.35a45952db64d30146faa63a55c20c1c
+                           .group:0000000000000000 wm4._stdint.h.10.f76354baea1c7088202064e6f3d4f5e3
+                           .group:0000000000000000 wm4.stdint.h.23.373a9d32a9e4c2e88fd347156532d281
+                           .group:0000000000000000 wm4.toolchain_defs.h.2.e4ebbe6e0a48032a9b79077dc42e1ffd
+                           .group:0000000000000000 wm4.newlib.h.8.2702bca278809460f0af6fba1d84eb68
+                           .group:0000000000000000 wm4.config.h.220.a09b0b0de3c25be3f39d71990e617bff
+                           .group:0000000000000000 wm4._ansi.h.23.84af8eb8cd468d25cc5f45f5eb13ec51
+                           .group:0000000000000000 wm4.stddef.h.39.daafd3d79fe2f3a84d2d73d7d4e706f8
+                           .group:0000000000000000 wm4.lock.h.2.9bc98482741e5e2a9450b12934a684ea
+                           .group:0000000000000000 wm4._types.h.54.d3d34a3b7f3cc230cd159baf022b4b08
+                           .group:0000000000000000 wm4.stddef.h.158.61317cdbfb4026324507d123a50b0fd6
+                           .group:0000000000000000 wm4.reent.h.17.8bd9e4098e0428508c282cad794fae43
+                           .group:0000000000000000 wm4.cdefs.h.47.e6563c1c3863188ba4ac4eaa2c85b6f1
+                           .group:0000000000000000 wm4.string.h.15.dab3980bf35408a4c507182805e2de3a
+                           .group:0000000000000000 wm4.stddef.h.158.a7efb00f6cbc6f43213b50e183c9830c
+                           .group:0000000000000000 wm4.stdbool.h.29.1c9ee6859ce8145f7838a4f2549ccec2
+                           .group:0000000000000000 wm4.hw_types.h.67.b10589a0806dcc2d274d6fab6b736519
+                           .group:0000000000000000 wm4.interrupt.h.41.272fc4ec0e276feb439e7974d0f77eaf
+                           .group:0000000000000000 wm4.board_info.h.22.aeb00002354a4949fff54190040e37af
+                           .group:0000000000000000 wm4.opendefs.h.23.bdaf9c024be66ead04de21e3ce3dfaf2
+
+UNDEFINED SYMBOLS
+memset
+sensors_is_present
+sensors_getCallbackRead
+sensors_getCallbackConvert

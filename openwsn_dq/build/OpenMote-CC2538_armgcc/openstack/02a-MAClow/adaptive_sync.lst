@@ -1,0 +1,1193 @@
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 6
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.file	"adaptive_sync.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.section	.rodata
+  19              		.align	2
+  22              	rreg_uriquery:
+  23 0000 683D7563 		.ascii	"h=ucb\000"
+  23      6200
+  24 0006 0000     		.align	2
+  27              	infoBoardname:
+  28 0008 43433235 		.ascii	"CC2538\000"
+  28      333800
+  29 000f 00       		.align	2
+  32              	infouCName:
+  33 0010 43433235 		.ascii	"CC2538\000"
+  33      333800
+  34 0017 00       		.align	2
+  37              	infoRadioName:
+  38 0018 43433235 		.ascii	"CC2538 SoC\000"
+  38      33382053 
+  38      6F4300
+  39 0023 00       		.align	2
+  42              	infoStackName:
+  43 0024 4F70656E 		.ascii	"OpenWSN \000"
+  43      57534E20 
+  43      00
+  44 002d 000000   		.align	2
+  47              	chTemplate_default:
+  48 0030 05       		.byte	5
+  49 0031 06       		.byte	6
+  50 0032 0C       		.byte	12
+  51 0033 07       		.byte	7
+  52 0034 0F       		.byte	15
+  53 0035 04       		.byte	4
+  54 0036 0E       		.byte	14
+  55 0037 0B       		.byte	11
+  56 0038 08       		.byte	8
+  57 0039 00       		.byte	0
+  58 003a 01       		.byte	1
+  59 003b 02       		.byte	2
+  60 003c 0D       		.byte	13
+  61 003d 03       		.byte	3
+  62 003e 09       		.byte	9
+  63 003f 0A       		.byte	10
+  64              		.align	2
+  67              	all_routers_multicast:
+  68 0040 FF       		.byte	-1
+  69 0041 02       		.byte	2
+  70 0042 00       		.byte	0
+  71 0043 00       		.byte	0
+  72 0044 00       		.byte	0
+  73 0045 00       		.byte	0
+  74 0046 00       		.byte	0
+  75 0047 00       		.byte	0
+  76 0048 00       		.byte	0
+  77 0049 00       		.byte	0
+  78 004a 00       		.byte	0
+  79 004b 00       		.byte	0
+  80 004c 00       		.byte	0
+  81 004d 00       		.byte	0
+  82 004e 00       		.byte	0
+  83 004f 1A       		.byte	26
+  84              		.comm	adaptive_sync_vars,44,4
+  85              		.text
+  86              		.align	2
+  87              		.global	adaptive_sync_init
+  88              		.thumb
+  89              		.thumb_func
+  91              	adaptive_sync_init:
+  92              	.LFB0:
+  93              		.file 1 "build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c"
+   1:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** /**
+   2:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** \brief this file is used for the time synchronizatino between different hardware platform
+   3:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** 
+   4:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** \author Tengfei Chang <tengfei.chang@gmail.com>, January ,2014.
+   5:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** */
+   6:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** #include "opendefs.h"
+   7:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** #include "adaptive_sync.h"
+   8:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** #include "IEEE802154E.h"
+   9:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** #include "radio.h"
+  10:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** #include "openserial.h"
+  11:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** #include "leds.h"
+  12:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** #include "neighbors.h"
+  13:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** #include "debugpins.h"
+  14:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** #include "packetfunctions.h"
+  15:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** #include "sixtop.h"
+  16:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** #include "scheduler.h"
+  17:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** #include "openqueue.h"
+  18:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** #include "openrandom.h"
+  19:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** 
+  20:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** //=========================== define ==========================================
+  21:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** 
+  22:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** #define BASIC_COMPENSATION_THRESHOLD  58
+  23:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** 
+  24:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** //=========================== type ============================================
+  25:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** 
+  26:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** //=========================== variables =======================================
+  27:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** 
+  28:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** adaptive_sync_vars_t adaptive_sync_vars;
+  29:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** 
+  30:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** //=========================== public ==========================================
+  31:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** 
+  32:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** /**
+  33:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** \brief initial this module
+  34:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** */
+  35:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** void adaptive_sync_init() {
+  94              		.loc 1 35 0
+  95              		.cfi_startproc
+  96              		@ args = 0, pretend = 0, frame = 0
+  97              		@ frame_needed = 1, uses_anonymous_args = 0
+  98 0000 80B5     		push	{r7, lr}
+  99              		.cfi_def_cfa_offset 8
+ 100              		.cfi_offset 7, -8
+ 101              		.cfi_offset 14, -4
+ 102 0002 00AF     		add	r7, sp, #0
+ 103              		.cfi_def_cfa_register 7
+  36:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****    // reset local variables
+  37:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****    memset(&adaptive_sync_vars,0x00,sizeof(adaptive_sync_vars_t));
+ 104              		.loc 1 37 0
+ 105 0004 0948     		ldr	r0, .L2
+ 106 0006 0021     		movs	r1, #0
+ 107 0008 2C22     		movs	r2, #44
+ 108 000a FFF7FEFF 		bl	memset
+  38:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****    
+  39:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****    // default local variables
+  40:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****    adaptive_sync_vars.clockState              = S_NONE;
+ 109              		.loc 1 40 0
+ 110 000e 074B     		ldr	r3, .L2
+ 111 0010 0022     		movs	r2, #0
+ 112 0012 1A70     		strb	r2, [r3]
+  41:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****    adaptive_sync_vars.sumOfTC                 = 0;
+ 113              		.loc 1 41 0
+ 114 0014 054B     		ldr	r3, .L2
+ 115 0016 0022     		movs	r2, #0
+ 116 0018 DA84     		strh	r2, [r3, #38]	@ movhi
+  42:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****    adaptive_sync_vars.compensateThreshold     = BASIC_COMPENSATION_THRESHOLD;
+ 117              		.loc 1 42 0
+ 118 001a 044B     		ldr	r3, .L2
+ 119 001c 3A22     		movs	r2, #58
+ 120 001e 1A85     		strh	r2, [r3, #40]	@ movhi
+  43:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****    adaptive_sync_vars.driftChanged            = FALSE;
+ 121              		.loc 1 43 0
+ 122 0020 024B     		ldr	r3, .L2
+ 123 0022 0022     		movs	r2, #0
+ 124 0024 83F82A20 		strb	r2, [r3, #42]
+  44:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** } 
+ 125              		.loc 1 44 0
+ 126 0028 80BD     		pop	{r7, pc}
+ 127              	.L3:
+ 128 002a 00BF     		.align	2
+ 129              	.L2:
+ 130 002c 00000000 		.word	adaptive_sync_vars
+ 131              		.cfi_endproc
+ 132              	.LFE0:
+ 134              		.align	2
+ 135              		.global	adaptive_sync_indicateTimeCorrection
+ 136              		.thumb
+ 137              		.thumb_func
+ 139              	adaptive_sync_indicateTimeCorrection:
+ 140              	.LFB1:
+  45:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** 
+  46:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** /**
+  47:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** \brief Calculate how many slots have elapsed since last synchronization.
+  48:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** 
+  49:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** \param[in] timeCorrection    The time correction being applied.
+  50:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** \param[in] timesource        The address of the neighbor with which I just
+  51:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****    communicated, which triggered a time correction.
+  52:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** */
+  53:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** void adaptive_sync_indicateTimeCorrection(int16_t timeCorrection, open_addr_t timesource){
+ 141              		.loc 1 53 0
+ 142              		.cfi_startproc
+ 143              		@ args = 24, pretend = 16, frame = 16
+ 144              		@ frame_needed = 1, uses_anonymous_args = 0
+ 145 0030 84B0     		sub	sp, sp, #16
+ 146              		.cfi_def_cfa_offset 16
+ 147 0032 B0B5     		push	{r4, r5, r7, lr}
+ 148              		.cfi_def_cfa_offset 32
+ 149              		.cfi_offset 4, -32
+ 150              		.cfi_offset 5, -28
+ 151              		.cfi_offset 7, -24
+ 152              		.cfi_offset 14, -20
+ 153 0034 84B0     		sub	sp, sp, #16
+ 154              		.cfi_def_cfa_offset 48
+ 155 0036 00AF     		add	r7, sp, #0
+ 156              		.cfi_def_cfa_register 7
+ 157 0038 0446     		mov	r4, r0
+ 158 003a 07F12400 		add	r0, r7, #36
+ 159 003e 80E80E00 		stmia	r0, {r1, r2, r3}
+ 160 0042 2346     		mov	r3, r4	@ movhi
+ 161 0044 FB80     		strh	r3, [r7, #6]	@ movhi
+  54:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****    uint8_t array[5];
+  55:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****    
+  56:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****    // stop calculating compensation period when compensateThreshold exceeds KATIMEOUT and drift is 
+  57:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****    if(
+  58:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****          adaptive_sync_vars.compensateThreshold  > MAXKAPERIOD &&
+ 162              		.loc 1 58 0
+ 163 0046 5E4B     		ldr	r3, .L12
+ 164 0048 1B8D     		ldrh	r3, [r3, #40]
+  57:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****          adaptive_sync_vars.compensateThreshold  > MAXKAPERIOD &&
+ 165              		.loc 1 57 0
+ 166 004a B3F5FA6F 		cmp	r3, #2000
+ 167 004e 0FD9     		bls	.L5
+  59:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****          adaptive_sync_vars.driftChanged        == FALSE
+ 168              		.loc 1 59 0
+ 169 0050 5B4B     		ldr	r3, .L12
+ 170 0052 93F82A30 		ldrb	r3, [r3, #42]	@ zero_extendqisi2
+ 171 0056 83F00103 		eor	r3, r3, #1
+ 172 005a DBB2     		uxtb	r3, r3
+  58:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****          adaptive_sync_vars.driftChanged        == FALSE
+ 173              		.loc 1 58 0
+ 174 005c 002B     		cmp	r3, #0
+ 175 005e 07D0     		beq	.L5
+  60:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****       ) {
+  61:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****       if(timeCorrection > LIMITLARGETIMECORRECTION) {
+ 176              		.loc 1 61 0
+ 177 0060 B7F90630 		ldrsh	r3, [r7, #6]
+ 178 0064 052B     		cmp	r3, #5
+ 179 0066 40F3A480 		ble	.L4
+  62:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****          //once I get a large time correction, it means previous calcluated drift is not accurate y
+  63:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****          adaptive_sync_driftChanged();
+ 180              		.loc 1 63 0
+ 181 006a FFF7FEFF 		bl	adaptive_sync_driftChanged
+  64:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****       }
+  65:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****       return;
+ 182              		.loc 1 65 0
+ 183 006e A0E0     		b	.L4
+ 184              	.L5:
+  66:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****    }
+  67:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****    
+  68:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****    // check whether I am synchronized and also check whether it's the same neighbor synchronized to
+  69:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****    if(
+  70:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****          adaptive_sync_vars.driftChanged == FALSE &&
+ 185              		.loc 1 70 0
+ 186 0070 534B     		ldr	r3, .L12
+ 187 0072 93F82A30 		ldrb	r3, [r3, #42]	@ zero_extendqisi2
+ 188 0076 83F00103 		eor	r3, r3, #1
+ 189 007a DBB2     		uxtb	r3, r3
+  69:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****          adaptive_sync_vars.driftChanged == FALSE &&
+ 190              		.loc 1 69 0
+ 191 007c 002B     		cmp	r3, #0
+ 192 007e 54D0     		beq	.L8
+  71:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****          ieee154e_isSynch()                       &&
+ 193              		.loc 1 71 0
+ 194 0080 FFF7FEFF 		bl	ieee154e_isSynch
+ 195 0084 0346     		mov	r3, r0
+  70:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****          ieee154e_isSynch()                       &&
+ 196              		.loc 1 70 0
+ 197 0086 002B     		cmp	r3, #0
+ 198 0088 4FD0     		beq	.L8
+  72:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****          packetfunctions_sameAddress(&timesource, &(adaptive_sync_vars.compensationInfo_vars.neighb
+ 199              		.loc 1 72 0
+ 200 008a 07F12403 		add	r3, r7, #36
+ 201 008e 1846     		mov	r0, r3
+ 202 0090 4C49     		ldr	r1, .L12+4
+ 203 0092 FFF7FEFF 		bl	packetfunctions_sameAddress
+ 204 0096 0346     		mov	r3, r0
+  71:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****          ieee154e_isSynch()                       &&
+ 205              		.loc 1 71 0
+ 206 0098 002B     		cmp	r3, #0
+ 207 009a 46D0     		beq	.L8
+  73:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****       ) {
+  74:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****          // only calcluate when asnDiff > compensateThresholdThreshold. (this is used for guarantee
+  75:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****          if(ieee154e_asnDiff(&adaptive_sync_vars.oldASN) > adaptive_sync_vars.compensateThreshold) 
+ 208              		.loc 1 75 0
+ 209 009c 4A48     		ldr	r0, .L12+8
+ 210 009e FFF7FEFF 		bl	ieee154e_asnDiff
+ 211 00a2 0246     		mov	r2, r0
+ 212 00a4 464B     		ldr	r3, .L12
+ 213 00a6 1B8D     		ldrh	r3, [r3, #40]
+ 214 00a8 9A42     		cmp	r2, r3
+ 215 00aa 34D9     		bls	.L9
+  76:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****             // calculate compensation interval
+  77:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****             adaptive_sync_calculateCompensatedSlots(timeCorrection);
+ 216              		.loc 1 77 0
+ 217 00ac B7F90630 		ldrsh	r3, [r7, #6]
+ 218 00b0 1846     		mov	r0, r3
+ 219 00b2 FFF7FEFF 		bl	adaptive_sync_calculateCompensatedSlots
+  78:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****             // reset compensationtTicks and sumOfTC after calculation
+  79:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****             adaptive_sync_vars.compensateTicks             = 0;
+ 220              		.loc 1 79 0
+ 221 00b6 424B     		ldr	r3, .L12
+ 222 00b8 0022     		movs	r2, #0
+ 223 00ba 5A81     		strh	r2, [r3, #10]	@ movhi
+  80:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****             adaptive_sync_vars.sumOfTC                     = 0;
+ 224              		.loc 1 80 0
+ 225 00bc 404B     		ldr	r3, .L12
+ 226 00be 0022     		movs	r2, #0
+ 227 00c0 DA84     		strh	r2, [r3, #38]	@ movhi
+  81:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****             // update threshold
+  82:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****             adaptive_sync_vars.compensateThreshold        *= 2;
+ 228              		.loc 1 82 0
+ 229 00c2 3F4B     		ldr	r3, .L12
+ 230 00c4 1B8D     		ldrh	r3, [r3, #40]
+ 231 00c6 5B00     		lsls	r3, r3, #1
+ 232 00c8 9AB2     		uxth	r2, r3
+ 233 00ca 3D4B     		ldr	r3, .L12
+ 234 00cc 1A85     		strh	r2, [r3, #40]	@ movhi
+  83:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****             sixtop_setKaPeriod(adaptive_sync_vars.compensateThreshold);
+ 235              		.loc 1 83 0
+ 236 00ce 3C4B     		ldr	r3, .L12
+ 237 00d0 1B8D     		ldrh	r3, [r3, #40]
+ 238 00d2 1846     		mov	r0, r3
+ 239 00d4 FFF7FEFF 		bl	sixtop_setKaPeriod
+  84:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****             // update oldASN
+  85:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****             ieee154e_getAsn(array);
+ 240              		.loc 1 85 0
+ 241 00d8 07F10803 		add	r3, r7, #8
+ 242 00dc 1846     		mov	r0, r3
+ 243 00de FFF7FEFF 		bl	ieee154e_getAsn
+  86:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****             adaptive_sync_vars.oldASN.bytes0and1           = ((uint16_t) array[1] << 8) | ((uint16_
+ 244              		.loc 1 86 0
+ 245 00e2 7B7A     		ldrb	r3, [r7, #9]	@ zero_extendqisi2
+ 246 00e4 1B02     		lsls	r3, r3, #8
+ 247 00e6 9AB2     		uxth	r2, r3
+ 248 00e8 3B7A     		ldrb	r3, [r7, #8]	@ zero_extendqisi2
+ 249 00ea 9BB2     		uxth	r3, r3
+ 250 00ec 1343     		orrs	r3, r3, r2
+ 251 00ee 9BB2     		uxth	r3, r3
+ 252 00f0 9AB2     		uxth	r2, r3
+ 253 00f2 334B     		ldr	r3, .L12
+ 254 00f4 A3F80F20 		strh	r2, [r3, #15]	@ unaligned
+  87:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****             adaptive_sync_vars.oldASN.bytes2and3           = ((uint16_t) array[3] << 8) | ((uint16_
+ 255              		.loc 1 87 0
+ 256 00f8 FB7A     		ldrb	r3, [r7, #11]	@ zero_extendqisi2
+ 257 00fa 1B02     		lsls	r3, r3, #8
+ 258 00fc 9AB2     		uxth	r2, r3
+ 259 00fe BB7A     		ldrb	r3, [r7, #10]	@ zero_extendqisi2
+ 260 0100 9BB2     		uxth	r3, r3
+ 261 0102 1343     		orrs	r3, r3, r2
+ 262 0104 9BB2     		uxth	r3, r3
+ 263 0106 9AB2     		uxth	r2, r3
+ 264 0108 2D4B     		ldr	r3, .L12
+ 265 010a A3F80D20 		strh	r2, [r3, #13]	@ unaligned
+  88:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****             adaptive_sync_vars.oldASN.byte4                = array[4]; 
+ 266              		.loc 1 88 0
+ 267 010e 3A7B     		ldrb	r2, [r7, #12]	@ zero_extendqisi2
+ 268 0110 2B4B     		ldr	r3, .L12
+ 269 0112 1A73     		strb	r2, [r3, #12]
+  75:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****             // calculate compensation interval
+ 270              		.loc 1 75 0
+ 271 0114 4DE0     		b	.L11
+ 272              	.L9:
+  89:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****          } else {
+  90:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****             // record the timeCorrection, if not calculate.
+  91:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****             adaptive_sync_vars.sumOfTC                    += timeCorrection;
+ 273              		.loc 1 91 0
+ 274 0116 2A4B     		ldr	r3, .L12
+ 275 0118 DB8C     		ldrh	r3, [r3, #38]
+ 276 011a 9AB2     		uxth	r2, r3
+ 277 011c FB88     		ldrh	r3, [r7, #6]
+ 278 011e 1344     		add	r3, r3, r2
+ 279 0120 9BB2     		uxth	r3, r3
+ 280 0122 9AB2     		uxth	r2, r3
+ 281 0124 264B     		ldr	r3, .L12
+ 282 0126 DA84     		strh	r2, [r3, #38]	@ movhi
+  75:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****             // calculate compensation interval
+ 283              		.loc 1 75 0
+ 284 0128 43E0     		b	.L11
+ 285              	.L8:
+  92:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****          }
+  93:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****    } else {
+  94:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****       adaptive_sync_vars.compensateThreshold               = BASIC_COMPENSATION_THRESHOLD;
+ 286              		.loc 1 94 0
+ 287 012a 254B     		ldr	r3, .L12
+ 288 012c 3A22     		movs	r2, #58
+ 289 012e 1A85     		strh	r2, [r3, #40]	@ movhi
+  95:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****       sixtop_setKaPeriod(adaptive_sync_vars.compensateThreshold);
+ 290              		.loc 1 95 0
+ 291 0130 234B     		ldr	r3, .L12
+ 292 0132 1B8D     		ldrh	r3, [r3, #40]
+ 293 0134 1846     		mov	r0, r3
+ 294 0136 FFF7FEFF 		bl	sixtop_setKaPeriod
+  96:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****       
+  97:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****       // when I joined the network, or changed my time parent, reset adaptive_sync relative variabl
+  98:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****       adaptive_sync_vars.clockState                        = S_NONE;
+ 295              		.loc 1 98 0
+ 296 013a 214B     		ldr	r3, .L12
+ 297 013c 0022     		movs	r2, #0
+ 298 013e 1A70     		strb	r2, [r3]
+  99:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****       adaptive_sync_vars.elapsedSlots                      = 0;
+ 299              		.loc 1 99 0
+ 300 0140 1F4B     		ldr	r3, .L12
+ 301 0142 0022     		movs	r2, #0
+ 302 0144 5A60     		str	r2, [r3, #4]
+ 100:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****       adaptive_sync_vars.compensationTimeout               = 0;
+ 303              		.loc 1 100 0
+ 304 0146 1E4B     		ldr	r3, .L12
+ 305 0148 0022     		movs	r2, #0
+ 306 014a 1A81     		strh	r2, [r3, #8]	@ movhi
+ 101:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****       adaptive_sync_vars.compensateTicks                   = 0;
+ 307              		.loc 1 101 0
+ 308 014c 1C4B     		ldr	r3, .L12
+ 309 014e 0022     		movs	r2, #0
+ 310 0150 5A81     		strh	r2, [r3, #10]	@ movhi
+ 102:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****       adaptive_sync_vars.sumOfTC                           = 0;
+ 311              		.loc 1 102 0
+ 312 0152 1B4B     		ldr	r3, .L12
+ 313 0154 0022     		movs	r2, #0
+ 314 0156 DA84     		strh	r2, [r3, #38]	@ movhi
+ 103:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****       
+ 104:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****       // update oldASN
+ 105:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****       ieee154e_getAsn(array);
+ 315              		.loc 1 105 0
+ 316 0158 07F10803 		add	r3, r7, #8
+ 317 015c 1846     		mov	r0, r3
+ 318 015e FFF7FEFF 		bl	ieee154e_getAsn
+ 106:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****       adaptive_sync_vars.oldASN.bytes0and1                 = ((uint16_t) array[1] << 8) | ((uint16_
+ 319              		.loc 1 106 0
+ 320 0162 7B7A     		ldrb	r3, [r7, #9]	@ zero_extendqisi2
+ 321 0164 1B02     		lsls	r3, r3, #8
+ 322 0166 9AB2     		uxth	r2, r3
+ 323 0168 3B7A     		ldrb	r3, [r7, #8]	@ zero_extendqisi2
+ 324 016a 9BB2     		uxth	r3, r3
+ 325 016c 1343     		orrs	r3, r3, r2
+ 326 016e 9BB2     		uxth	r3, r3
+ 327 0170 9AB2     		uxth	r2, r3
+ 328 0172 134B     		ldr	r3, .L12
+ 329 0174 A3F80F20 		strh	r2, [r3, #15]	@ unaligned
+ 107:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****       adaptive_sync_vars.oldASN.bytes2and3                 = ((uint16_t) array[3] << 8) | ((uint16_
+ 330              		.loc 1 107 0
+ 331 0178 FB7A     		ldrb	r3, [r7, #11]	@ zero_extendqisi2
+ 332 017a 1B02     		lsls	r3, r3, #8
+ 333 017c 9AB2     		uxth	r2, r3
+ 334 017e BB7A     		ldrb	r3, [r7, #10]	@ zero_extendqisi2
+ 335 0180 9BB2     		uxth	r3, r3
+ 336 0182 1343     		orrs	r3, r3, r2
+ 337 0184 9BB2     		uxth	r3, r3
+ 338 0186 9AB2     		uxth	r2, r3
+ 339 0188 0D4B     		ldr	r3, .L12
+ 340 018a A3F80D20 		strh	r2, [r3, #13]	@ unaligned
+ 108:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****       adaptive_sync_vars.oldASN.byte4                      = array[4]; 
+ 341              		.loc 1 108 0
+ 342 018e 3A7B     		ldrb	r2, [r7, #12]	@ zero_extendqisi2
+ 343 0190 0B4B     		ldr	r3, .L12
+ 344 0192 1A73     		strb	r2, [r3, #12]
+ 109:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****       
+ 110:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****       // record this neighbor as my time source
+ 111:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****       memcpy(&(adaptive_sync_vars.compensationInfo_vars.neighborID), &timesource, sizeof(open_addr_
+ 345              		.loc 1 111 0
+ 346 0194 0A4B     		ldr	r3, .L12
+ 347 0196 1233     		adds	r3, r3, #18
+ 348 0198 07F12402 		add	r2, r7, #36
+ 349 019c 1568     		ldr	r5, [r2]	@ unaligned
+ 350 019e 5468     		ldr	r4, [r2, #4]	@ unaligned
+ 351 01a0 9068     		ldr	r0, [r2, #8]	@ unaligned
+ 352 01a2 D168     		ldr	r1, [r2, #12]	@ unaligned
+ 353 01a4 1D60     		str	r5, [r3]	@ unaligned
+ 354 01a6 5C60     		str	r4, [r3, #4]	@ unaligned
+ 355 01a8 9860     		str	r0, [r3, #8]	@ unaligned
+ 356 01aa D960     		str	r1, [r3, #12]	@ unaligned
+ 357 01ac 127C     		ldrb	r2, [r2, #16]
+ 358 01ae 1A74     		strb	r2, [r3, #16]
+ 359 01b0 FFE7     		b	.L4
+ 360              	.L11:
+ 361              	.L4:
+ 112:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****    }
+ 113:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** }
+ 362              		.loc 1 113 0
+ 363 01b2 1037     		adds	r7, r7, #16
+ 364              		.cfi_def_cfa_offset 32
+ 365 01b4 BD46     		mov	sp, r7
+ 366              		.cfi_def_cfa_register 13
+ 367              		@ sp needed
+ 368 01b6 BDE8B040 		pop	{r4, r5, r7, lr}
+ 369              		.cfi_restore 14
+ 370              		.cfi_restore 7
+ 371              		.cfi_restore 5
+ 372              		.cfi_restore 4
+ 373              		.cfi_def_cfa_offset 16
+ 374 01ba 04B0     		add	sp, sp, #16
+ 375              		.cfi_def_cfa_offset 0
+ 376 01bc 7047     		bx	lr
+ 377              	.L13:
+ 378 01be 00BF     		.align	2
+ 379              	.L12:
+ 380 01c0 00000000 		.word	adaptive_sync_vars
+ 381 01c4 12000000 		.word	adaptive_sync_vars+18
+ 382 01c8 0C000000 		.word	adaptive_sync_vars+12
+ 383              		.cfi_endproc
+ 384              	.LFE1:
+ 386              		.align	2
+ 387              		.global	adaptive_sync_calculateCompensatedSlots
+ 388              		.thumb
+ 389              		.thumb_func
+ 391              	adaptive_sync_calculateCompensatedSlots:
+ 392              	.LFB2:
+ 114:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** 
+ 115:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** /**
+ 116:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** \brief Calculate the compensation interval, in number of slots.
+ 117:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** 
+ 118:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** \param[in] timeCorrection time to be corrected
+ 119:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** 
+ 120:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** \returns compensationSlots the number of slots. 
+ 121:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** */
+ 122:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** void adaptive_sync_calculateCompensatedSlots(int16_t timeCorrection) {
+ 393              		.loc 1 122 0
+ 394              		.cfi_startproc
+ 395              		@ args = 0, pretend = 0, frame = 16
+ 396              		@ frame_needed = 1, uses_anonymous_args = 0
+ 397 01cc 80B5     		push	{r7, lr}
+ 398              		.cfi_def_cfa_offset 8
+ 399              		.cfi_offset 7, -8
+ 400              		.cfi_offset 14, -4
+ 401 01ce 84B0     		sub	sp, sp, #16
+ 402              		.cfi_def_cfa_offset 24
+ 403 01d0 00AF     		add	r7, sp, #0
+ 404              		.cfi_def_cfa_register 7
+ 405 01d2 0346     		mov	r3, r0
+ 406 01d4 FB80     		strh	r3, [r7, #6]	@ movhi
+ 123:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****    bool     isFirstSync;              // is this the first sync after joining network?
+ 124:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****    uint16_t totalTimeCorrectionTicks; // how much error in ticks since last synchronization.
+ 125:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****    
+ 126:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****    if(adaptive_sync_vars.clockState == S_NONE) {
+ 407              		.loc 1 126 0
+ 408 01d6 3C4B     		ldr	r3, .L23
+ 409 01d8 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 410 01da 002B     		cmp	r3, #0
+ 411 01dc 02D1     		bne	.L15
+ 127:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****       isFirstSync = TRUE;
+ 412              		.loc 1 127 0
+ 413 01de 0123     		movs	r3, #1
+ 414 01e0 FB73     		strb	r3, [r7, #15]
+ 415 01e2 01E0     		b	.L16
+ 416              	.L15:
+ 128:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****    } else {
+ 129:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****       isFirstSync = FALSE;
+ 417              		.loc 1 129 0
+ 418 01e4 0023     		movs	r3, #0
+ 419 01e6 FB73     		strb	r3, [r7, #15]
+ 420              	.L16:
+ 130:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****    }
+ 131:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****    adaptive_sync_vars.elapsedSlots = ieee154e_asnDiff(&adaptive_sync_vars.oldASN);
+ 421              		.loc 1 131 0
+ 422 01e8 3848     		ldr	r0, .L23+4
+ 423 01ea FFF7FEFF 		bl	ieee154e_asnDiff
+ 424 01ee 0246     		mov	r2, r0
+ 425 01f0 354B     		ldr	r3, .L23
+ 426 01f2 5A60     		str	r2, [r3, #4]
+ 132:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****    
+ 133:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****    if(isFirstSync) {
+ 427              		.loc 1 133 0
+ 428 01f4 FB7B     		ldrb	r3, [r7, #15]	@ zero_extendqisi2
+ 429 01f6 002B     		cmp	r3, #0
+ 430 01f8 2FD0     		beq	.L17
+ 134:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****       if(timeCorrection > 1) {
+ 431              		.loc 1 134 0
+ 432 01fa B7F90630 		ldrsh	r3, [r7, #6]
+ 433 01fe 012B     		cmp	r3, #1
+ 434 0200 12DD     		ble	.L18
+ 135:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****          adaptive_sync_vars.clockState = S_FASTER;
+ 435              		.loc 1 135 0
+ 436 0202 314B     		ldr	r3, .L23
+ 437 0204 0122     		movs	r2, #1
+ 438 0206 1A70     		strb	r2, [r3]
+ 136:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****          adaptive_sync_vars.compensationInfo_vars.compensationSlots       = SYNC_ACCURACY*adaptive_
+ 439              		.loc 1 136 0
+ 440 0208 2F4B     		ldr	r3, .L23
+ 441 020a 5B68     		ldr	r3, [r3, #4]
+ 442 020c 9AB2     		uxth	r2, r3
+ 443 020e 2E4B     		ldr	r3, .L23
+ 444 0210 9A84     		strh	r2, [r3, #36]	@ movhi
+ 137:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****          adaptive_sync_vars.compensationInfo_vars.compensationSlots      /= timeCorrection;
+ 445              		.loc 1 137 0
+ 446 0212 2D4B     		ldr	r3, .L23
+ 447 0214 9B8C     		ldrh	r3, [r3, #36]
+ 448 0216 1A46     		mov	r2, r3
+ 449 0218 B7F90630 		ldrsh	r3, [r7, #6]
+ 450 021c 92FBF3F3 		sdiv	r3, r2, r3
+ 451 0220 9AB2     		uxth	r2, r3
+ 452 0222 294B     		ldr	r3, .L23
+ 453 0224 9A84     		strh	r2, [r3, #36]	@ movhi
+ 454 0226 48E0     		b	.L19
+ 455              	.L18:
+ 138:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****       } else {
+ 139:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****          if(timeCorrection < -1) {
+ 456              		.loc 1 139 0
+ 457 0228 B7F90630 		ldrsh	r3, [r7, #6]
+ 458 022c B3F1FF3F 		cmp	r3, #-1
+ 459 0230 43DA     		bge	.L19
+ 140:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****             adaptive_sync_vars.clockState = S_SLOWER;
+ 460              		.loc 1 140 0
+ 461 0232 254B     		ldr	r3, .L23
+ 462 0234 0222     		movs	r2, #2
+ 463 0236 1A70     		strb	r2, [r3]
+ 141:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****             adaptive_sync_vars.compensationInfo_vars.compensationSlots    = SYNC_ACCURACY*adaptive_
+ 464              		.loc 1 141 0
+ 465 0238 234B     		ldr	r3, .L23
+ 466 023a 5B68     		ldr	r3, [r3, #4]
+ 467 023c 9AB2     		uxth	r2, r3
+ 468 023e 224B     		ldr	r3, .L23
+ 469 0240 9A84     		strh	r2, [r3, #36]	@ movhi
+ 142:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****             adaptive_sync_vars.compensationInfo_vars.compensationSlots   /= (-timeCorrection);
+ 470              		.loc 1 142 0
+ 471 0242 214B     		ldr	r3, .L23
+ 472 0244 9B8C     		ldrh	r3, [r3, #36]
+ 473 0246 1A46     		mov	r2, r3
+ 474 0248 B7F90630 		ldrsh	r3, [r7, #6]
+ 475 024c 5B42     		negs	r3, r3
+ 476 024e 92FBF3F3 		sdiv	r3, r2, r3
+ 477 0252 9AB2     		uxth	r2, r3
+ 478 0254 1C4B     		ldr	r3, .L23
+ 479 0256 9A84     		strh	r2, [r3, #36]	@ movhi
+ 480 0258 2FE0     		b	.L19
+ 481              	.L17:
+ 143:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****          } else {
+ 144:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****             //timeCorrection = {-1,1}, it's not accurate when timeCorrection belongs to {-1,1}
+ 145:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****             //nothing is needed to do with this case.
+ 146:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****          }
+ 147:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****       }
+ 148:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****    } else {
+ 149:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****       if(adaptive_sync_vars.clockState == S_SLOWER) {
+ 482              		.loc 1 149 0
+ 483 025a 1B4B     		ldr	r3, .L23
+ 484 025c 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 485 025e 022B     		cmp	r3, #2
+ 486 0260 0CD1     		bne	.L20
+ 150:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****          totalTimeCorrectionTicks                                    = adaptive_sync_vars.compensat
+ 487              		.loc 1 150 0
+ 488 0262 194B     		ldr	r3, .L23
+ 489 0264 5B89     		ldrh	r3, [r3, #10]	@ movhi
+ 490 0266 BB81     		strh	r3, [r7, #12]	@ movhi
+ 151:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****          totalTimeCorrectionTicks                                   -= timeCorrection+adaptive_sync
+ 491              		.loc 1 151 0
+ 492 0268 174B     		ldr	r3, .L23
+ 493 026a DB8C     		ldrh	r3, [r3, #38]
+ 494 026c 9AB2     		uxth	r2, r3
+ 495 026e FB88     		ldrh	r3, [r7, #6]
+ 496 0270 1344     		add	r3, r3, r2
+ 497 0272 9BB2     		uxth	r3, r3
+ 498 0274 BA89     		ldrh	r2, [r7, #12]	@ movhi
+ 499 0276 D31A     		subs	r3, r2, r3
+ 500 0278 BB81     		strh	r3, [r7, #12]	@ movhi
+ 501 027a 0BE0     		b	.L21
+ 502              	.L20:
+ 152:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****       } else {
+ 153:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****          totalTimeCorrectionTicks                                    = adaptive_sync_vars.compensat
+ 503              		.loc 1 153 0
+ 504 027c 124B     		ldr	r3, .L23
+ 505 027e 5B89     		ldrh	r3, [r3, #10]	@ movhi
+ 506 0280 BB81     		strh	r3, [r7, #12]	@ movhi
+ 154:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****          totalTimeCorrectionTicks                                   += timeCorrection+adaptive_sync
+ 507              		.loc 1 154 0
+ 508 0282 114B     		ldr	r3, .L23
+ 509 0284 DB8C     		ldrh	r3, [r3, #38]
+ 510 0286 9AB2     		uxth	r2, r3
+ 511 0288 FB88     		ldrh	r3, [r7, #6]
+ 512 028a 1344     		add	r3, r3, r2
+ 513 028c 9AB2     		uxth	r2, r3
+ 514 028e BB89     		ldrh	r3, [r7, #12]	@ movhi
+ 515 0290 1344     		add	r3, r3, r2
+ 516 0292 BB81     		strh	r3, [r7, #12]	@ movhi
+ 517              	.L21:
+ 155:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****       }
+ 156:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****       if(totalTimeCorrectionTicks == 0) {
+ 518              		.loc 1 156 0
+ 519 0294 BB89     		ldrh	r3, [r7, #12]
+ 520 0296 002B     		cmp	r3, #0
+ 521 0298 02D1     		bne	.L22
+ 157:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****          // totalTimeCorrectionTicks should be always positive if drift of clock is constant. if to
+ 158:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****          adaptive_sync_driftChanged();
+ 522              		.loc 1 158 0
+ 523 029a FFF7FEFF 		bl	adaptive_sync_driftChanged
+ 524 029e 0CE0     		b	.L19
+ 525              	.L22:
+ 159:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****       } else {
+ 160:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****          adaptive_sync_vars.compensationInfo_vars.compensationSlots  = SYNC_ACCURACY*adaptive_sync_
+ 526              		.loc 1 160 0
+ 527 02a0 094B     		ldr	r3, .L23
+ 528 02a2 5B68     		ldr	r3, [r3, #4]
+ 529 02a4 9AB2     		uxth	r2, r3
+ 530 02a6 084B     		ldr	r3, .L23
+ 531 02a8 9A84     		strh	r2, [r3, #36]	@ movhi
+ 161:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****          adaptive_sync_vars.compensationInfo_vars.compensationSlots /= totalTimeCorrectionTicks;
+ 532              		.loc 1 161 0
+ 533 02aa 074B     		ldr	r3, .L23
+ 534 02ac 9A8C     		ldrh	r2, [r3, #36]
+ 535 02ae BB89     		ldrh	r3, [r7, #12]
+ 536 02b0 B2FBF3F3 		udiv	r3, r2, r3
+ 537 02b4 9AB2     		uxth	r2, r3
+ 538 02b6 044B     		ldr	r3, .L23
+ 539 02b8 9A84     		strh	r2, [r3, #36]	@ movhi
+ 540              	.L19:
+ 162:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****       }
+ 163:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****    }
+ 164:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****    
+ 165:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****    adaptive_sync_vars.compensationTimeout = adaptive_sync_vars.compensationInfo_vars.compensationSl
+ 541              		.loc 1 165 0
+ 542 02ba 034B     		ldr	r3, .L23
+ 543 02bc 9A8C     		ldrh	r2, [r3, #36]
+ 544 02be 024B     		ldr	r3, .L23
+ 545 02c0 1A81     		strh	r2, [r3, #8]	@ movhi
+ 166:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** }
+ 546              		.loc 1 166 0
+ 547 02c2 1037     		adds	r7, r7, #16
+ 548              		.cfi_def_cfa_offset 8
+ 549 02c4 BD46     		mov	sp, r7
+ 550              		.cfi_def_cfa_register 13
+ 551              		@ sp needed
+ 552 02c6 80BD     		pop	{r7, pc}
+ 553              	.L24:
+ 554              		.align	2
+ 555              	.L23:
+ 556 02c8 00000000 		.word	adaptive_sync_vars
+ 557 02cc 0C000000 		.word	adaptive_sync_vars+12
+ 558              		.cfi_endproc
+ 559              	.LFE2:
+ 561              		.align	2
+ 562              		.global	adaptive_sync_countCompensationTimeout
+ 563              		.thumb
+ 564              		.thumb_func
+ 566              	adaptive_sync_countCompensationTimeout:
+ 567              	.LFB3:
+ 167:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** 
+ 168:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** /**
+ 169:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** \brief update compensationTimeout at the beginning of each slot and adjust current slot length when
+ 170:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** 
+ 171:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** Once compensationTimeout == 0, extend or shorten current slot length for one tick.
+ 172:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** */
+ 173:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** void adaptive_sync_countCompensationTimeout() {
+ 568              		.loc 1 173 0
+ 569              		.cfi_startproc
+ 570              		@ args = 0, pretend = 0, frame = 8
+ 571              		@ frame_needed = 1, uses_anonymous_args = 0
+ 572 02d0 80B5     		push	{r7, lr}
+ 573              		.cfi_def_cfa_offset 8
+ 574              		.cfi_offset 7, -8
+ 575              		.cfi_offset 14, -4
+ 576 02d2 82B0     		sub	sp, sp, #8
+ 577              		.cfi_def_cfa_offset 16
+ 578 02d4 00AF     		add	r7, sp, #0
+ 579              		.cfi_def_cfa_register 7
+ 174:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****    uint16_t newSlotDuration;
+ 175:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****    
+ 176:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****    newSlotDuration  = ieee154e_getSlotDuration();
+ 580              		.loc 1 176 0
+ 581 02d6 FFF7FEFF 		bl	ieee154e_getSlotDuration
+ 582 02da 0346     		mov	r3, r0
+ 583 02dc FB80     		strh	r3, [r7, #6]	@ movhi
+ 177:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****    
+ 178:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****    // if clockState is not set yet, don't compensate.
+ 179:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****    if (adaptive_sync_vars.clockState == S_NONE) {
+ 584              		.loc 1 179 0
+ 585 02de 1B4B     		ldr	r3, .L31
+ 586 02e0 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 587 02e2 002B     		cmp	r3, #0
+ 588 02e4 00D1     		bne	.L26
+ 180:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****       return;
+ 589              		.loc 1 180 0
+ 590 02e6 2DE0     		b	.L25
+ 591              	.L26:
+ 181:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****    }
+ 182:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****    
+ 183:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****    if (adaptive_sync_vars.compensationTimeout == 0) {
+ 592              		.loc 1 183 0
+ 593 02e8 184B     		ldr	r3, .L31
+ 594 02ea 1B89     		ldrh	r3, [r3, #8]
+ 595 02ec 002B     		cmp	r3, #0
+ 596 02ee 00D1     		bne	.L28
+ 184:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****       return; // should not happen
+ 597              		.loc 1 184 0 discriminator 2
+ 598 02f0 28E0     		b	.L25
+ 599              	.L28:
+ 185:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****    }
+ 186:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****    
+ 187:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****    adaptive_sync_vars.compensationTimeout--;
+ 600              		.loc 1 187 0
+ 601 02f2 164B     		ldr	r3, .L31
+ 602 02f4 1B89     		ldrh	r3, [r3, #8]
+ 603 02f6 013B     		subs	r3, r3, #1
+ 604 02f8 9AB2     		uxth	r2, r3
+ 605 02fa 144B     		ldr	r3, .L31
+ 606 02fc 1A81     		strh	r2, [r3, #8]	@ movhi
+ 188:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****    
+ 189:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****    // when compensationTimeout, adjust current slot length
+ 190:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****    if(adaptive_sync_vars.compensationTimeout == 0) {
+ 607              		.loc 1 190 0
+ 608 02fe 134B     		ldr	r3, .L31
+ 609 0300 1B89     		ldrh	r3, [r3, #8]
+ 610 0302 002B     		cmp	r3, #0
+ 611 0304 1ED1     		bne	.L25
+ 191:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****       if(adaptive_sync_vars.clockState == S_SLOWER) {
+ 612              		.loc 1 191 0
+ 613 0306 114B     		ldr	r3, .L31
+ 614 0308 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 615 030a 022B     		cmp	r3, #2
+ 616 030c 09D1     		bne	.L29
+ 192:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****          newSlotDuration                    -= SYNC_ACCURACY;
+ 617              		.loc 1 192 0
+ 618 030e FB88     		ldrh	r3, [r7, #6]	@ movhi
+ 619 0310 013B     		subs	r3, r3, #1
+ 620 0312 FB80     		strh	r3, [r7, #6]	@ movhi
+ 193:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****          adaptive_sync_vars.compensateTicks += SYNC_ACCURACY;
+ 621              		.loc 1 193 0
+ 622 0314 0D4B     		ldr	r3, .L31
+ 623 0316 5B89     		ldrh	r3, [r3, #10]
+ 624 0318 0133     		adds	r3, r3, #1
+ 625 031a 9AB2     		uxth	r2, r3
+ 626 031c 0B4B     		ldr	r3, .L31
+ 627 031e 5A81     		strh	r2, [r3, #10]	@ movhi
+ 628 0320 08E0     		b	.L30
+ 629              	.L29:
+ 194:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****       } else { // clock is fast
+ 195:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****          newSlotDuration                    += SYNC_ACCURACY;
+ 630              		.loc 1 195 0
+ 631 0322 FB88     		ldrh	r3, [r7, #6]	@ movhi
+ 632 0324 0133     		adds	r3, r3, #1
+ 633 0326 FB80     		strh	r3, [r7, #6]	@ movhi
+ 196:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****          adaptive_sync_vars.compensateTicks += SYNC_ACCURACY;
+ 634              		.loc 1 196 0
+ 635 0328 084B     		ldr	r3, .L31
+ 636 032a 5B89     		ldrh	r3, [r3, #10]
+ 637 032c 0133     		adds	r3, r3, #1
+ 638 032e 9AB2     		uxth	r2, r3
+ 639 0330 064B     		ldr	r3, .L31
+ 640 0332 5A81     		strh	r2, [r3, #10]	@ movhi
+ 641              	.L30:
+ 197:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****       }
+ 198:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****       // update current slot duration and reload compensationTimeout
+ 199:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****       radio_setTimerPeriod(newSlotDuration);
+ 642              		.loc 1 199 0
+ 643 0334 FB88     		ldrh	r3, [r7, #6]
+ 644 0336 1846     		mov	r0, r3
+ 645 0338 FFF7FEFF 		bl	radio_setTimerPeriod
+ 200:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****       adaptive_sync_vars.compensationTimeout = adaptive_sync_vars.compensationInfo_vars.compensatio
+ 646              		.loc 1 200 0
+ 647 033c 034B     		ldr	r3, .L31
+ 648 033e 9A8C     		ldrh	r2, [r3, #36]
+ 649 0340 024B     		ldr	r3, .L31
+ 650 0342 1A81     		strh	r2, [r3, #8]	@ movhi
+ 651              	.L25:
+ 201:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** #ifdef OPENSIM
+ 202:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****       debugpins_debug_set();
+ 203:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****       debugpins_debug_clr();
+ 204:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** #endif
+ 205:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****    }
+ 206:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** }
+ 652              		.loc 1 206 0
+ 653 0344 0837     		adds	r7, r7, #8
+ 654              		.cfi_def_cfa_offset 8
+ 655 0346 BD46     		mov	sp, r7
+ 656              		.cfi_def_cfa_register 13
+ 657              		@ sp needed
+ 658 0348 80BD     		pop	{r7, pc}
+ 659              	.L32:
+ 660 034a 00BF     		.align	2
+ 661              	.L31:
+ 662 034c 00000000 		.word	adaptive_sync_vars
+ 663              		.cfi_endproc
+ 664              	.LFE3:
+ 666              		.align	2
+ 667              		.global	adaptive_sync_countCompensationTimeout_compoundSlots
+ 668              		.thumb
+ 669              		.thumb_func
+ 671              	adaptive_sync_countCompensationTimeout_compoundSlots:
+ 672              	.LFB4:
+ 207:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** 
+ 208:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** /**
+ 209:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** \brief update compensationTimeout when compound slots are scheduled and adjust the slot when the el
+ 210:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** 
+ 211:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** \param[in] compoundSlots how many slots will be elapsed before wakeup next time.
+ 212:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** */
+ 213:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** void adaptive_sync_countCompensationTimeout_compoundSlots(uint16_t compoundSlots) {
+ 673              		.loc 1 213 0
+ 674              		.cfi_startproc
+ 675              		@ args = 0, pretend = 0, frame = 16
+ 676              		@ frame_needed = 1, uses_anonymous_args = 0
+ 677 0350 80B5     		push	{r7, lr}
+ 678              		.cfi_def_cfa_offset 8
+ 679              		.cfi_offset 7, -8
+ 680              		.cfi_offset 14, -4
+ 681 0352 84B0     		sub	sp, sp, #16
+ 682              		.cfi_def_cfa_offset 24
+ 683 0354 00AF     		add	r7, sp, #0
+ 684              		.cfi_def_cfa_register 7
+ 685 0356 0346     		mov	r3, r0
+ 686 0358 FB80     		strh	r3, [r7, #6]	@ movhi
+ 214:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****    uint16_t counter;
+ 215:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****    uint8_t  compensateTicks;
+ 216:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****    uint16_t newSlotDuration;
+ 217:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****    
+ 218:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****    newSlotDuration  = ieee154e_getSlotDuration()*(compoundSlots+1);
+ 687              		.loc 1 218 0
+ 688 035a FFF7FEFF 		bl	ieee154e_getSlotDuration
+ 689 035e 0346     		mov	r3, r0
+ 690 0360 1A46     		mov	r2, r3
+ 691 0362 FB88     		ldrh	r3, [r7, #6]
+ 692 0364 0133     		adds	r3, r3, #1
+ 693 0366 9BB2     		uxth	r3, r3
+ 694 0368 03FB02F3 		mul	r3, r3, r2
+ 695 036c 7B81     		strh	r3, [r7, #10]	@ movhi
+ 219:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****    
+ 220:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****    // if clockState is not set yet, don't compensate.
+ 221:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****    if(adaptive_sync_vars.clockState == S_NONE) {
+ 696              		.loc 1 221 0
+ 697 036e 294B     		ldr	r3, .L43
+ 698 0370 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 699 0372 002B     		cmp	r3, #0
+ 700 0374 00D1     		bne	.L34
+ 222:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****       return;
+ 701              		.loc 1 222 0
+ 702 0376 4AE0     		b	.L33
+ 703              	.L34:
+ 223:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****    }
+ 224:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****    
+ 225:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****    if(adaptive_sync_vars.compensationTimeout == 0) {
+ 704              		.loc 1 225 0
+ 705 0378 264B     		ldr	r3, .L43
+ 706 037a 1B89     		ldrh	r3, [r3, #8]
+ 707 037c 002B     		cmp	r3, #0
+ 708 037e 00D1     		bne	.L36
+ 226:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****       return; // should not happen
+ 709              		.loc 1 226 0 discriminator 2
+ 710 0380 45E0     		b	.L33
+ 711              	.L36:
+ 227:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****    }
+ 228:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****    
+ 229:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****    if(compoundSlots < 1) {
+ 712              		.loc 1 229 0
+ 713 0382 FB88     		ldrh	r3, [r7, #6]
+ 714 0384 002B     		cmp	r3, #0
+ 715 0386 00D1     		bne	.L37
+ 230:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****       // return, if this is not a compoundSlot
+ 231:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****       return;
+ 716              		.loc 1 231 0 discriminator 3
+ 717 0388 41E0     		b	.L33
+ 718              	.L37:
+ 232:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****    }
+ 233:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****    
+ 234:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****    counter          = compoundSlots; 
+ 719              		.loc 1 234 0
+ 720 038a FB88     		ldrh	r3, [r7, #6]	@ movhi
+ 721 038c FB81     		strh	r3, [r7, #14]	@ movhi
+ 235:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****    compensateTicks  = 0;
+ 722              		.loc 1 235 0
+ 723 038e 0023     		movs	r3, #0
+ 724 0390 7B73     		strb	r3, [r7, #13]
+ 236:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****    while(counter > 0) {
+ 725              		.loc 1 236 0
+ 726 0392 13E0     		b	.L38
+ 727              	.L40:
+ 237:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****       adaptive_sync_vars.compensationTimeout--;
+ 728              		.loc 1 237 0
+ 729 0394 1F4B     		ldr	r3, .L43
+ 730 0396 1B89     		ldrh	r3, [r3, #8]
+ 731 0398 013B     		subs	r3, r3, #1
+ 732 039a 9AB2     		uxth	r2, r3
+ 733 039c 1D4B     		ldr	r3, .L43
+ 734 039e 1A81     		strh	r2, [r3, #8]	@ movhi
+ 238:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****       if (adaptive_sync_vars.compensationTimeout == 0) {
+ 735              		.loc 1 238 0
+ 736 03a0 1C4B     		ldr	r3, .L43
+ 737 03a2 1B89     		ldrh	r3, [r3, #8]
+ 738 03a4 002B     		cmp	r3, #0
+ 739 03a6 06D1     		bne	.L39
+ 239:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****          compensateTicks += 1;
+ 740              		.loc 1 239 0
+ 741 03a8 7B7B     		ldrb	r3, [r7, #13]
+ 742 03aa 0133     		adds	r3, r3, #1
+ 743 03ac 7B73     		strb	r3, [r7, #13]
+ 240:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****          adaptive_sync_vars.compensationTimeout = adaptive_sync_vars.compensationInfo_vars.compensa
+ 744              		.loc 1 240 0
+ 745 03ae 194B     		ldr	r3, .L43
+ 746 03b0 9A8C     		ldrh	r2, [r3, #36]
+ 747 03b2 184B     		ldr	r3, .L43
+ 748 03b4 1A81     		strh	r2, [r3, #8]	@ movhi
+ 749              	.L39:
+ 241:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****       }
+ 242:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****       counter--;
+ 750              		.loc 1 242 0
+ 751 03b6 FB89     		ldrh	r3, [r7, #14]
+ 752 03b8 013B     		subs	r3, r3, #1
+ 753 03ba FB81     		strh	r3, [r7, #14]	@ movhi
+ 754              	.L38:
+ 236:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****       adaptive_sync_vars.compensationTimeout--;
+ 755              		.loc 1 236 0
+ 756 03bc FB89     		ldrh	r3, [r7, #14]
+ 757 03be 002B     		cmp	r3, #0
+ 758 03c0 E8D1     		bne	.L40
+ 243:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****    }
+ 244:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****    
+ 245:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****    // when compensateTicks > 0, I need to do compensation by adjusting current slot length
+ 246:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****    if(compensateTicks > 0) {
+ 759              		.loc 1 246 0
+ 760 03c2 7B7B     		ldrb	r3, [r7, #13]	@ zero_extendqisi2
+ 761 03c4 002B     		cmp	r3, #0
+ 762 03c6 22D0     		beq	.L33
+ 247:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****       if(adaptive_sync_vars.clockState == S_SLOWER) {
+ 763              		.loc 1 247 0
+ 764 03c8 124B     		ldr	r3, .L43
+ 765 03ca 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 766 03cc 022B     		cmp	r3, #2
+ 767 03ce 0DD1     		bne	.L41
+ 248:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****          newSlotDuration                    -= compensateTicks*SYNC_ACCURACY;
+ 768              		.loc 1 248 0
+ 769 03d0 7B7B     		ldrb	r3, [r7, #13]	@ zero_extendqisi2
+ 770 03d2 9BB2     		uxth	r3, r3
+ 771 03d4 7A89     		ldrh	r2, [r7, #10]	@ movhi
+ 772 03d6 D31A     		subs	r3, r2, r3
+ 773 03d8 7B81     		strh	r3, [r7, #10]	@ movhi
+ 249:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****          adaptive_sync_vars.compensateTicks += compensateTicks*SYNC_ACCURACY;
+ 774              		.loc 1 249 0
+ 775 03da 0E4B     		ldr	r3, .L43
+ 776 03dc 5A89     		ldrh	r2, [r3, #10]
+ 777 03de 7B7B     		ldrb	r3, [r7, #13]	@ zero_extendqisi2
+ 778 03e0 9BB2     		uxth	r3, r3
+ 779 03e2 1344     		add	r3, r3, r2
+ 780 03e4 9AB2     		uxth	r2, r3
+ 781 03e6 0B4B     		ldr	r3, .L43
+ 782 03e8 5A81     		strh	r2, [r3, #10]	@ movhi
+ 783 03ea 0CE0     		b	.L42
+ 784              	.L41:
+ 250:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****       } else { // clock is fast
+ 251:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****          newSlotDuration                    += compensateTicks*SYNC_ACCURACY;
+ 785              		.loc 1 251 0
+ 786 03ec 7B7B     		ldrb	r3, [r7, #13]	@ zero_extendqisi2
+ 787 03ee 9AB2     		uxth	r2, r3
+ 788 03f0 7B89     		ldrh	r3, [r7, #10]	@ movhi
+ 789 03f2 1344     		add	r3, r3, r2
+ 790 03f4 7B81     		strh	r3, [r7, #10]	@ movhi
+ 252:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****          adaptive_sync_vars.compensateTicks += compensateTicks * SYNC_ACCURACY;
+ 791              		.loc 1 252 0
+ 792 03f6 074B     		ldr	r3, .L43
+ 793 03f8 5A89     		ldrh	r2, [r3, #10]
+ 794 03fa 7B7B     		ldrb	r3, [r7, #13]	@ zero_extendqisi2
+ 795 03fc 9BB2     		uxth	r3, r3
+ 796 03fe 1344     		add	r3, r3, r2
+ 797 0400 9AB2     		uxth	r2, r3
+ 798 0402 044B     		ldr	r3, .L43
+ 799 0404 5A81     		strh	r2, [r3, #10]	@ movhi
+ 800              	.L42:
+ 253:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****       }
+ 254:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****       radio_setTimerPeriod(newSlotDuration);
+ 801              		.loc 1 254 0
+ 802 0406 7B89     		ldrh	r3, [r7, #10]
+ 803 0408 1846     		mov	r0, r3
+ 804 040a FFF7FEFF 		bl	radio_setTimerPeriod
+ 805              	.L33:
+ 255:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** #ifdef OPENSIM
+ 256:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****       debugpins_debug_set();
+ 257:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****       debugpins_debug_clr();
+ 258:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** #endif
+ 259:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****    }
+ 260:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** }
+ 806              		.loc 1 260 0
+ 807 040e 1037     		adds	r7, r7, #16
+ 808              		.cfi_def_cfa_offset 8
+ 809 0410 BD46     		mov	sp, r7
+ 810              		.cfi_def_cfa_register 13
+ 811              		@ sp needed
+ 812 0412 80BD     		pop	{r7, pc}
+ 813              	.L44:
+ 814              		.align	2
+ 815              	.L43:
+ 816 0414 00000000 		.word	adaptive_sync_vars
+ 817              		.cfi_endproc
+ 818              	.LFE4:
+ 820              		.align	2
+ 821              		.global	adaptive_sync_driftChanged
+ 822              		.thumb
+ 823              		.thumb_func
+ 825              	adaptive_sync_driftChanged:
+ 826              	.LFB5:
+ 261:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** 
+ 262:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** /**
+ 263:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** \brief set driftChanged to true.
+ 264:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** */
+ 265:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** void adaptive_sync_driftChanged() {
+ 827              		.loc 1 265 0
+ 828              		.cfi_startproc
+ 829              		@ args = 0, pretend = 0, frame = 0
+ 830              		@ frame_needed = 1, uses_anonymous_args = 0
+ 831              		@ link register save eliminated.
+ 832 0418 80B4     		push	{r7}
+ 833              		.cfi_def_cfa_offset 4
+ 834              		.cfi_offset 7, -4
+ 835 041a 00AF     		add	r7, sp, #0
+ 836              		.cfi_def_cfa_register 7
+ 266:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** #ifndef NOADAPTIVESYNC
+ 267:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c ****    adaptive_sync_vars.driftChanged = TRUE;
+ 837              		.loc 1 267 0
+ 838 041c 034B     		ldr	r3, .L46
+ 839 041e 0122     		movs	r2, #1
+ 840 0420 83F82A20 		strb	r2, [r3, #42]
+ 268:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** #endif
+ 269:build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.c **** }
+ 841              		.loc 1 269 0
+ 842 0424 BD46     		mov	sp, r7
+ 843              		.cfi_def_cfa_register 13
+ 844              		@ sp needed
+ 845 0426 5DF8047B 		ldr	r7, [sp], #4
+ 846              		.cfi_restore 7
+ 847              		.cfi_def_cfa_offset 0
+ 848 042a 7047     		bx	lr
+ 849              	.L47:
+ 850              		.align	2
+ 851              	.L46:
+ 852 042c 00000000 		.word	adaptive_sync_vars
+ 853              		.cfi_endproc
+ 854              	.LFE5:
+ 856              	.Letext0:
+ 857              		.file 2 "/usr/arm-none-eabi/include/machine/_default_types.h"
+ 858              		.file 3 "/usr/arm-none-eabi/include/sys/_stdint.h"
+ 859              		.file 4 "inc/opendefs.h"
+ 860              		.file 5 "build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/adaptive_sync.h"
+ 861              		.file 6 "bsp/boards/OpenMote-CC2538/board_info.h"
+ 862              		.file 7 "build/OpenMote-CC2538_armgcc/openstack/02a-MAClow/IEEE802154E.h"
+ 863              		.file 8 "openstack/03b-IPv6/icmpv6rpl.h"
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 adaptive_sync.c
+     /tmp/cczDnZq3.s:19     .rodata:0000000000000000 $d
+     /tmp/cczDnZq3.s:22     .rodata:0000000000000000 rreg_uriquery
+     /tmp/cczDnZq3.s:27     .rodata:0000000000000008 infoBoardname
+     /tmp/cczDnZq3.s:32     .rodata:0000000000000010 infouCName
+     /tmp/cczDnZq3.s:37     .rodata:0000000000000018 infoRadioName
+     /tmp/cczDnZq3.s:42     .rodata:0000000000000024 infoStackName
+     /tmp/cczDnZq3.s:47     .rodata:0000000000000030 chTemplate_default
+     /tmp/cczDnZq3.s:67     .rodata:0000000000000040 all_routers_multicast
+                            *COM*:000000000000002c adaptive_sync_vars
+     /tmp/cczDnZq3.s:86     .text:0000000000000000 $t
+     /tmp/cczDnZq3.s:91     .text:0000000000000000 adaptive_sync_init
+     /tmp/cczDnZq3.s:130    .text:000000000000002c $d
+     /tmp/cczDnZq3.s:134    .text:0000000000000030 $t
+     /tmp/cczDnZq3.s:139    .text:0000000000000030 adaptive_sync_indicateTimeCorrection
+     /tmp/cczDnZq3.s:825    .text:0000000000000418 adaptive_sync_driftChanged
+     /tmp/cczDnZq3.s:391    .text:00000000000001cc adaptive_sync_calculateCompensatedSlots
+     /tmp/cczDnZq3.s:380    .text:00000000000001c0 $d
+     /tmp/cczDnZq3.s:386    .text:00000000000001cc $t
+     /tmp/cczDnZq3.s:556    .text:00000000000002c8 $d
+     /tmp/cczDnZq3.s:561    .text:00000000000002d0 $t
+     /tmp/cczDnZq3.s:566    .text:00000000000002d0 adaptive_sync_countCompensationTimeout
+     /tmp/cczDnZq3.s:662    .text:000000000000034c $d
+     /tmp/cczDnZq3.s:666    .text:0000000000000350 $t
+     /tmp/cczDnZq3.s:671    .text:0000000000000350 adaptive_sync_countCompensationTimeout_compoundSlots
+     /tmp/cczDnZq3.s:816    .text:0000000000000414 $d
+     /tmp/cczDnZq3.s:820    .text:0000000000000418 $t
+     /tmp/cczDnZq3.s:852    .text:000000000000042c $d
+                     .debug_frame:0000000000000010 $d
+                           .group:0000000000000000 wm4.0.59116071098782a37a9183a8102fe91b
+                           .group:0000000000000000 wm4.features.h.22.2e382148a0560adabf236cddd4e880f4
+                           .group:0000000000000000 wm4._default_types.h.15.933e8edd27a65e0b69af4a865eb623d2
+                           .group:0000000000000000 wm4._intsup.h.10.35a45952db64d30146faa63a55c20c1c
+                           .group:0000000000000000 wm4._stdint.h.10.f76354baea1c7088202064e6f3d4f5e3
+                           .group:0000000000000000 wm4.stdint.h.23.373a9d32a9e4c2e88fd347156532d281
+                           .group:0000000000000000 wm4.toolchain_defs.h.2.e4ebbe6e0a48032a9b79077dc42e1ffd
+                           .group:0000000000000000 wm4.newlib.h.8.2702bca278809460f0af6fba1d84eb68
+                           .group:0000000000000000 wm4.config.h.220.a09b0b0de3c25be3f39d71990e617bff
+                           .group:0000000000000000 wm4._ansi.h.23.84af8eb8cd468d25cc5f45f5eb13ec51
+                           .group:0000000000000000 wm4.stddef.h.39.daafd3d79fe2f3a84d2d73d7d4e706f8
+                           .group:0000000000000000 wm4.lock.h.2.9bc98482741e5e2a9450b12934a684ea
+                           .group:0000000000000000 wm4._types.h.54.d3d34a3b7f3cc230cd159baf022b4b08
+                           .group:0000000000000000 wm4.stddef.h.158.61317cdbfb4026324507d123a50b0fd6
+                           .group:0000000000000000 wm4.reent.h.17.8bd9e4098e0428508c282cad794fae43
+                           .group:0000000000000000 wm4.cdefs.h.47.e6563c1c3863188ba4ac4eaa2c85b6f1
+                           .group:0000000000000000 wm4.string.h.15.dab3980bf35408a4c507182805e2de3a
+                           .group:0000000000000000 wm4.stddef.h.158.a7efb00f6cbc6f43213b50e183c9830c
+                           .group:0000000000000000 wm4.stdbool.h.29.1c9ee6859ce8145f7838a4f2549ccec2
+                           .group:0000000000000000 wm4.hw_types.h.67.b10589a0806dcc2d274d6fab6b736519
+                           .group:0000000000000000 wm4.interrupt.h.41.272fc4ec0e276feb439e7974d0f77eaf
+                           .group:0000000000000000 wm4.board_info.h.22.aeb00002354a4949fff54190040e37af
+                           .group:0000000000000000 wm4.opendefs.h.23.bdaf9c024be66ead04de21e3ce3dfaf2
+                           .group:0000000000000000 wm4.opentimers.h.8.044f2d040a134cdb0ddb58adfc2508be
+                           .group:0000000000000000 wm4.schedule.h.2.80d40225a0ebadc3afa75a6755f49055
+                           .group:0000000000000000 wm4.processIE.h.2.08a2f2ba75e9146930605c9ce967d701
+                           .group:0000000000000000 wm4.IEEE802154E.h.25.7e65f5c386a4972498bd1c3f001ddfd0
+                           .group:0000000000000000 wm4.openserial.h.8.a9fe077ce3323e4f6730d3ecdff542cc
+                           .group:0000000000000000 wm4.icmpv6rpl.h.2.1b9b0c3d4c338cb1d7d7805fa59cf215
+                           .group:0000000000000000 wm4.neighbors.h.15.9f35f180a0332d1bc442efb0ec51905c
+                           .group:0000000000000000 wm4.sixtop.h.16.86500a0bb0402cd2ae7c7334d9c87a2b
+                           .group:0000000000000000 wm4.scheduler.h.2.d8d85f436d0d4b3991926a15b8490cf4
+
+UNDEFINED SYMBOLS
+memset
+ieee154e_isSynch
+packetfunctions_sameAddress
+ieee154e_asnDiff
+sixtop_setKaPeriod
+ieee154e_getAsn
+ieee154e_getSlotDuration
+radio_setTimerPeriod

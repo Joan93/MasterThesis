@@ -1,0 +1,581 @@
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 6
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.file	"adc.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.align	2
+  19              		.global	SOCADCIntRegister
+  20              		.thumb
+  21              		.thumb_func
+  23              	SOCADCIntRegister:
+  24              	.LFB0:
+  25              		.file 1 "build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c"
+   1:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** /******************************************************************************
+   2:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** *  Filename:       adc.c
+   3:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** *  Revised:        $Date: 2013-03-24 11:41:19 +0100 (Sun, 24 Mar 2013) $
+   4:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** *  Revision:       $Revision: 9521 $
+   5:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** *
+   6:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** *  Description:    Driver for the SOC ADC Module.
+   7:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** *
+   8:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** *  Copyright (C) 2012 Texas Instruments Incorporated - http://www.ti.com/
+   9:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** *
+  10:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** *
+  11:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** *  Redistribution and use in source and binary forms, with or without
+  12:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** *  modification, are permitted provided that the following conditions
+  13:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** *  are met:
+  14:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** *
+  15:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** *    Redistributions of source code must retain the above copyright
+  16:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** *    notice, this list of conditions and the following disclaimer.
+  17:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** *
+  18:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** *    Redistributions in binary form must reproduce the above copyright
+  19:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** *    notice, this list of conditions and the following disclaimer in the
+  20:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** *    documentation and/or other materials provided with the distribution.
+  21:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** *
+  22:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** *    Neither the name of Texas Instruments Incorporated nor the names of
+  23:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** *    its contributors may be used to endorse or promote products derived
+  24:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** *    from this software without specific prior written permission.
+  25:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** *
+  26:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  27:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** *  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  28:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** *  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  29:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** *  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  30:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** *  OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  31:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** *  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  32:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** *  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  33:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** *  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  34:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** *  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  35:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  36:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** *  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  37:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** *
+  38:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** ******************************************************************************/
+  39:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** 
+  40:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //*****************************************************************************
+  41:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //
+  42:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //! \addtogroup adc_api
+  43:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //! @{
+  44:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //
+  45:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //*****************************************************************************
+  46:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** 
+  47:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** #include <headers/hw_ints.h>
+  48:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** #include <headers/hw_memmap.h>
+  49:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** #include <headers/hw_soc_adc.h>
+  50:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** #include "debug.h"
+  51:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** #include "interrupt.h"
+  52:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** #include "adc.h"
+  53:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** 
+  54:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //*****************************************************************************
+  55:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //
+  56:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //! Registers an interrupt handler for ADC interrupt
+  57:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //!
+  58:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //! \param pfnHandler is a pointer to the function called when the
+  59:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //! SOC ADC interrupt occurs.
+  60:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //!
+  61:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //! This function does the actual registering of the interrupt handler, which
+  62:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //! enables the global interrupt in the interrupt controller.
+  63:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //!
+  64:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //! \sa IntRegister() for important information about registering interrupt
+  65:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //! handlers.
+  66:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //!
+  67:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //! \return None
+  68:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //
+  69:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //*****************************************************************************
+  70:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** void
+  71:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** SOCADCIntRegister(void (*pfnHandler)(void))
+  72:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** {
+  26              		.loc 1 72 0
+  27              		.cfi_startproc
+  28              		@ args = 0, pretend = 0, frame = 8
+  29              		@ frame_needed = 1, uses_anonymous_args = 0
+  30 0000 80B5     		push	{r7, lr}
+  31              		.cfi_def_cfa_offset 8
+  32              		.cfi_offset 7, -8
+  33              		.cfi_offset 14, -4
+  34 0002 82B0     		sub	sp, sp, #8
+  35              		.cfi_def_cfa_offset 16
+  36 0004 00AF     		add	r7, sp, #0
+  37              		.cfi_def_cfa_register 7
+  38 0006 7860     		str	r0, [r7, #4]
+  73:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c ****     //
+  74:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c ****     // Register the interrupt handler.
+  75:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c ****     //
+  76:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c ****     IntRegister(INT_ADC0, pfnHandler);
+  39              		.loc 1 76 0
+  40 0008 1E20     		movs	r0, #30
+  41 000a 7968     		ldr	r1, [r7, #4]
+  42 000c FFF7FEFF 		bl	IntRegister
+  77:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** 
+  78:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c ****     //
+  79:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c ****     // Enable the ADC interrupt.
+  80:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c ****     //
+  81:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c ****     IntEnable(INT_ADC0);
+  43              		.loc 1 81 0
+  44 0010 1E20     		movs	r0, #30
+  45 0012 FFF7FEFF 		bl	IntEnable
+  82:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** }
+  46              		.loc 1 82 0
+  47 0016 0837     		adds	r7, r7, #8
+  48              		.cfi_def_cfa_offset 8
+  49 0018 BD46     		mov	sp, r7
+  50              		.cfi_def_cfa_register 13
+  51              		@ sp needed
+  52 001a 80BD     		pop	{r7, pc}
+  53              		.cfi_endproc
+  54              	.LFE0:
+  56              		.align	2
+  57              		.global	SOCADCIntUnregister
+  58              		.thumb
+  59              		.thumb_func
+  61              	SOCADCIntUnregister:
+  62              	.LFB1:
+  83:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** 
+  84:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //*****************************************************************************
+  85:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //
+  86:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //! Unregisters an interrupt handler for the ADC interrupt
+  87:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //!
+  88:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //! This function does the actual unregistering of the interrupt handler. This
+  89:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //! function clears the handler to be called when an ADC interrupt occurs
+  90:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //! and masks off the interrupt in the interrupt controller so that the
+  91:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //! interrupt handler no longer is called.
+  92:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //!
+  93:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //! \sa IntRegister() for important information about registering interrupt
+  94:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //! handlers.
+  95:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //!
+  96:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //! \return None
+  97:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //
+  98:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //*****************************************************************************
+  99:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** void
+ 100:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** SOCADCIntUnregister(void)
+ 101:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** {
+  63              		.loc 1 101 0
+  64              		.cfi_startproc
+  65              		@ args = 0, pretend = 0, frame = 0
+  66              		@ frame_needed = 1, uses_anonymous_args = 0
+  67 001c 80B5     		push	{r7, lr}
+  68              		.cfi_def_cfa_offset 8
+  69              		.cfi_offset 7, -8
+  70              		.cfi_offset 14, -4
+  71 001e 00AF     		add	r7, sp, #0
+  72              		.cfi_def_cfa_register 7
+ 102:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c ****     //
+ 103:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c ****     // Disable the interrupt.
+ 104:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c ****     //
+ 105:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c ****     IntDisable(INT_ADC0);
+  73              		.loc 1 105 0
+  74 0020 1E20     		movs	r0, #30
+  75 0022 FFF7FEFF 		bl	IntDisable
+ 106:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** 
+ 107:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c ****     //
+ 108:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c ****     // Unregister the interrupt handler.
+ 109:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c ****     //
+ 110:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c ****     IntUnregister(INT_ADC0);
+  76              		.loc 1 110 0
+  77 0026 1E20     		movs	r0, #30
+  78 0028 FFF7FEFF 		bl	IntUnregister
+ 111:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** }
+  79              		.loc 1 111 0
+  80 002c 80BD     		pop	{r7, pc}
+  81              		.cfi_endproc
+  82              	.LFE1:
+  84 002e 00BF     		.align	2
+  85              		.global	SOCADCSingleConfigure
+  86              		.thumb
+  87              		.thumb_func
+  89              	SOCADCSingleConfigure:
+  90              	.LFB2:
+ 112:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** 
+ 113:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //*****************************************************************************
+ 114:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //
+ 115:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //! Configure ADC conversion for a single channel
+ 116:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //!
+ 117:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //! \param ui32Resolution is the resolution of the conversion.
+ 118:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //! \param ui32Reference is the reference voltage to be used for the conversion.
+ 119:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //!
+ 120:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //! This function configures the ADC for a single channel conversion.
+ 121:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //! The \e ui32Resolution parameter must be one of:
+ 122:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //! \b SOCADC_7_BIT, \b SOCADC_9_BIT, \b SOCADC_10_BIT or \b SOCADC_12_BIT.
+ 123:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //! The reference voltage is set using the \e ui32Reference parameter, which
+ 124:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //! must be configured as one of the following:
+ 125:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //! \b SOCADC_REF_INTERNAL  for internal reference,
+ 126:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //! \b SOCADC_REF_EXT_AIN7  for external reference on pin AIN7 (pad PA7),
+ 127:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //! \b SOCADC_REF_AVDD5     for external AVDD5 pin,
+ 128:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //! \b SOCADC_REF_EXT_AIN67 for external reference on differential input pins
+ 129:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //!  AIN6-AIN7 (Pads PA6-PA7).
+ 130:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //!
+ 131:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //! \note A single conversion triggers an interrupt if this has been registered
+ 132:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //! using SOCADCIntRegister().
+ 133:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //!
+ 134:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //! \sa SOCADCSingleStart() and SOCADCIntRegister().
+ 135:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //!
+ 136:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //! \return None
+ 137:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //
+ 138:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //*****************************************************************************
+ 139:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** void
+ 140:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** SOCADCSingleConfigure(uint32_t ui32Resolution, uint32_t ui32Reference)
+ 141:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** {
+  91              		.loc 1 141 0
+  92              		.cfi_startproc
+  93              		@ args = 0, pretend = 0, frame = 16
+  94              		@ frame_needed = 1, uses_anonymous_args = 0
+  95              		@ link register save eliminated.
+  96 0030 80B4     		push	{r7}
+  97              		.cfi_def_cfa_offset 4
+  98              		.cfi_offset 7, -4
+  99 0032 85B0     		sub	sp, sp, #20
+ 100              		.cfi_def_cfa_offset 24
+ 101 0034 00AF     		add	r7, sp, #0
+ 102              		.cfi_def_cfa_register 7
+ 103 0036 7860     		str	r0, [r7, #4]
+ 104 0038 3960     		str	r1, [r7]
+ 142:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c ****     uint32_t ui32Reg;
+ 143:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** 
+ 144:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c ****     //
+ 145:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c ****     // Check the arguments.
+ 146:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c ****     //
+ 147:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c ****     ASSERT((ui32Resolution == SOCADC_7_BIT)  ||
+ 148:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c ****            (ui32Resolution == SOCADC_9_BIT)  ||
+ 149:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c ****            (ui32Resolution == SOCADC_10_BIT) ||
+ 150:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c ****            (ui32Resolution == SOCADC_12_BIT));
+ 151:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c ****     ASSERT((ui32Reference == SOCADC_REF_INTERNAL) ||
+ 152:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c ****            (ui32Reference == SOCADC_REF_EXT_AIN7) ||
+ 153:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c ****            (ui32Reference == SOCADC_REF_AVDD5)    ||
+ 154:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c ****            (ui32Reference == SOCADC_REF_EXT_AIN67));
+ 155:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** 
+ 156:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c ****     //
+ 157:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c ****     // Stop random generator
+ 158:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c ****     //
+ 159:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c ****     HWREG(SOC_ADC_ADCCON1) = 0x3c;
+ 105              		.loc 1 159 0
+ 106 003a 0A4B     		ldr	r3, .L4
+ 107 003c 3C22     		movs	r2, #60
+ 108 003e 1A60     		str	r2, [r3]
+ 160:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** 
+ 161:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c ****     ui32Reg = HWREG(SOC_ADC_ADCCON3) & ~(SOC_ADC_ADCCON3_EREF_M |
+ 109              		.loc 1 161 0
+ 110 0040 094B     		ldr	r3, .L4+4
+ 111 0042 1B68     		ldr	r3, [r3]
+ 112 0044 23F0F003 		bic	r3, r3, #240
+ 113 0048 FB60     		str	r3, [r7, #12]
+ 162:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c ****                                          SOC_ADC_ADCCON3_EDIV_M);
+ 163:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c ****     HWREG(SOC_ADC_ADCCON3) = ui32Reg | ui32Resolution | ui32Reference;
+ 114              		.loc 1 163 0
+ 115 004a 0749     		ldr	r1, .L4+4
+ 116 004c FA68     		ldr	r2, [r7, #12]
+ 117 004e 7B68     		ldr	r3, [r7, #4]
+ 118 0050 1A43     		orrs	r2, r2, r3
+ 119 0052 3B68     		ldr	r3, [r7]
+ 120 0054 1343     		orrs	r3, r3, r2
+ 121 0056 0B60     		str	r3, [r1]
+ 164:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** }
+ 122              		.loc 1 164 0
+ 123 0058 1437     		adds	r7, r7, #20
+ 124              		.cfi_def_cfa_offset 4
+ 125 005a BD46     		mov	sp, r7
+ 126              		.cfi_def_cfa_register 13
+ 127              		@ sp needed
+ 128 005c 5DF8047B 		ldr	r7, [sp], #4
+ 129              		.cfi_restore 7
+ 130              		.cfi_def_cfa_offset 0
+ 131 0060 7047     		bx	lr
+ 132              	.L5:
+ 133 0062 00BF     		.align	2
+ 134              	.L4:
+ 135 0064 00700D40 		.word	1074622464
+ 136 0068 08700D40 		.word	1074622472
+ 137              		.cfi_endproc
+ 138              	.LFE2:
+ 140              		.align	2
+ 141              		.global	SOCADCSingleStart
+ 142              		.thumb
+ 143              		.thumb_func
+ 145              	SOCADCSingleStart:
+ 146              	.LFB3:
+ 165:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** 
+ 166:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //*****************************************************************************
+ 167:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //
+ 168:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //! Start a configured single conversion
+ 169:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //!
+ 170:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //! \param ui32Channel is the input channel to use for the conversion.
+ 171:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //!
+ 172:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //! This function initiates a configured single channel conversion.
+ 173:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //! The input channel is set using the \e ui32Channel parameter.
+ 174:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //! This parameter must be configured as one of the following values:
+ 175:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //! \b SOCADC_AIN0       for single ended input Pad PA0
+ 176:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //! \b SOCADC_AIN1       for single ended input Pad PA1
+ 177:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //! \b SOCADC_AIN2       for single ended input Pad PA2
+ 178:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //! \b SOCADC_AIN3       for single ended input Pad PA3
+ 179:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //! \b SOCADC_AIN4       for single ended input Pad PA4
+ 180:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //! \b SOCADC_AIN5       for single ended input Pad PA5
+ 181:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //! \b SOCADC_AIN6       for single ended input Pad PA6
+ 182:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //! \b SOCADC_AIN7       for single ended input Pad PA7
+ 183:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //! \b SOCADC_AIN01      for differential Pads PA0-PA1
+ 184:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //! \b SOCADC_AIN23      for differential Pads PA2-PA3
+ 185:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //! \b SOCADC_AIN45      for differential Pads PA4-PA5
+ 186:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //! \b SOCADC_AIN67      for differential Pads PA6-PA7
+ 187:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //! \b SOCADC_GND        for Ground as input
+ 188:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //! \b SOCADC_TEMP_SENS  for on-chip temperature sensor
+ 189:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //! \b SOCADC_VDD        for Vdd/3
+ 190:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //!
+ 191:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //! \note A single conversion triggers an interrupt if this has been registered
+ 192:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //! using SOCADCIntRegister().
+ 193:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //!
+ 194:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //! \sa SOCADCSingleConfigure() and SOCADCIntRegister().
+ 195:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //!
+ 196:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //! \return None
+ 197:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //
+ 198:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //*****************************************************************************
+ 199:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** void
+ 200:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** SOCADCSingleStart(uint32_t ui32Channel)
+ 201:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** {
+ 147              		.loc 1 201 0
+ 148              		.cfi_startproc
+ 149              		@ args = 0, pretend = 0, frame = 16
+ 150              		@ frame_needed = 1, uses_anonymous_args = 0
+ 151              		@ link register save eliminated.
+ 152 006c 80B4     		push	{r7}
+ 153              		.cfi_def_cfa_offset 4
+ 154              		.cfi_offset 7, -4
+ 155 006e 85B0     		sub	sp, sp, #20
+ 156              		.cfi_def_cfa_offset 24
+ 157 0070 00AF     		add	r7, sp, #0
+ 158              		.cfi_def_cfa_register 7
+ 159 0072 7860     		str	r0, [r7, #4]
+ 202:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c ****     uint32_t ui32Reg;
+ 203:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** 
+ 204:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c ****     //
+ 205:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c ****     // Check the arguments.
+ 206:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c ****     //
+ 207:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c ****     ASSERT((ui32Channel == SOCADC_AIN0)     ||
+ 208:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c ****            (ui32Channel == SOCADC_AIN1)      ||
+ 209:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c ****            (ui32Channel == SOCADC_AIN2)      ||
+ 210:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c ****            (ui32Channel == SOCADC_AIN3)      ||
+ 211:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c ****            (ui32Channel == SOCADC_AIN4)      ||
+ 212:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c ****            (ui32Channel == SOCADC_AIN5)      ||
+ 213:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c ****            (ui32Channel == SOCADC_AIN6)      ||
+ 214:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c ****            (ui32Channel == SOCADC_AIN7)      ||
+ 215:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c ****            (ui32Channel == SOCADC_AIN01)     ||
+ 216:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c ****            (ui32Channel == SOCADC_AIN23)     ||
+ 217:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c ****            (ui32Channel == SOCADC_AIN45)     ||
+ 218:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c ****            (ui32Channel == SOCADC_AIN67)     ||
+ 219:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c ****            (ui32Channel == SOCADC_GND)       ||
+ 220:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c ****            (ui32Channel == SOCADC_TEMP_SENS) ||
+ 221:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c ****            (ui32Channel == SOCADC_VDD));
+ 222:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** 
+ 223:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c ****     //
+ 224:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c ****     // Program selected channel, this indirectly starts the conversion
+ 225:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c ****     //
+ 226:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c ****     ui32Reg = HWREG(SOC_ADC_ADCCON3) & ~(SOC_ADC_ADCCON3_ECH_M);
+ 160              		.loc 1 226 0
+ 161 0074 074B     		ldr	r3, .L7
+ 162 0076 1B68     		ldr	r3, [r3]
+ 163 0078 23F00F03 		bic	r3, r3, #15
+ 164 007c FB60     		str	r3, [r7, #12]
+ 227:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c ****     HWREG(SOC_ADC_ADCCON3) = ui32Reg | ui32Channel;
+ 165              		.loc 1 227 0
+ 166 007e 0549     		ldr	r1, .L7
+ 167 0080 FA68     		ldr	r2, [r7, #12]
+ 168 0082 7B68     		ldr	r3, [r7, #4]
+ 169 0084 1343     		orrs	r3, r3, r2
+ 170 0086 0B60     		str	r3, [r1]
+ 228:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** }
+ 171              		.loc 1 228 0
+ 172 0088 1437     		adds	r7, r7, #20
+ 173              		.cfi_def_cfa_offset 4
+ 174 008a BD46     		mov	sp, r7
+ 175              		.cfi_def_cfa_register 13
+ 176              		@ sp needed
+ 177 008c 5DF8047B 		ldr	r7, [sp], #4
+ 178              		.cfi_restore 7
+ 179              		.cfi_def_cfa_offset 0
+ 180 0090 7047     		bx	lr
+ 181              	.L8:
+ 182 0092 00BF     		.align	2
+ 183              	.L7:
+ 184 0094 08700D40 		.word	1074622472
+ 185              		.cfi_endproc
+ 186              	.LFE3:
+ 188              		.align	2
+ 189              		.global	SOCADCDataGet
+ 190              		.thumb
+ 191              		.thumb_func
+ 193              	SOCADCDataGet:
+ 194              	.LFB4:
+ 229:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** 
+ 230:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //*****************************************************************************
+ 231:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //
+ 232:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //! Get data value from conversion
+ 233:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //!
+ 234:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //! This function gets the latest conversion data result of the programmed
+ 235:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //! conversion. The function returns 16 bits of data, but depending on the
+ 236:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //! programmed precision, only part of the data is significant.
+ 237:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //! The following defined bit masks can be used to extract the significant data
+ 238:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //! depending on the decimation rate:
+ 239:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //!   \b SOCADC_7_BIT_MASK, \b SOCADC_9_BIT_MASK,
+ 240:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //!   \b SOCADC_10_BIT_MASK and \b SOCADC_12_BIT_MASK
+ 241:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //!
+ 242:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //! \sa SOCADCEndOfCOnversionGet().
+ 243:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //!
+ 244:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //! \return Data conversion value
+ 245:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //
+ 246:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //*****************************************************************************
+ 247:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** uint16_t
+ 248:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** SOCADCDataGet(void)
+ 249:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** {
+ 195              		.loc 1 249 0
+ 196              		.cfi_startproc
+ 197              		@ args = 0, pretend = 0, frame = 8
+ 198              		@ frame_needed = 1, uses_anonymous_args = 0
+ 199              		@ link register save eliminated.
+ 200 0098 80B4     		push	{r7}
+ 201              		.cfi_def_cfa_offset 4
+ 202              		.cfi_offset 7, -4
+ 203 009a 83B0     		sub	sp, sp, #12
+ 204              		.cfi_def_cfa_offset 16
+ 205 009c 00AF     		add	r7, sp, #0
+ 206              		.cfi_def_cfa_register 7
+ 250:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c ****     uint32_t ui32Reg;
+ 251:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** 
+ 252:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c ****     ui32Reg = HWREG(SOC_ADC_ADCL) & SOC_ADC_ADCL_ADC_M;
+ 207              		.loc 1 252 0
+ 208 009e 0A4B     		ldr	r3, .L11
+ 209 00a0 1B68     		ldr	r3, [r3]
+ 210 00a2 03F0FC03 		and	r3, r3, #252
+ 211 00a6 7B60     		str	r3, [r7, #4]
+ 253:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c ****     ui32Reg |= ((HWREG(SOC_ADC_ADCH) & SOC_ADC_ADCH_ADC_M) << 8);
+ 212              		.loc 1 253 0
+ 213 00a8 084B     		ldr	r3, .L11+4
+ 214 00aa 1B68     		ldr	r3, [r3]
+ 215 00ac 1B02     		lsls	r3, r3, #8
+ 216 00ae 9BB2     		uxth	r3, r3
+ 217 00b0 7A68     		ldr	r2, [r7, #4]
+ 218 00b2 1343     		orrs	r3, r3, r2
+ 219 00b4 7B60     		str	r3, [r7, #4]
+ 254:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** 
+ 255:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c ****     return ((uint16_t) ui32Reg);
+ 220              		.loc 1 255 0
+ 221 00b6 7B68     		ldr	r3, [r7, #4]
+ 222 00b8 9BB2     		uxth	r3, r3
+ 256:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** }
+ 223              		.loc 1 256 0
+ 224 00ba 1846     		mov	r0, r3
+ 225 00bc 0C37     		adds	r7, r7, #12
+ 226              		.cfi_def_cfa_offset 4
+ 227 00be BD46     		mov	sp, r7
+ 228              		.cfi_def_cfa_register 13
+ 229              		@ sp needed
+ 230 00c0 5DF8047B 		ldr	r7, [sp], #4
+ 231              		.cfi_restore 7
+ 232              		.cfi_def_cfa_offset 0
+ 233 00c4 7047     		bx	lr
+ 234              	.L12:
+ 235 00c6 00BF     		.align	2
+ 236              	.L11:
+ 237 00c8 0C700D40 		.word	1074622476
+ 238 00cc 10700D40 		.word	1074622480
+ 239              		.cfi_endproc
+ 240              	.LFE4:
+ 242              		.align	2
+ 243              		.global	SOCADCEndOfCOnversionGet
+ 244              		.thumb
+ 245              		.thumb_func
+ 247              	SOCADCEndOfCOnversionGet:
+ 248              	.LFB5:
+ 257:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** 
+ 258:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //*****************************************************************************
+ 259:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //
+ 260:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //! Check if conversion is done
+ 261:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //!
+ 262:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //! This function can be used to query the status of the conversion.
+ 263:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //!
+ 264:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //! \return true if conversion is done, otherwise false.
+ 265:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //
+ 266:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** //*****************************************************************************
+ 267:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** bool
+ 268:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** SOCADCEndOfCOnversionGet(void)
+ 269:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** {
+ 249              		.loc 1 269 0
+ 250              		.cfi_startproc
+ 251              		@ args = 0, pretend = 0, frame = 0
+ 252              		@ frame_needed = 1, uses_anonymous_args = 0
+ 253              		@ link register save eliminated.
+ 254 00d0 80B4     		push	{r7}
+ 255              		.cfi_def_cfa_offset 4
+ 256              		.cfi_offset 7, -4
+ 257 00d2 00AF     		add	r7, sp, #0
+ 258              		.cfi_def_cfa_register 7
+ 270:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c ****     return((HWREG(SOC_ADC_ADCCON1) & SOC_ADC_ADCCON1_EOC) ? true : false);
+ 259              		.loc 1 270 0
+ 260 00d4 064B     		ldr	r3, .L15
+ 261 00d6 1B68     		ldr	r3, [r3]
+ 262 00d8 03F08003 		and	r3, r3, #128
+ 263 00dc 002B     		cmp	r3, #0
+ 264 00de 14BF     		ite	ne
+ 265 00e0 0123     		movne	r3, #1
+ 266 00e2 0023     		moveq	r3, #0
+ 267 00e4 DBB2     		uxtb	r3, r3
+ 271:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/adc.c **** }
+ 268              		.loc 1 271 0
+ 269 00e6 1846     		mov	r0, r3
+ 270 00e8 BD46     		mov	sp, r7
+ 271              		.cfi_def_cfa_register 13
+ 272              		@ sp needed
+ 273 00ea 5DF8047B 		ldr	r7, [sp], #4
+ 274              		.cfi_restore 7
+ 275              		.cfi_def_cfa_offset 0
+ 276 00ee 7047     		bx	lr
+ 277              	.L16:
+ 278              		.align	2
+ 279              	.L15:
+ 280 00f0 00700D40 		.word	1074622464
+ 281              		.cfi_endproc
+ 282              	.LFE5:
+ 284              	.Letext0:
+ 285              		.file 2 "/usr/arm-none-eabi/include/machine/_default_types.h"
+ 286              		.file 3 "/usr/arm-none-eabi/include/sys/_stdint.h"
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 adc.c
+     /tmp/ccikK28K.s:18     .text:0000000000000000 $t
+     /tmp/ccikK28K.s:23     .text:0000000000000000 SOCADCIntRegister
+     /tmp/ccikK28K.s:61     .text:000000000000001c SOCADCIntUnregister
+     /tmp/ccikK28K.s:89     .text:0000000000000030 SOCADCSingleConfigure
+     /tmp/ccikK28K.s:135    .text:0000000000000064 $d
+     /tmp/ccikK28K.s:140    .text:000000000000006c $t
+     /tmp/ccikK28K.s:145    .text:000000000000006c SOCADCSingleStart
+     /tmp/ccikK28K.s:184    .text:0000000000000094 $d
+     /tmp/ccikK28K.s:188    .text:0000000000000098 $t
+     /tmp/ccikK28K.s:193    .text:0000000000000098 SOCADCDataGet
+     /tmp/ccikK28K.s:237    .text:00000000000000c8 $d
+     /tmp/ccikK28K.s:242    .text:00000000000000d0 $t
+     /tmp/ccikK28K.s:247    .text:00000000000000d0 SOCADCEndOfCOnversionGet
+     /tmp/ccikK28K.s:280    .text:00000000000000f0 $d
+                     .debug_frame:0000000000000010 $d
+                           .group:0000000000000000 wm4.0.59116071098782a37a9183a8102fe91b
+                           .group:0000000000000000 wm4.hw_ints.h.42.85b9479f2be35b086f1bb7cbb15bc097
+                           .group:0000000000000000 wm4.hw_memmap.h.39.19283c377d449c9bca5fdd8ccb62628c
+                           .group:0000000000000000 wm4.hw_soc_adc.h.39.49d9b13af378603af2f404bc5269b2c2
+                           .group:0000000000000000 wm4.features.h.22.2e382148a0560adabf236cddd4e880f4
+                           .group:0000000000000000 wm4._default_types.h.15.933e8edd27a65e0b69af4a865eb623d2
+                           .group:0000000000000000 wm4._intsup.h.10.35a45952db64d30146faa63a55c20c1c
+                           .group:0000000000000000 wm4._stdint.h.10.f76354baea1c7088202064e6f3d4f5e3
+                           .group:0000000000000000 wm4.stdint.h.23.373a9d32a9e4c2e88fd347156532d281
+                           .group:0000000000000000 wm4.stdbool.h.29.1c9ee6859ce8145f7838a4f2549ccec2
+                           .group:0000000000000000 wm4.hw_types.h.67.b10589a0806dcc2d274d6fab6b736519
+                           .group:0000000000000000 wm4.interrupt.h.41.272fc4ec0e276feb439e7974d0f77eaf
+                           .group:0000000000000000 wm4.adc.h.41.a9050d8b156af9fced6aa679c9da9963
+
+UNDEFINED SYMBOLS
+IntRegister
+IntEnable
+IntDisable
+IntUnregister

@@ -1,0 +1,2586 @@
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 6
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.file	"gptimer.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.align	2
+  19              		.global	TimerEnable
+  20              		.thumb
+  21              		.thumb_func
+  23              	TimerEnable:
+  24              	.LFB0:
+  25              		.file 1 "build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c"
+   1:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** /******************************************************************************
+   2:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** *  Filename:       gptimer.c
+   3:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** *  Revised:        $Date: 2013-04-12 14:54:28 +0200 (Fri, 12 Apr 2013) $
+   4:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** *  Revision:       $Revision: 9731 $
+   5:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** *
+   6:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** *  Description:    Driver for the general purpose timer module.
+   7:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** *
+   8:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** *  Copyright (C) 2012 Texas Instruments Incorporated - http://www.ti.com/
+   9:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** *
+  10:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** *
+  11:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** *  Redistribution and use in source and binary forms, with or without
+  12:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** *  modification, are permitted provided that the following conditions
+  13:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** *  are met:
+  14:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** *
+  15:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** *    Redistributions of source code must retain the above copyright
+  16:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** *    notice, this list of conditions and the following disclaimer.
+  17:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** *
+  18:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** *    Redistributions in binary form must reproduce the above copyright
+  19:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** *    notice, this list of conditions and the following disclaimer in the
+  20:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** *    documentation and/or other materials provided with the distribution.
+  21:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** *
+  22:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** *    Neither the name of Texas Instruments Incorporated nor the names of
+  23:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** *    its contributors may be used to endorse or promote products derived
+  24:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** *    from this software without specific prior written permission.
+  25:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** *
+  26:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  27:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** *  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  28:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** *  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  29:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** *  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  30:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** *  OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  31:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** *  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  32:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** *  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  33:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** *  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  34:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** *  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  35:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  36:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** *  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  37:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** *
+  38:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** ******************************************************************************/
+  39:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** 
+  40:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //*****************************************************************************
+  41:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //
+  42:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \addtogroup timer_api
+  43:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! @{
+  44:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //
+  45:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //*****************************************************************************
+  46:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** 
+  47:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** #include <headers/hw_gptimer.h>
+  48:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** #include <headers/hw_ints.h>
+  49:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** #include <headers/hw_memmap.h>
+  50:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** #include "debug.h"
+  51:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** #include "interrupt.h"
+  52:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** #include "gptimer.h"
+  53:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** 
+  54:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //*****************************************************************************
+  55:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //
+  56:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \internal
+  57:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! Checks a timer base address
+  58:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+  59:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \param ui32Base is the base address of the timer module.
+  60:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+  61:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! This function determines if a timer module base address is valid.
+  62:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+  63:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \return Returns \b true if the base address is valid and \b false
+  64:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! otherwise.
+  65:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //
+  66:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //*****************************************************************************
+  67:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** #ifdef ENABLE_ASSERT
+  68:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** static bool
+  69:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** TimerBaseValid(uint32_t ui32Base)
+  70:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** {
+  71:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     return((ui32Base == GPTIMER0_BASE) || (ui32Base == GPTIMER1_BASE) ||
+  72:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****            (ui32Base == GPTIMER2_BASE) || (ui32Base == GPTIMER3_BASE));
+  73:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** }
+  74:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** #endif
+  75:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** 
+  76:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //*****************************************************************************
+  77:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //
+  78:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! Enables the timer(s)
+  79:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+  80:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \param ui32Base is the base address of the timer module.
+  81:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \param ui32Timer specifies the timer(s) to enable; must be one of \b GPTIMER_A,
+  82:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \b GPTIMER_B, or \b GPTIMER_BOTH.
+  83:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+  84:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! This function enables operation of the timer module.  The timer must be
+  85:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! configured before it is enabled.
+  86:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+  87:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \return None
+  88:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //
+  89:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //*****************************************************************************
+  90:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** void
+  91:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** TimerEnable(uint32_t ui32Base, uint32_t ui32Timer)
+  92:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** {
+  26              		.loc 1 92 0
+  27              		.cfi_startproc
+  28              		@ args = 0, pretend = 0, frame = 8
+  29              		@ frame_needed = 1, uses_anonymous_args = 0
+  30              		@ link register save eliminated.
+  31 0000 80B4     		push	{r7}
+  32              		.cfi_def_cfa_offset 4
+  33              		.cfi_offset 7, -4
+  34 0002 83B0     		sub	sp, sp, #12
+  35              		.cfi_def_cfa_offset 16
+  36 0004 00AF     		add	r7, sp, #0
+  37              		.cfi_def_cfa_register 7
+  38 0006 7860     		str	r0, [r7, #4]
+  39 0008 3960     		str	r1, [r7]
+  93:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+  94:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     // Check the arguments.
+  95:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+  96:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     ASSERT(TimerBaseValid(ui32Base));
+  97:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     ASSERT((ui32Timer == GPTIMER_A) || (ui32Timer == GPTIMER_B) ||
+  98:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****            (ui32Timer == GPTIMER_BOTH));
+  99:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** 
+ 100:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 101:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     // Enable the timer(s) module.
+ 102:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 103:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     HWREG(ui32Base + GPTIMER_O_CTL) |= ui32Timer & (GPTIMER_CTL_TAEN | GPTIMER_CTL_TBEN);
+  40              		.loc 1 103 0
+  41 000a 7B68     		ldr	r3, [r7, #4]
+  42 000c 0C33     		adds	r3, r3, #12
+  43 000e 1846     		mov	r0, r3
+  44 0010 7B68     		ldr	r3, [r7, #4]
+  45 0012 0C33     		adds	r3, r3, #12
+  46 0014 1A68     		ldr	r2, [r3]
+  47 0016 3968     		ldr	r1, [r7]
+  48 0018 40F20113 		movw	r3, #257
+  49 001c 0B40     		ands	r3, r3, r1
+  50 001e 1343     		orrs	r3, r3, r2
+  51 0020 0360     		str	r3, [r0]
+ 104:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** }
+  52              		.loc 1 104 0
+  53 0022 0C37     		adds	r7, r7, #12
+  54              		.cfi_def_cfa_offset 4
+  55 0024 BD46     		mov	sp, r7
+  56              		.cfi_def_cfa_register 13
+  57              		@ sp needed
+  58 0026 5DF8047B 		ldr	r7, [sp], #4
+  59              		.cfi_restore 7
+  60              		.cfi_def_cfa_offset 0
+  61 002a 7047     		bx	lr
+  62              		.cfi_endproc
+  63              	.LFE0:
+  65              		.align	2
+  66              		.global	TimerDisable
+  67              		.thumb
+  68              		.thumb_func
+  70              	TimerDisable:
+  71              	.LFB1:
+ 105:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** 
+ 106:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //*****************************************************************************
+ 107:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //
+ 108:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! Disables the timer(s)
+ 109:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+ 110:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \param ui32Base is the base address of the timer module.
+ 111:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \param ui32Timer specifies the timer(s) to disable; must be one of
+ 112:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \b GPTIMER_A, \b GPTIMER_B, or \b GPTIMER_BOTH.
+ 113:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+ 114:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! This function disables operation of the timer module.
+ 115:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+ 116:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \return None
+ 117:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //
+ 118:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //*****************************************************************************
+ 119:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** void
+ 120:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** TimerDisable(uint32_t ui32Base, uint32_t ui32Timer)
+ 121:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** {
+  72              		.loc 1 121 0
+  73              		.cfi_startproc
+  74              		@ args = 0, pretend = 0, frame = 8
+  75              		@ frame_needed = 1, uses_anonymous_args = 0
+  76              		@ link register save eliminated.
+  77 002c 80B4     		push	{r7}
+  78              		.cfi_def_cfa_offset 4
+  79              		.cfi_offset 7, -4
+  80 002e 83B0     		sub	sp, sp, #12
+  81              		.cfi_def_cfa_offset 16
+  82 0030 00AF     		add	r7, sp, #0
+  83              		.cfi_def_cfa_register 7
+  84 0032 7860     		str	r0, [r7, #4]
+  85 0034 3960     		str	r1, [r7]
+ 122:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 123:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     // Check the arguments.
+ 124:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 125:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     ASSERT(TimerBaseValid(ui32Base));
+ 126:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     ASSERT((ui32Timer == GPTIMER_A) || (ui32Timer == GPTIMER_B) ||
+ 127:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****            (ui32Timer == GPTIMER_BOTH));
+ 128:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** 
+ 129:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 130:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     // Disable the timer module.
+ 131:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 132:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     HWREG(ui32Base + GPTIMER_O_CTL) &= ~(ui32Timer &
+  86              		.loc 1 132 0
+  87 0036 7B68     		ldr	r3, [r7, #4]
+  88 0038 0C33     		adds	r3, r3, #12
+  89 003a 1846     		mov	r0, r3
+  90 003c 7B68     		ldr	r3, [r7, #4]
+  91 003e 0C33     		adds	r3, r3, #12
+  92 0040 1A68     		ldr	r2, [r3]
+  93 0042 3968     		ldr	r1, [r7]
+  94 0044 40F20113 		movw	r3, #257
+  95 0048 0B40     		ands	r3, r3, r1
+  96 004a DB43     		mvns	r3, r3
+  97 004c 1340     		ands	r3, r3, r2
+  98 004e 0360     		str	r3, [r0]
+ 133:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****                                          (GPTIMER_CTL_TAEN | GPTIMER_CTL_TBEN));
+ 134:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** }
+  99              		.loc 1 134 0
+ 100 0050 0C37     		adds	r7, r7, #12
+ 101              		.cfi_def_cfa_offset 4
+ 102 0052 BD46     		mov	sp, r7
+ 103              		.cfi_def_cfa_register 13
+ 104              		@ sp needed
+ 105 0054 5DF8047B 		ldr	r7, [sp], #4
+ 106              		.cfi_restore 7
+ 107              		.cfi_def_cfa_offset 0
+ 108 0058 7047     		bx	lr
+ 109              		.cfi_endproc
+ 110              	.LFE1:
+ 112 005a 00BF     		.align	2
+ 113              		.global	TimerConfigure
+ 114              		.thumb
+ 115              		.thumb_func
+ 117              	TimerConfigure:
+ 118              	.LFB2:
+ 135:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** 
+ 136:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** 
+ 137:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //*****************************************************************************
+ 138:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //
+ 139:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! Configures the timer(s)
+ 140:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+ 141:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \param ui32Base is the base address of the timer module.
+ 142:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \param ui32Config is the configuration for the timer.
+ 143:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+ 144:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! This function configures the operating mode of the timer(s).  The timer
+ 145:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! module is disabled before being configured, and is left in the disabled
+ 146:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! state.
+ 147:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! The 16/32-bit timer is comprised of two 16-bit timers that can
+ 148:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! operate independently or be concatenated to form a 32-bit timer.
+ 149:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+ 150:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! The configuration is specified in \e ui32Config as one of the following
+ 151:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! values:
+ 152:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+ 153:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! - \b GPTIMER_CFG_ONE_SHOT - Full-width one-shot timer
+ 154:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! - \b GPTIMER_CFG_ONE_SHOT_UP - Full-width one-shot timer that counts up
+ 155:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!   instead of down (not available on all parts)
+ 156:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! - \b GPTIMER_CFG_PERIODIC - Full-width periodic timer
+ 157:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! - \b GPTIMER_CFG_PERIODIC_UP - Full-width periodic timer that counts up
+ 158:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!   instead of down (not available on all parts)
+ 159:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! - \b GPTIMER_CFG_SPLIT_PAIR - Two half-width timers
+ 160:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+ 161:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! When configured for a pair of half-width timers, each timer is separately
+ 162:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! configured.  The first timer is configured by setting \e ui32Config to
+ 163:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! the result of a logical OR operation between one of the following values
+ 164:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! and \e ui32Config:
+ 165:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+ 166:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! - \b GPTIMER_CFG_A_ONE_SHOT - Half-width one-shot timer
+ 167:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! - \b GPTIMER_CFG_A_ONE_SHOT_UP - Half-width one-shot timer that counts up
+ 168:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!   instead of down (not available on all parts)
+ 169:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! - \b GPTIMER_CFG_A_PERIODIC - Half-width periodic timer
+ 170:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! - \b GPTIMER_CFG_A_PERIODIC_UP - Half-width periodic timer that counts up
+ 171:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!   instead of down (not available on all parts)
+ 172:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! - \b GPTIMER_CFG_A_CAP_COUNT - Half-width edge count capture
+ 173:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! - \b GPTIMER_CFG_A_CAP_COUNT_UP - Half-width edge count capture that counts
+ 174:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!   up instead of down (not available on all parts)
+ 175:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! - \b GPTIMER_CFG_A_CAP_TIME - Half-width edge time capture
+ 176:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! - \b GPTIMER_CFG_A_CAP_TIME_UP - Half-width edge time capture that
+ 177:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!   counts up instead of down (not available on all parts)
+ 178:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! - \b GPTIMER_CFG_A_PWM - Half-width PWM output
+ 179:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+ 180:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! Similarly, the second timer is configured by setting \e ui32Config to
+ 181:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! the result of a logical OR operation between one of the corresponding
+ 182:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \b GPTIMER_CFG_B_* values and \e ui32Config.
+ 183:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+ 184:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \return None
+ 185:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //
+ 186:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //*****************************************************************************
+ 187:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** void
+ 188:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** TimerConfigure(uint32_t ui32Base, uint32_t ui32Config)
+ 189:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** {
+ 119              		.loc 1 189 0
+ 120              		.cfi_startproc
+ 121              		@ args = 0, pretend = 0, frame = 8
+ 122              		@ frame_needed = 1, uses_anonymous_args = 0
+ 123              		@ link register save eliminated.
+ 124 005c 80B4     		push	{r7}
+ 125              		.cfi_def_cfa_offset 4
+ 126              		.cfi_offset 7, -4
+ 127 005e 83B0     		sub	sp, sp, #12
+ 128              		.cfi_def_cfa_offset 16
+ 129 0060 00AF     		add	r7, sp, #0
+ 130              		.cfi_def_cfa_register 7
+ 131 0062 7860     		str	r0, [r7, #4]
+ 132 0064 3960     		str	r1, [r7]
+ 190:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 191:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     // Check the arguments.
+ 192:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 193:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     ASSERT(TimerBaseValid(ui32Base));
+ 194:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     ASSERT((ui32Config == GPTIMER_CFG_ONE_SHOT) ||
+ 195:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****            (ui32Config == GPTIMER_CFG_ONE_SHOT_UP) ||
+ 196:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****            (ui32Config == GPTIMER_CFG_PERIODIC) ||
+ 197:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****            (ui32Config == GPTIMER_CFG_PERIODIC_UP) ||
+ 198:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****            ((ui32Config & 0xff000000) == GPTIMER_CFG_SPLIT_PAIR));
+ 199:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     ASSERT(((ui32Config & 0xff000000) != GPTIMER_CFG_SPLIT_PAIR) ||
+ 200:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****            ((((ui32Config & 0x000000ff) == GPTIMER_CFG_A_ONE_SHOT) ||
+ 201:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****              ((ui32Config & 0x000000ff) == GPTIMER_CFG_A_ONE_SHOT_UP) ||
+ 202:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****              ((ui32Config & 0x000000ff) == GPTIMER_CFG_A_PERIODIC) ||
+ 203:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****              ((ui32Config & 0x000000ff) == GPTIMER_CFG_A_PERIODIC_UP) ||
+ 204:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****              ((ui32Config & 0x000000ff) == GPTIMER_CFG_A_CAP_COUNT) ||
+ 205:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****              ((ui32Config & 0x000000ff) == GPTIMER_CFG_A_CAP_TIME) ||
+ 206:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****              ((ui32Config & 0x000000ff) == GPTIMER_CFG_A_PWM)) &&
+ 207:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****             (((ui32Config & 0x0000ff00) == GPTIMER_CFG_B_ONE_SHOT) ||
+ 208:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****              ((ui32Config & 0x0000ff00) == GPTIMER_CFG_B_ONE_SHOT_UP) ||
+ 209:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****              ((ui32Config & 0x0000ff00) == GPTIMER_CFG_B_PERIODIC) ||
+ 210:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****              ((ui32Config & 0x0000ff00) == GPTIMER_CFG_B_PERIODIC_UP) ||
+ 211:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****              ((ui32Config & 0x0000ff00) == GPTIMER_CFG_B_CAP_COUNT) ||
+ 212:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****              ((ui32Config & 0x0000ff00) == GPTIMER_CFG_B_CAP_COUNT_UP) ||
+ 213:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****              ((ui32Config & 0x0000ff00) == GPTIMER_CFG_B_CAP_TIME) ||
+ 214:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****              ((ui32Config & 0x0000ff00) == GPTIMER_CFG_B_CAP_TIME_UP) ||
+ 215:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****              ((ui32Config & 0x0000ff00) == GPTIMER_CFG_B_PWM))));
+ 216:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** 
+ 217:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 218:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     // Disable the timers.
+ 219:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 220:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     HWREG(ui32Base + GPTIMER_O_CTL) &= ~(GPTIMER_CTL_TAEN | GPTIMER_CTL_TBEN);
+ 133              		.loc 1 220 0
+ 134 0066 7B68     		ldr	r3, [r7, #4]
+ 135 0068 0C33     		adds	r3, r3, #12
+ 136 006a 1A46     		mov	r2, r3
+ 137 006c 7B68     		ldr	r3, [r7, #4]
+ 138 006e 0C33     		adds	r3, r3, #12
+ 139 0070 1B68     		ldr	r3, [r3]
+ 140 0072 23F48073 		bic	r3, r3, #256
+ 141 0076 23F00103 		bic	r3, r3, #1
+ 142 007a 1360     		str	r3, [r2]
+ 221:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** 
+ 222:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 223:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     // Set the global timer configuration.
+ 224:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 225:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     HWREG(ui32Base + GPTIMER_O_CFG) = ui32Config >> 24;
+ 143              		.loc 1 225 0
+ 144 007c 7B68     		ldr	r3, [r7, #4]
+ 145 007e 3A68     		ldr	r2, [r7]
+ 146 0080 120E     		lsrs	r2, r2, #24
+ 147 0082 1A60     		str	r2, [r3]
+ 226:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** 
+ 227:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 228:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     // Set the configuration of the A and B timers.  Note that the B timer
+ 229:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     // configuration is ignored by the hardware in 32-bit modes.
+ 230:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 231:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     HWREG(ui32Base + GPTIMER_O_TAMR) = (ui32Config & 255) | GPTIMER_TAMR_TAPWMIE;
+ 148              		.loc 1 231 0
+ 149 0084 7B68     		ldr	r3, [r7, #4]
+ 150 0086 0433     		adds	r3, r3, #4
+ 151 0088 1A46     		mov	r2, r3
+ 152 008a 3B68     		ldr	r3, [r7]
+ 153 008c DBB2     		uxtb	r3, r3
+ 154 008e 43F40073 		orr	r3, r3, #512
+ 155 0092 1360     		str	r3, [r2]
+ 232:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     HWREG(ui32Base + GPTIMER_O_TBMR) =
+ 156              		.loc 1 232 0
+ 157 0094 7B68     		ldr	r3, [r7, #4]
+ 158 0096 0833     		adds	r3, r3, #8
+ 159 0098 1A46     		mov	r2, r3
+ 233:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****         ((ui32Config >> 8) & 255) | GPTIMER_TBMR_TBPWMIE;
+ 160              		.loc 1 233 0
+ 161 009a 3B68     		ldr	r3, [r7]
+ 162 009c 1B0A     		lsrs	r3, r3, #8
+ 163 009e DBB2     		uxtb	r3, r3
+ 164 00a0 43F40073 		orr	r3, r3, #512
+ 232:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     HWREG(ui32Base + GPTIMER_O_TBMR) =
+ 165              		.loc 1 232 0
+ 166 00a4 1360     		str	r3, [r2]
+ 234:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** }
+ 167              		.loc 1 234 0
+ 168 00a6 0C37     		adds	r7, r7, #12
+ 169              		.cfi_def_cfa_offset 4
+ 170 00a8 BD46     		mov	sp, r7
+ 171              		.cfi_def_cfa_register 13
+ 172              		@ sp needed
+ 173 00aa 5DF8047B 		ldr	r7, [sp], #4
+ 174              		.cfi_restore 7
+ 175              		.cfi_def_cfa_offset 0
+ 176 00ae 7047     		bx	lr
+ 177              		.cfi_endproc
+ 178              	.LFE2:
+ 180              		.align	2
+ 181              		.global	TimerControlLevel
+ 182              		.thumb
+ 183              		.thumb_func
+ 185              	TimerControlLevel:
+ 186              	.LFB3:
+ 235:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** 
+ 236:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //*****************************************************************************
+ 237:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //
+ 238:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! Controls the output level
+ 239:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+ 240:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \param ui32Base is the base address of the timer module.
+ 241:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \param ui32Timer specifies the timer(s) to adjust; must be one of \b GPTIMER_A,
+ 242:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \b GPTIMER_B, or \b GPTIMER_BOTH.
+ 243:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \param bInvert specifies the output level.
+ 244:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+ 245:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! This function sets the PWM output level for the specified timer.  If the
+ 246:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \e bInvert parameter is \b true, then the timer's output is made active
+ 247:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! low; otherwise, it is made active high.
+ 248:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+ 249:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \return None
+ 250:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //
+ 251:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //*****************************************************************************
+ 252:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** void
+ 253:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** TimerControlLevel(uint32_t ui32Base, uint32_t ui32Timer,
+ 254:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****                   bool bInvert)
+ 255:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** {
+ 187              		.loc 1 255 0
+ 188              		.cfi_startproc
+ 189              		@ args = 0, pretend = 0, frame = 16
+ 190              		@ frame_needed = 1, uses_anonymous_args = 0
+ 191              		@ link register save eliminated.
+ 192 00b0 80B4     		push	{r7}
+ 193              		.cfi_def_cfa_offset 4
+ 194              		.cfi_offset 7, -4
+ 195 00b2 85B0     		sub	sp, sp, #20
+ 196              		.cfi_def_cfa_offset 24
+ 197 00b4 00AF     		add	r7, sp, #0
+ 198              		.cfi_def_cfa_register 7
+ 199 00b6 F860     		str	r0, [r7, #12]
+ 200 00b8 B960     		str	r1, [r7, #8]
+ 201 00ba 1346     		mov	r3, r2
+ 202 00bc FB71     		strb	r3, [r7, #7]
+ 256:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 257:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     // Check the arguments.
+ 258:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 259:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     ASSERT(TimerBaseValid(ui32Base));
+ 260:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     ASSERT((ui32Timer == GPTIMER_A) || (ui32Timer == GPTIMER_B) ||
+ 261:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****            (ui32Timer == GPTIMER_BOTH));
+ 262:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** 
+ 263:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 264:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     // Set the output levels as requested.
+ 265:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 266:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     ui32Timer &= GPTIMER_CTL_TAPWML | GPTIMER_CTL_TBPWML;
+ 203              		.loc 1 266 0
+ 204 00be BA68     		ldr	r2, [r7, #8]
+ 205 00c0 44F24003 		movw	r3, #16448
+ 206 00c4 1340     		ands	r3, r3, r2
+ 207 00c6 BB60     		str	r3, [r7, #8]
+ 267:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     HWREG(ui32Base + GPTIMER_O_CTL) = (bInvert ?
+ 208              		.loc 1 267 0
+ 209 00c8 FB68     		ldr	r3, [r7, #12]
+ 210 00ca 0C33     		adds	r3, r3, #12
+ 211 00cc 1946     		mov	r1, r3
+ 268:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****                                        (HWREG(ui32Base + GPTIMER_O_CTL) | ui32Timer) :
+ 212              		.loc 1 268 0
+ 213 00ce FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 214 00d0 002B     		cmp	r3, #0
+ 215 00d2 05D0     		beq	.L5
+ 216              		.loc 1 268 0 is_stmt 0 discriminator 1
+ 217 00d4 FB68     		ldr	r3, [r7, #12]
+ 218 00d6 0C33     		adds	r3, r3, #12
+ 219 00d8 1A68     		ldr	r2, [r3]
+ 220 00da BB68     		ldr	r3, [r7, #8]
+ 221 00dc 1343     		orrs	r3, r3, r2
+ 222 00de 05E0     		b	.L6
+ 223              	.L5:
+ 269:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****                                        (HWREG(ui32Base + GPTIMER_O_CTL) & ~(ui32Timer)));
+ 224              		.loc 1 269 0 is_stmt 1 discriminator 2
+ 225 00e0 FB68     		ldr	r3, [r7, #12]
+ 226 00e2 0C33     		adds	r3, r3, #12
+ 227 00e4 1A68     		ldr	r2, [r3]
+ 228 00e6 BB68     		ldr	r3, [r7, #8]
+ 229 00e8 DB43     		mvns	r3, r3
+ 268:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****                                        (HWREG(ui32Base + GPTIMER_O_CTL) | ui32Timer) :
+ 230              		.loc 1 268 0 discriminator 2
+ 231 00ea 1340     		ands	r3, r3, r2
+ 232              	.L6:
+ 267:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     HWREG(ui32Base + GPTIMER_O_CTL) = (bInvert ?
+ 233              		.loc 1 267 0
+ 234 00ec 0B60     		str	r3, [r1]
+ 270:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** }
+ 235              		.loc 1 270 0
+ 236 00ee 1437     		adds	r7, r7, #20
+ 237              		.cfi_def_cfa_offset 4
+ 238 00f0 BD46     		mov	sp, r7
+ 239              		.cfi_def_cfa_register 13
+ 240              		@ sp needed
+ 241 00f2 5DF8047B 		ldr	r7, [sp], #4
+ 242              		.cfi_restore 7
+ 243              		.cfi_def_cfa_offset 0
+ 244 00f6 7047     		bx	lr
+ 245              		.cfi_endproc
+ 246              	.LFE3:
+ 248              		.align	2
+ 249              		.global	TimerControlTrigger
+ 250              		.thumb
+ 251              		.thumb_func
+ 253              	TimerControlTrigger:
+ 254              	.LFB4:
+ 271:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** 
+ 272:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //*****************************************************************************
+ 273:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //
+ 274:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! Enables or disables the trigger output
+ 275:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+ 276:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \param ui32Base is the base address of the timer module.
+ 277:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \param ui32Timer specifies the timer to adjust; must be one of \b GPTIMER_A,
+ 278:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \b GPTIMER_B, or \b GPTIMER_BOTH.
+ 279:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \param bEnable specifies the desired trigger state.
+ 280:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+ 281:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! This function controls the trigger output for the specified timer.  If the
+ 282:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \e bEnable parameter is \b true, then the timer's output trigger is
+ 283:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! enabled; otherwise it is disabled.
+ 284:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+ 285:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \return None
+ 286:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //
+ 287:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //*****************************************************************************
+ 288:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** void
+ 289:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** TimerControlTrigger(uint32_t ui32Base, uint32_t ui32Timer,
+ 290:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****                     bool bEnable)
+ 291:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** {
+ 255              		.loc 1 291 0
+ 256              		.cfi_startproc
+ 257              		@ args = 0, pretend = 0, frame = 16
+ 258              		@ frame_needed = 1, uses_anonymous_args = 0
+ 259              		@ link register save eliminated.
+ 260 00f8 80B4     		push	{r7}
+ 261              		.cfi_def_cfa_offset 4
+ 262              		.cfi_offset 7, -4
+ 263 00fa 85B0     		sub	sp, sp, #20
+ 264              		.cfi_def_cfa_offset 24
+ 265 00fc 00AF     		add	r7, sp, #0
+ 266              		.cfi_def_cfa_register 7
+ 267 00fe F860     		str	r0, [r7, #12]
+ 268 0100 B960     		str	r1, [r7, #8]
+ 269 0102 1346     		mov	r3, r2
+ 270 0104 FB71     		strb	r3, [r7, #7]
+ 292:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 293:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     // Check the arguments.
+ 294:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 295:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     ASSERT(TimerBaseValid(ui32Base));
+ 296:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     ASSERT((ui32Timer == GPTIMER_A) || (ui32Timer == GPTIMER_B) ||
+ 297:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****            (ui32Timer == GPTIMER_BOTH));
+ 298:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** 
+ 299:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 300:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     // Set the trigger output as requested.
+ 301:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 302:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     ui32Timer &= GPTIMER_CTL_TAOTE | GPTIMER_CTL_TBOTE;
+ 271              		.loc 1 302 0
+ 272 0106 BA68     		ldr	r2, [r7, #8]
+ 273 0108 42F22003 		movw	r3, #8224
+ 274 010c 1340     		ands	r3, r3, r2
+ 275 010e BB60     		str	r3, [r7, #8]
+ 303:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     HWREG(ui32Base + GPTIMER_O_CTL) = (bEnable ?
+ 276              		.loc 1 303 0
+ 277 0110 FB68     		ldr	r3, [r7, #12]
+ 278 0112 0C33     		adds	r3, r3, #12
+ 279 0114 1946     		mov	r1, r3
+ 304:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****                                        (HWREG(ui32Base + GPTIMER_O_CTL) | ui32Timer) :
+ 280              		.loc 1 304 0
+ 281 0116 FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 282 0118 002B     		cmp	r3, #0
+ 283 011a 05D0     		beq	.L8
+ 284              		.loc 1 304 0 is_stmt 0 discriminator 1
+ 285 011c FB68     		ldr	r3, [r7, #12]
+ 286 011e 0C33     		adds	r3, r3, #12
+ 287 0120 1A68     		ldr	r2, [r3]
+ 288 0122 BB68     		ldr	r3, [r7, #8]
+ 289 0124 1343     		orrs	r3, r3, r2
+ 290 0126 05E0     		b	.L9
+ 291              	.L8:
+ 305:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****                                        (HWREG(ui32Base + GPTIMER_O_CTL) & ~(ui32Timer)));
+ 292              		.loc 1 305 0 is_stmt 1 discriminator 2
+ 293 0128 FB68     		ldr	r3, [r7, #12]
+ 294 012a 0C33     		adds	r3, r3, #12
+ 295 012c 1A68     		ldr	r2, [r3]
+ 296 012e BB68     		ldr	r3, [r7, #8]
+ 297 0130 DB43     		mvns	r3, r3
+ 304:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****                                        (HWREG(ui32Base + GPTIMER_O_CTL) | ui32Timer) :
+ 298              		.loc 1 304 0 discriminator 2
+ 299 0132 1340     		ands	r3, r3, r2
+ 300              	.L9:
+ 303:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     HWREG(ui32Base + GPTIMER_O_CTL) = (bEnable ?
+ 301              		.loc 1 303 0
+ 302 0134 0B60     		str	r3, [r1]
+ 306:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** }
+ 303              		.loc 1 306 0
+ 304 0136 1437     		adds	r7, r7, #20
+ 305              		.cfi_def_cfa_offset 4
+ 306 0138 BD46     		mov	sp, r7
+ 307              		.cfi_def_cfa_register 13
+ 308              		@ sp needed
+ 309 013a 5DF8047B 		ldr	r7, [sp], #4
+ 310              		.cfi_restore 7
+ 311              		.cfi_def_cfa_offset 0
+ 312 013e 7047     		bx	lr
+ 313              		.cfi_endproc
+ 314              	.LFE4:
+ 316              		.align	2
+ 317              		.global	TimerControlEvent
+ 318              		.thumb
+ 319              		.thumb_func
+ 321              	TimerControlEvent:
+ 322              	.LFB5:
+ 307:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** 
+ 308:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //*****************************************************************************
+ 309:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //
+ 310:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! Controls the event type
+ 311:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+ 312:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \param ui32Base is the base address of the timer module.
+ 313:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \param ui32Timer specifies the timer(s) to be adjusted; must be one of
+ 314:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \b GPTIMER_A, \b GPTIMER_B, or \b GPTIMER_BOTH.
+ 315:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \param ui32Event specifies the type of event; must be one of
+ 316:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \b GPTIMER_EVENT_POS_EDGE, \b GPTIMER_EVENT_NEG_EDGE, or
+ 317:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \b GPTIMER_EVENT_BOTH_EDGES.
+ 318:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+ 319:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! This function sets the signal edge(s) that triggers the timer when in
+ 320:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! capture mode.
+ 321:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+ 322:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \return None
+ 323:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //
+ 324:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //*****************************************************************************
+ 325:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** void
+ 326:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** TimerControlEvent(uint32_t ui32Base, uint32_t ui32Timer,
+ 327:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****                   uint32_t ui32Event)
+ 328:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** {
+ 323              		.loc 1 328 0
+ 324              		.cfi_startproc
+ 325              		@ args = 0, pretend = 0, frame = 16
+ 326              		@ frame_needed = 1, uses_anonymous_args = 0
+ 327              		@ link register save eliminated.
+ 328 0140 80B4     		push	{r7}
+ 329              		.cfi_def_cfa_offset 4
+ 330              		.cfi_offset 7, -4
+ 331 0142 85B0     		sub	sp, sp, #20
+ 332              		.cfi_def_cfa_offset 24
+ 333 0144 00AF     		add	r7, sp, #0
+ 334              		.cfi_def_cfa_register 7
+ 335 0146 F860     		str	r0, [r7, #12]
+ 336 0148 B960     		str	r1, [r7, #8]
+ 337 014a 7A60     		str	r2, [r7, #4]
+ 329:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 330:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     // Check the arguments.
+ 331:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 332:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     ASSERT(TimerBaseValid(ui32Base));
+ 333:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     ASSERT((ui32Timer == GPTIMER_A) || (ui32Timer == GPTIMER_B) ||
+ 334:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****            (ui32Timer == GPTIMER_BOTH));
+ 335:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** 
+ 336:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 337:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     // Set the event type.
+ 338:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 339:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     ui32Timer &= GPTIMER_CTL_TAEVENT_M | GPTIMER_CTL_TBEVENT_M;
+ 338              		.loc 1 339 0
+ 339 014c BA68     		ldr	r2, [r7, #8]
+ 340 014e 40F60C43 		movw	r3, #3084
+ 341 0152 1340     		ands	r3, r3, r2
+ 342 0154 BB60     		str	r3, [r7, #8]
+ 340:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     HWREG(ui32Base + GPTIMER_O_CTL) = ((HWREG(ui32Base + GPTIMER_O_CTL) & ~ui32Timer) |
+ 343              		.loc 1 340 0
+ 344 0156 FB68     		ldr	r3, [r7, #12]
+ 345 0158 0C33     		adds	r3, r3, #12
+ 346 015a 1846     		mov	r0, r3
+ 347 015c FB68     		ldr	r3, [r7, #12]
+ 348 015e 0C33     		adds	r3, r3, #12
+ 349 0160 1A68     		ldr	r2, [r3]
+ 350 0162 BB68     		ldr	r3, [r7, #8]
+ 351 0164 DB43     		mvns	r3, r3
+ 352 0166 1A40     		ands	r2, r2, r3
+ 341:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****                                        (ui32Event & ui32Timer));
+ 353              		.loc 1 341 0
+ 354 0168 7968     		ldr	r1, [r7, #4]
+ 355 016a BB68     		ldr	r3, [r7, #8]
+ 356 016c 0B40     		ands	r3, r3, r1
+ 340:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     HWREG(ui32Base + GPTIMER_O_CTL) = ((HWREG(ui32Base + GPTIMER_O_CTL) & ~ui32Timer) |
+ 357              		.loc 1 340 0
+ 358 016e 1343     		orrs	r3, r3, r2
+ 359 0170 0360     		str	r3, [r0]
+ 342:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** }
+ 360              		.loc 1 342 0
+ 361 0172 1437     		adds	r7, r7, #20
+ 362              		.cfi_def_cfa_offset 4
+ 363 0174 BD46     		mov	sp, r7
+ 364              		.cfi_def_cfa_register 13
+ 365              		@ sp needed
+ 366 0176 5DF8047B 		ldr	r7, [sp], #4
+ 367              		.cfi_restore 7
+ 368              		.cfi_def_cfa_offset 0
+ 369 017a 7047     		bx	lr
+ 370              		.cfi_endproc
+ 371              	.LFE5:
+ 373              		.align	2
+ 374              		.global	TimerControlStall
+ 375              		.thumb
+ 376              		.thumb_func
+ 378              	TimerControlStall:
+ 379              	.LFB6:
+ 343:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** 
+ 344:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //*****************************************************************************
+ 345:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //
+ 346:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! Controls the stall handling
+ 347:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+ 348:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \param ui32Base is the base address of the timer module.
+ 349:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \param ui32Timer specifies the timer(s) to be adjusted; must be one of
+ 350:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \b GPTIMER_A, \b GPTIMER_B, or \b GPTIMER_BOTH.
+ 351:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \param bStall specifies the response to a stall signal.
+ 352:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+ 353:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! This function controls the stall response for the specified timer.  If the
+ 354:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \e bStall parameter is \b true, then the timer stops counting if the
+ 355:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! processor enters debug mode; otherwise the timer keeps running while in
+ 356:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! debug mode.
+ 357:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+ 358:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \return None
+ 359:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //
+ 360:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //*****************************************************************************
+ 361:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** void
+ 362:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** TimerControlStall(uint32_t ui32Base, uint32_t ui32Timer,
+ 363:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****                   bool bStall)
+ 364:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** {
+ 380              		.loc 1 364 0
+ 381              		.cfi_startproc
+ 382              		@ args = 0, pretend = 0, frame = 16
+ 383              		@ frame_needed = 1, uses_anonymous_args = 0
+ 384              		@ link register save eliminated.
+ 385 017c 80B4     		push	{r7}
+ 386              		.cfi_def_cfa_offset 4
+ 387              		.cfi_offset 7, -4
+ 388 017e 85B0     		sub	sp, sp, #20
+ 389              		.cfi_def_cfa_offset 24
+ 390 0180 00AF     		add	r7, sp, #0
+ 391              		.cfi_def_cfa_register 7
+ 392 0182 F860     		str	r0, [r7, #12]
+ 393 0184 B960     		str	r1, [r7, #8]
+ 394 0186 1346     		mov	r3, r2
+ 395 0188 FB71     		strb	r3, [r7, #7]
+ 365:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 366:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     // Check the arguments.
+ 367:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 368:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     ASSERT(TimerBaseValid(ui32Base));
+ 369:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     ASSERT((ui32Timer == GPTIMER_A) || (ui32Timer == GPTIMER_B) ||
+ 370:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****            (ui32Timer == GPTIMER_BOTH));
+ 371:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** 
+ 372:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 373:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     // Set the stall mode.
+ 374:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 375:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     ui32Timer &= GPTIMER_CTL_TASTALL | GPTIMER_CTL_TBSTALL;
+ 396              		.loc 1 375 0
+ 397 018a BA68     		ldr	r2, [r7, #8]
+ 398 018c 40F20223 		movw	r3, #514
+ 399 0190 1340     		ands	r3, r3, r2
+ 400 0192 BB60     		str	r3, [r7, #8]
+ 376:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     HWREG(ui32Base + GPTIMER_O_CTL) = (bStall ?
+ 401              		.loc 1 376 0
+ 402 0194 FB68     		ldr	r3, [r7, #12]
+ 403 0196 0C33     		adds	r3, r3, #12
+ 404 0198 1946     		mov	r1, r3
+ 377:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****                                        (HWREG(ui32Base + GPTIMER_O_CTL) | ui32Timer) :
+ 405              		.loc 1 377 0
+ 406 019a FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 407 019c 002B     		cmp	r3, #0
+ 408 019e 05D0     		beq	.L12
+ 409              		.loc 1 377 0 is_stmt 0 discriminator 1
+ 410 01a0 FB68     		ldr	r3, [r7, #12]
+ 411 01a2 0C33     		adds	r3, r3, #12
+ 412 01a4 1A68     		ldr	r2, [r3]
+ 413 01a6 BB68     		ldr	r3, [r7, #8]
+ 414 01a8 1343     		orrs	r3, r3, r2
+ 415 01aa 05E0     		b	.L13
+ 416              	.L12:
+ 378:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****                                        (HWREG(ui32Base + GPTIMER_O_CTL) & ~(ui32Timer)));
+ 417              		.loc 1 378 0 is_stmt 1 discriminator 2
+ 418 01ac FB68     		ldr	r3, [r7, #12]
+ 419 01ae 0C33     		adds	r3, r3, #12
+ 420 01b0 1A68     		ldr	r2, [r3]
+ 421 01b2 BB68     		ldr	r3, [r7, #8]
+ 422 01b4 DB43     		mvns	r3, r3
+ 377:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****                                        (HWREG(ui32Base + GPTIMER_O_CTL) | ui32Timer) :
+ 423              		.loc 1 377 0 discriminator 2
+ 424 01b6 1340     		ands	r3, r3, r2
+ 425              	.L13:
+ 376:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     HWREG(ui32Base + GPTIMER_O_CTL) = (bStall ?
+ 426              		.loc 1 376 0
+ 427 01b8 0B60     		str	r3, [r1]
+ 379:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** }
+ 428              		.loc 1 379 0
+ 429 01ba 1437     		adds	r7, r7, #20
+ 430              		.cfi_def_cfa_offset 4
+ 431 01bc BD46     		mov	sp, r7
+ 432              		.cfi_def_cfa_register 13
+ 433              		@ sp needed
+ 434 01be 5DF8047B 		ldr	r7, [sp], #4
+ 435              		.cfi_restore 7
+ 436              		.cfi_def_cfa_offset 0
+ 437 01c2 7047     		bx	lr
+ 438              		.cfi_endproc
+ 439              	.LFE6:
+ 441              		.align	2
+ 442              		.global	TimerControlWaitOnTrigger
+ 443              		.thumb
+ 444              		.thumb_func
+ 446              	TimerControlWaitOnTrigger:
+ 447              	.LFB7:
+ 380:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** 
+ 381:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //*****************************************************************************
+ 382:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //
+ 383:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! Controls the wait on trigger handling
+ 384:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+ 385:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \param ui32Base is the base address of the timer module.
+ 386:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \param ui32Timer specifies the timer(s) to be adjusted; must be one of
+ 387:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \b GPTIMER_A, \b GPTIMER_B, or \b GPTIMER_BOTH.
+ 388:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \param bWait specifies if the timer should wait for a trigger input.
+ 389:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+ 390:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! This function controls whether or not a timer waits for a trigger input to
+ 391:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! start counting.  When enabled, the previous timer in the trigger chain must
+ 392:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! count to its timeout in order for this timer to start counting.  Refer to
+ 393:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! the part's data sheet for a description of the trigger chain.
+ 394:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+ 395:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \note This functionality is not available on all parts.
+ 396:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+ 397:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \return None
+ 398:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //
+ 399:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //*****************************************************************************
+ 400:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** void
+ 401:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** TimerControlWaitOnTrigger(uint32_t ui32Base, uint32_t ui32Timer,
+ 402:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****                           bool bWait)
+ 403:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** {
+ 448              		.loc 1 403 0
+ 449              		.cfi_startproc
+ 450              		@ args = 0, pretend = 0, frame = 16
+ 451              		@ frame_needed = 1, uses_anonymous_args = 0
+ 452              		@ link register save eliminated.
+ 453 01c4 80B4     		push	{r7}
+ 454              		.cfi_def_cfa_offset 4
+ 455              		.cfi_offset 7, -4
+ 456 01c6 85B0     		sub	sp, sp, #20
+ 457              		.cfi_def_cfa_offset 24
+ 458 01c8 00AF     		add	r7, sp, #0
+ 459              		.cfi_def_cfa_register 7
+ 460 01ca F860     		str	r0, [r7, #12]
+ 461 01cc B960     		str	r1, [r7, #8]
+ 462 01ce 1346     		mov	r3, r2
+ 463 01d0 FB71     		strb	r3, [r7, #7]
+ 404:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 405:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     // Check the arguments.
+ 406:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 407:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     ASSERT(TimerBaseValid(ui32Base));
+ 408:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     ASSERT((ui32Timer == GPTIMER_A) || (ui32Timer == GPTIMER_B) ||
+ 409:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****            (ui32Timer == GPTIMER_BOTH));
+ 410:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** 
+ 411:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 412:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     // Set the wait on trigger mode for timer A.
+ 413:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 414:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     if((ui32Timer & GPTIMER_A) != 0)
+ 464              		.loc 1 414 0
+ 465 01d2 BB68     		ldr	r3, [r7, #8]
+ 466 01d4 DBB2     		uxtb	r3, r3
+ 467 01d6 002B     		cmp	r3, #0
+ 468 01d8 15D0     		beq	.L15
+ 415:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     {
+ 416:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****         if(bWait)
+ 469              		.loc 1 416 0
+ 470 01da FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 471 01dc 002B     		cmp	r3, #0
+ 472 01de 09D0     		beq	.L16
+ 417:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****         {
+ 418:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****             HWREG(ui32Base + GPTIMER_O_TAMR) |= GPTIMER_TAMR_TAWOT;
+ 473              		.loc 1 418 0
+ 474 01e0 FB68     		ldr	r3, [r7, #12]
+ 475 01e2 0433     		adds	r3, r3, #4
+ 476 01e4 1A46     		mov	r2, r3
+ 477 01e6 FB68     		ldr	r3, [r7, #12]
+ 478 01e8 0433     		adds	r3, r3, #4
+ 479 01ea 1B68     		ldr	r3, [r3]
+ 480 01ec 43F04003 		orr	r3, r3, #64
+ 481 01f0 1360     		str	r3, [r2]
+ 482 01f2 08E0     		b	.L15
+ 483              	.L16:
+ 419:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****         }
+ 420:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****         else
+ 421:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****         {
+ 422:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****             HWREG(ui32Base + GPTIMER_O_TAMR) &= ~(GPTIMER_TAMR_TAWOT);
+ 484              		.loc 1 422 0
+ 485 01f4 FB68     		ldr	r3, [r7, #12]
+ 486 01f6 0433     		adds	r3, r3, #4
+ 487 01f8 1A46     		mov	r2, r3
+ 488 01fa FB68     		ldr	r3, [r7, #12]
+ 489 01fc 0433     		adds	r3, r3, #4
+ 490 01fe 1B68     		ldr	r3, [r3]
+ 491 0200 23F04003 		bic	r3, r3, #64
+ 492 0204 1360     		str	r3, [r2]
+ 493              	.L15:
+ 423:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****         }
+ 424:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     }
+ 425:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** 
+ 426:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 427:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     // Set the wait on trigger mode for timer B.
+ 428:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 429:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     if((ui32Timer & GPTIMER_B) != 0)
+ 494              		.loc 1 429 0
+ 495 0206 BB68     		ldr	r3, [r7, #8]
+ 496 0208 03F47F43 		and	r3, r3, #65280
+ 497 020c 002B     		cmp	r3, #0
+ 498 020e 15D0     		beq	.L14
+ 430:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     {
+ 431:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****         if(bWait)
+ 499              		.loc 1 431 0
+ 500 0210 FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 501 0212 002B     		cmp	r3, #0
+ 502 0214 09D0     		beq	.L18
+ 432:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****         {
+ 433:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****             HWREG(ui32Base + GPTIMER_O_TBMR) |= GPTIMER_TBMR_TBWOT;
+ 503              		.loc 1 433 0
+ 504 0216 FB68     		ldr	r3, [r7, #12]
+ 505 0218 0833     		adds	r3, r3, #8
+ 506 021a 1A46     		mov	r2, r3
+ 507 021c FB68     		ldr	r3, [r7, #12]
+ 508 021e 0833     		adds	r3, r3, #8
+ 509 0220 1B68     		ldr	r3, [r3]
+ 510 0222 43F04003 		orr	r3, r3, #64
+ 511 0226 1360     		str	r3, [r2]
+ 512 0228 08E0     		b	.L14
+ 513              	.L18:
+ 434:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****         }
+ 435:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****         else
+ 436:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****         {
+ 437:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****             HWREG(ui32Base + GPTIMER_O_TBMR) &= ~(GPTIMER_TBMR_TBWOT);
+ 514              		.loc 1 437 0
+ 515 022a FB68     		ldr	r3, [r7, #12]
+ 516 022c 0833     		adds	r3, r3, #8
+ 517 022e 1A46     		mov	r2, r3
+ 518 0230 FB68     		ldr	r3, [r7, #12]
+ 519 0232 0833     		adds	r3, r3, #8
+ 520 0234 1B68     		ldr	r3, [r3]
+ 521 0236 23F04003 		bic	r3, r3, #64
+ 522 023a 1360     		str	r3, [r2]
+ 523              	.L14:
+ 438:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****         }
+ 439:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     }
+ 440:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** }
+ 524              		.loc 1 440 0
+ 525 023c 1437     		adds	r7, r7, #20
+ 526              		.cfi_def_cfa_offset 4
+ 527 023e BD46     		mov	sp, r7
+ 528              		.cfi_def_cfa_register 13
+ 529              		@ sp needed
+ 530 0240 5DF8047B 		ldr	r7, [sp], #4
+ 531              		.cfi_restore 7
+ 532              		.cfi_def_cfa_offset 0
+ 533 0244 7047     		bx	lr
+ 534              		.cfi_endproc
+ 535              	.LFE7:
+ 537 0246 00BF     		.align	2
+ 538              		.global	TimerPrescaleSet
+ 539              		.thumb
+ 540              		.thumb_func
+ 542              	TimerPrescaleSet:
+ 543              	.LFB8:
+ 441:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** 
+ 442:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //*****************************************************************************
+ 443:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //
+ 444:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! Set the timer prescale value
+ 445:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+ 446:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \param ui32Base is the base address of the timer module.
+ 447:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \param ui32Timer specifies the timer(s) to adjust; must be one of \b GPTIMER_A,
+ 448:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \b GPTIMER_B, or \b GPTIMER_BOTH.
+ 449:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \param ui32Value is the timer prescale value; must be between 0 and 255,
+ 450:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! inclusive.
+ 451:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+ 452:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! This function sets the value of the input clock prescaler.  The prescaler
+ 453:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! is only operational when in 16-bit mode and is used to extend the range of
+ 454:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! the 16-bit timer modes.
+ 455:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+ 456:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \note The availability of the prescaler varies with the timer mode in use.
+ 457:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! Please consult the datasheet for the part you are using
+ 458:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! to determine whether this support is available.
+ 459:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+ 460:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \return None
+ 461:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //
+ 462:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //*****************************************************************************
+ 463:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** void
+ 464:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** TimerPrescaleSet(uint32_t ui32Base, uint32_t ui32Timer,
+ 465:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****                  uint32_t ui32Value)
+ 466:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** {
+ 544              		.loc 1 466 0
+ 545              		.cfi_startproc
+ 546              		@ args = 0, pretend = 0, frame = 16
+ 547              		@ frame_needed = 1, uses_anonymous_args = 0
+ 548              		@ link register save eliminated.
+ 549 0248 80B4     		push	{r7}
+ 550              		.cfi_def_cfa_offset 4
+ 551              		.cfi_offset 7, -4
+ 552 024a 85B0     		sub	sp, sp, #20
+ 553              		.cfi_def_cfa_offset 24
+ 554 024c 00AF     		add	r7, sp, #0
+ 555              		.cfi_def_cfa_register 7
+ 556 024e F860     		str	r0, [r7, #12]
+ 557 0250 B960     		str	r1, [r7, #8]
+ 558 0252 7A60     		str	r2, [r7, #4]
+ 467:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 468:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     // Check the arguments.
+ 469:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 470:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     ASSERT(TimerBaseValid(ui32Base));
+ 471:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     ASSERT((ui32Timer == GPTIMER_A) || (ui32Timer == GPTIMER_B) ||
+ 472:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****            (ui32Timer == GPTIMER_BOTH));
+ 473:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     ASSERT(ui32Value < 256);
+ 474:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** 
+ 475:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 476:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     // Set the timer A prescaler if requested.
+ 477:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 478:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     if(ui32Timer & GPTIMER_A)
+ 559              		.loc 1 478 0
+ 560 0254 BB68     		ldr	r3, [r7, #8]
+ 561 0256 DBB2     		uxtb	r3, r3
+ 562 0258 002B     		cmp	r3, #0
+ 563 025a 04D0     		beq	.L20
+ 479:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     {
+ 480:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****         HWREG(ui32Base + GPTIMER_O_TAPR) = ui32Value;
+ 564              		.loc 1 480 0
+ 565 025c FB68     		ldr	r3, [r7, #12]
+ 566 025e 3833     		adds	r3, r3, #56
+ 567 0260 1A46     		mov	r2, r3
+ 568 0262 7B68     		ldr	r3, [r7, #4]
+ 569 0264 1360     		str	r3, [r2]
+ 570              	.L20:
+ 481:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     }
+ 482:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** 
+ 483:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 484:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     // Set the timer B prescaler if requested.
+ 485:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 486:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     if(ui32Timer & GPTIMER_B)
+ 571              		.loc 1 486 0
+ 572 0266 BB68     		ldr	r3, [r7, #8]
+ 573 0268 03F47F43 		and	r3, r3, #65280
+ 574 026c 002B     		cmp	r3, #0
+ 575 026e 04D0     		beq	.L19
+ 487:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     {
+ 488:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****         HWREG(ui32Base + GPTIMER_O_TBPR) = ui32Value;
+ 576              		.loc 1 488 0
+ 577 0270 FB68     		ldr	r3, [r7, #12]
+ 578 0272 3C33     		adds	r3, r3, #60
+ 579 0274 1A46     		mov	r2, r3
+ 580 0276 7B68     		ldr	r3, [r7, #4]
+ 581 0278 1360     		str	r3, [r2]
+ 582              	.L19:
+ 489:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     }
+ 490:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** }
+ 583              		.loc 1 490 0
+ 584 027a 1437     		adds	r7, r7, #20
+ 585              		.cfi_def_cfa_offset 4
+ 586 027c BD46     		mov	sp, r7
+ 587              		.cfi_def_cfa_register 13
+ 588              		@ sp needed
+ 589 027e 5DF8047B 		ldr	r7, [sp], #4
+ 590              		.cfi_restore 7
+ 591              		.cfi_def_cfa_offset 0
+ 592 0282 7047     		bx	lr
+ 593              		.cfi_endproc
+ 594              	.LFE8:
+ 596              		.align	2
+ 597              		.global	TimerPrescaleGet
+ 598              		.thumb
+ 599              		.thumb_func
+ 601              	TimerPrescaleGet:
+ 602              	.LFB9:
+ 491:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** 
+ 492:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //*****************************************************************************
+ 493:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //
+ 494:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! Get the timer prescale value
+ 495:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+ 496:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \param ui32Base is the base address of the timer module.
+ 497:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \param ui32Timer specifies the timer; must be one of \b GPTIMER_A or
+ 498:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \b GPTIMER_B.
+ 499:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+ 500:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! This function gets the value of the input clock prescaler.  The prescaler
+ 501:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! is only operational when in 16-bit mode and is used to extend the range of
+ 502:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! the 16-bit timer modes.
+ 503:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+ 504:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \note The availability of the prescaler varies with the timer mode in use.
+ 505:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! Please consult the datasheet for the part you are using
+ 506:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! to determine whether this support is available.
+ 507:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+ 508:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \return The value of the timer prescaler
+ 509:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //
+ 510:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //*****************************************************************************
+ 511:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** uint32_t
+ 512:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** TimerPrescaleGet(uint32_t ui32Base, uint32_t ui32Timer)
+ 513:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** {
+ 603              		.loc 1 513 0
+ 604              		.cfi_startproc
+ 605              		@ args = 0, pretend = 0, frame = 8
+ 606              		@ frame_needed = 1, uses_anonymous_args = 0
+ 607              		@ link register save eliminated.
+ 608 0284 80B4     		push	{r7}
+ 609              		.cfi_def_cfa_offset 4
+ 610              		.cfi_offset 7, -4
+ 611 0286 83B0     		sub	sp, sp, #12
+ 612              		.cfi_def_cfa_offset 16
+ 613 0288 00AF     		add	r7, sp, #0
+ 614              		.cfi_def_cfa_register 7
+ 615 028a 7860     		str	r0, [r7, #4]
+ 616 028c 3960     		str	r1, [r7]
+ 514:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 515:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     // Check the arguments.
+ 516:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 517:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     ASSERT(TimerBaseValid(ui32Base));
+ 518:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     ASSERT((ui32Timer == GPTIMER_A) || (ui32Timer == GPTIMER_B) ||
+ 519:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****            (ui32Timer == GPTIMER_BOTH));
+ 520:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** 
+ 521:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 522:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     // Return the appropriate prescale value.
+ 523:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 524:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     return((ui32Timer == GPTIMER_A) ? HWREG(ui32Base + GPTIMER_O_TAPR) :
+ 617              		.loc 1 524 0
+ 618 028e 3B68     		ldr	r3, [r7]
+ 619 0290 FF2B     		cmp	r3, #255
+ 620 0292 03D1     		bne	.L23
+ 621              		.loc 1 524 0 is_stmt 0 discriminator 1
+ 622 0294 7B68     		ldr	r3, [r7, #4]
+ 623 0296 3833     		adds	r3, r3, #56
+ 624 0298 1B68     		ldr	r3, [r3]
+ 625 029a 02E0     		b	.L24
+ 626              	.L23:
+ 525:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****            HWREG(ui32Base + GPTIMER_O_TBPR));
+ 627              		.loc 1 525 0 is_stmt 1 discriminator 2
+ 628 029c 7B68     		ldr	r3, [r7, #4]
+ 629 029e 3C33     		adds	r3, r3, #60
+ 524:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****            HWREG(ui32Base + GPTIMER_O_TBPR));
+ 630              		.loc 1 524 0 discriminator 2
+ 631 02a0 1B68     		ldr	r3, [r3]
+ 632              	.L24:
+ 526:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** }
+ 633              		.loc 1 526 0 discriminator 4
+ 634 02a2 1846     		mov	r0, r3
+ 635 02a4 0C37     		adds	r7, r7, #12
+ 636              		.cfi_def_cfa_offset 4
+ 637 02a6 BD46     		mov	sp, r7
+ 638              		.cfi_def_cfa_register 13
+ 639              		@ sp needed
+ 640 02a8 5DF8047B 		ldr	r7, [sp], #4
+ 641              		.cfi_restore 7
+ 642              		.cfi_def_cfa_offset 0
+ 643 02ac 7047     		bx	lr
+ 644              		.cfi_endproc
+ 645              	.LFE9:
+ 647 02ae 00BF     		.align	2
+ 648              		.global	TimerPrescaleMatchSet
+ 649              		.thumb
+ 650              		.thumb_func
+ 652              	TimerPrescaleMatchSet:
+ 653              	.LFB10:
+ 527:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** 
+ 528:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //*****************************************************************************
+ 529:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //
+ 530:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! Set the timer prescale match value
+ 531:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+ 532:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \param ui32Base is the base address of the timer module.
+ 533:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \param ui32Timer specifies the timer(s) to adjust; must be one of
+ 534:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \b GPTIMER_A, \b GPTIMER_B, or \b GPTIMER_BOTH.
+ 535:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \param ui32Value is the timer prescale match value; must be between 0 and
+ 536:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! 255, inclusive.
+ 537:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+ 538:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! This function sets the value of the input clock prescaler match value.
+ 539:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! When in a 16-bit mode that uses the counter match and the prescaler, the
+ 540:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! prescale match effectively extends the range of the counter to 24-bits.
+ 541:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+ 542:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \note The availability of the prescaler match varies with the timer mode
+ 543:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! in use.  Please consult the datasheet for the part you are using to
+ 544:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! determine whether this support is available.
+ 545:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+ 546:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \return None
+ 547:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //
+ 548:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //*****************************************************************************
+ 549:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** void
+ 550:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** TimerPrescaleMatchSet(uint32_t ui32Base, uint32_t ui32Timer,
+ 551:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****                       uint32_t ui32Value)
+ 552:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** {
+ 654              		.loc 1 552 0
+ 655              		.cfi_startproc
+ 656              		@ args = 0, pretend = 0, frame = 16
+ 657              		@ frame_needed = 1, uses_anonymous_args = 0
+ 658              		@ link register save eliminated.
+ 659 02b0 80B4     		push	{r7}
+ 660              		.cfi_def_cfa_offset 4
+ 661              		.cfi_offset 7, -4
+ 662 02b2 85B0     		sub	sp, sp, #20
+ 663              		.cfi_def_cfa_offset 24
+ 664 02b4 00AF     		add	r7, sp, #0
+ 665              		.cfi_def_cfa_register 7
+ 666 02b6 F860     		str	r0, [r7, #12]
+ 667 02b8 B960     		str	r1, [r7, #8]
+ 668 02ba 7A60     		str	r2, [r7, #4]
+ 553:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 554:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     // Check the arguments.
+ 555:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 556:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     ASSERT(TimerBaseValid(ui32Base));
+ 557:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     ASSERT((ui32Timer == GPTIMER_A) || (ui32Timer == GPTIMER_B) ||
+ 558:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****            (ui32Timer == GPTIMER_BOTH));
+ 559:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     ASSERT(ui32Value < 256);
+ 560:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** 
+ 561:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 562:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     // Set the timer A prescale match if requested.
+ 563:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 564:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     if(ui32Timer & GPTIMER_A)
+ 669              		.loc 1 564 0
+ 670 02bc BB68     		ldr	r3, [r7, #8]
+ 671 02be DBB2     		uxtb	r3, r3
+ 672 02c0 002B     		cmp	r3, #0
+ 673 02c2 04D0     		beq	.L27
+ 565:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     {
+ 566:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****         HWREG(ui32Base + GPTIMER_O_TAPMR) = ui32Value;
+ 674              		.loc 1 566 0
+ 675 02c4 FB68     		ldr	r3, [r7, #12]
+ 676 02c6 4033     		adds	r3, r3, #64
+ 677 02c8 1A46     		mov	r2, r3
+ 678 02ca 7B68     		ldr	r3, [r7, #4]
+ 679 02cc 1360     		str	r3, [r2]
+ 680              	.L27:
+ 567:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     }
+ 568:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** 
+ 569:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 570:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     // Set the timer B prescale match if requested.
+ 571:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 572:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     if(ui32Timer & GPTIMER_B)
+ 681              		.loc 1 572 0
+ 682 02ce BB68     		ldr	r3, [r7, #8]
+ 683 02d0 03F47F43 		and	r3, r3, #65280
+ 684 02d4 002B     		cmp	r3, #0
+ 685 02d6 04D0     		beq	.L26
+ 573:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     {
+ 574:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****         HWREG(ui32Base + GPTIMER_O_TBPMR) = ui32Value;
+ 686              		.loc 1 574 0
+ 687 02d8 FB68     		ldr	r3, [r7, #12]
+ 688 02da 4433     		adds	r3, r3, #68
+ 689 02dc 1A46     		mov	r2, r3
+ 690 02de 7B68     		ldr	r3, [r7, #4]
+ 691 02e0 1360     		str	r3, [r2]
+ 692              	.L26:
+ 575:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     }
+ 576:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** }
+ 693              		.loc 1 576 0
+ 694 02e2 1437     		adds	r7, r7, #20
+ 695              		.cfi_def_cfa_offset 4
+ 696 02e4 BD46     		mov	sp, r7
+ 697              		.cfi_def_cfa_register 13
+ 698              		@ sp needed
+ 699 02e6 5DF8047B 		ldr	r7, [sp], #4
+ 700              		.cfi_restore 7
+ 701              		.cfi_def_cfa_offset 0
+ 702 02ea 7047     		bx	lr
+ 703              		.cfi_endproc
+ 704              	.LFE10:
+ 706              		.align	2
+ 707              		.global	TimerPrescaleMatchGet
+ 708              		.thumb
+ 709              		.thumb_func
+ 711              	TimerPrescaleMatchGet:
+ 712              	.LFB11:
+ 577:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** 
+ 578:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //*****************************************************************************
+ 579:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //
+ 580:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! Get the timer prescale match value
+ 581:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+ 582:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \param ui32Base is the base address of the timer module.
+ 583:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \param ui32Timer specifies the timer; must be one of \b GPTIMER_A or
+ 584:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \b GPTIMER_B.
+ 585:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+ 586:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! This function gets the value of the input clock prescaler match value.
+ 587:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! When in a 16-bit mode that uses the counter match and prescaler, the
+ 588:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! prescale match effectively extends the range of the counter to 24-bits.
+ 589:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+ 590:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \note The availability of the prescaler match varies with the timer mode
+ 591:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! in use.  Please consult the datasheet for the part you are using to
+ 592:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! determine whether this support is available.
+ 593:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+ 594:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \return The value of the timer prescale match.
+ 595:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //
+ 596:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //*****************************************************************************
+ 597:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** uint32_t
+ 598:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** TimerPrescaleMatchGet(uint32_t ui32Base, uint32_t ui32Timer)
+ 599:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** {
+ 713              		.loc 1 599 0
+ 714              		.cfi_startproc
+ 715              		@ args = 0, pretend = 0, frame = 8
+ 716              		@ frame_needed = 1, uses_anonymous_args = 0
+ 717              		@ link register save eliminated.
+ 718 02ec 80B4     		push	{r7}
+ 719              		.cfi_def_cfa_offset 4
+ 720              		.cfi_offset 7, -4
+ 721 02ee 83B0     		sub	sp, sp, #12
+ 722              		.cfi_def_cfa_offset 16
+ 723 02f0 00AF     		add	r7, sp, #0
+ 724              		.cfi_def_cfa_register 7
+ 725 02f2 7860     		str	r0, [r7, #4]
+ 726 02f4 3960     		str	r1, [r7]
+ 600:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 601:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     // Check the arguments.
+ 602:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 603:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     ASSERT(TimerBaseValid(ui32Base));
+ 604:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     ASSERT((ui32Timer == GPTIMER_A) || (ui32Timer == GPTIMER_B) ||
+ 605:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****            (ui32Timer == GPTIMER_BOTH));
+ 606:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** 
+ 607:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 608:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     // Return the appropriate prescale match value.
+ 609:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 610:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     return((ui32Timer == GPTIMER_A) ? HWREG(ui32Base + GPTIMER_O_TAPMR) :
+ 727              		.loc 1 610 0
+ 728 02f6 3B68     		ldr	r3, [r7]
+ 729 02f8 FF2B     		cmp	r3, #255
+ 730 02fa 03D1     		bne	.L30
+ 731              		.loc 1 610 0 is_stmt 0 discriminator 1
+ 732 02fc 7B68     		ldr	r3, [r7, #4]
+ 733 02fe 4033     		adds	r3, r3, #64
+ 734 0300 1B68     		ldr	r3, [r3]
+ 735 0302 02E0     		b	.L31
+ 736              	.L30:
+ 611:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****            HWREG(ui32Base + GPTIMER_O_TBPMR));
+ 737              		.loc 1 611 0 is_stmt 1 discriminator 2
+ 738 0304 7B68     		ldr	r3, [r7, #4]
+ 739 0306 4433     		adds	r3, r3, #68
+ 610:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****            HWREG(ui32Base + GPTIMER_O_TBPMR));
+ 740              		.loc 1 610 0 discriminator 2
+ 741 0308 1B68     		ldr	r3, [r3]
+ 742              	.L31:
+ 612:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** }
+ 743              		.loc 1 612 0 discriminator 4
+ 744 030a 1846     		mov	r0, r3
+ 745 030c 0C37     		adds	r7, r7, #12
+ 746              		.cfi_def_cfa_offset 4
+ 747 030e BD46     		mov	sp, r7
+ 748              		.cfi_def_cfa_register 13
+ 749              		@ sp needed
+ 750 0310 5DF8047B 		ldr	r7, [sp], #4
+ 751              		.cfi_restore 7
+ 752              		.cfi_def_cfa_offset 0
+ 753 0314 7047     		bx	lr
+ 754              		.cfi_endproc
+ 755              	.LFE11:
+ 757 0316 00BF     		.align	2
+ 758              		.global	TimerLoadSet
+ 759              		.thumb
+ 760              		.thumb_func
+ 762              	TimerLoadSet:
+ 763              	.LFB12:
+ 613:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** 
+ 614:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //*****************************************************************************
+ 615:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //
+ 616:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! Sets the timer load value
+ 617:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+ 618:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \param ui32Base is the base address of the timer module.
+ 619:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \param ui32Timer specifies the timer(s) to adjust; must be one of:
+ 620:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \b GPTIMER_A, \b GPTIMER_B, or \b GPTIMER_BOTH. Only \b GPTIMER_A should
+ 621:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! be used when the timer is configured for 32-bit operation.
+ 622:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \param ui32Value is the load value.
+ 623:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+ 624:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! This function sets the timer load value; if the timer is running then the
+ 625:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! value will be immediately loaded into the timer.
+ 626:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+ 627:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \return None
+ 628:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //
+ 629:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //*****************************************************************************
+ 630:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** void
+ 631:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** TimerLoadSet(uint32_t ui32Base, uint32_t ui32Timer,
+ 632:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****              uint32_t ui32Value)
+ 633:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** {
+ 764              		.loc 1 633 0
+ 765              		.cfi_startproc
+ 766              		@ args = 0, pretend = 0, frame = 16
+ 767              		@ frame_needed = 1, uses_anonymous_args = 0
+ 768              		@ link register save eliminated.
+ 769 0318 80B4     		push	{r7}
+ 770              		.cfi_def_cfa_offset 4
+ 771              		.cfi_offset 7, -4
+ 772 031a 85B0     		sub	sp, sp, #20
+ 773              		.cfi_def_cfa_offset 24
+ 774 031c 00AF     		add	r7, sp, #0
+ 775              		.cfi_def_cfa_register 7
+ 776 031e F860     		str	r0, [r7, #12]
+ 777 0320 B960     		str	r1, [r7, #8]
+ 778 0322 7A60     		str	r2, [r7, #4]
+ 634:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 635:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     // Check the arguments.
+ 636:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 637:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     ASSERT(TimerBaseValid(ui32Base));
+ 638:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     ASSERT((ui32Timer == GPTIMER_A) || (ui32Timer == GPTIMER_B) ||
+ 639:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****            (ui32Timer == GPTIMER_BOTH));
+ 640:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** 
+ 641:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 642:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     // Set the timer A load value if requested.
+ 643:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 644:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     if(ui32Timer & GPTIMER_A)
+ 779              		.loc 1 644 0
+ 780 0324 BB68     		ldr	r3, [r7, #8]
+ 781 0326 DBB2     		uxtb	r3, r3
+ 782 0328 002B     		cmp	r3, #0
+ 783 032a 04D0     		beq	.L34
+ 645:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     {
+ 646:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****         HWREG(ui32Base + GPTIMER_O_TAILR) = ui32Value;
+ 784              		.loc 1 646 0
+ 785 032c FB68     		ldr	r3, [r7, #12]
+ 786 032e 2833     		adds	r3, r3, #40
+ 787 0330 1A46     		mov	r2, r3
+ 788 0332 7B68     		ldr	r3, [r7, #4]
+ 789 0334 1360     		str	r3, [r2]
+ 790              	.L34:
+ 647:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     }
+ 648:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** 
+ 649:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 650:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     // Set the timer B load value if requested.
+ 651:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 652:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     if(ui32Timer & GPTIMER_B)
+ 791              		.loc 1 652 0
+ 792 0336 BB68     		ldr	r3, [r7, #8]
+ 793 0338 03F47F43 		and	r3, r3, #65280
+ 794 033c 002B     		cmp	r3, #0
+ 795 033e 04D0     		beq	.L33
+ 653:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     {
+ 654:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****         HWREG(ui32Base + GPTIMER_O_TBILR) = ui32Value;
+ 796              		.loc 1 654 0
+ 797 0340 FB68     		ldr	r3, [r7, #12]
+ 798 0342 2C33     		adds	r3, r3, #44
+ 799 0344 1A46     		mov	r2, r3
+ 800 0346 7B68     		ldr	r3, [r7, #4]
+ 801 0348 1360     		str	r3, [r2]
+ 802              	.L33:
+ 655:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     }
+ 656:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** }
+ 803              		.loc 1 656 0
+ 804 034a 1437     		adds	r7, r7, #20
+ 805              		.cfi_def_cfa_offset 4
+ 806 034c BD46     		mov	sp, r7
+ 807              		.cfi_def_cfa_register 13
+ 808              		@ sp needed
+ 809 034e 5DF8047B 		ldr	r7, [sp], #4
+ 810              		.cfi_restore 7
+ 811              		.cfi_def_cfa_offset 0
+ 812 0352 7047     		bx	lr
+ 813              		.cfi_endproc
+ 814              	.LFE12:
+ 816              		.align	2
+ 817              		.global	TimerLoadGet
+ 818              		.thumb
+ 819              		.thumb_func
+ 821              	TimerLoadGet:
+ 822              	.LFB13:
+ 657:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** 
+ 658:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //*****************************************************************************
+ 659:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //
+ 660:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! Gets the timer load value
+ 661:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+ 662:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \param ui32Base is the base address of the timer module.
+ 663:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \param ui32Timer specifies the timer; must be one of \b GPTIMER_A or
+ 664:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \b GPTIMER_B.  Only \b GPTIMER_A should be used when the timer is
+ 665:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! configured for 32-bit operation.
+ 666:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+ 667:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! This function gets the currently programmed interval load value for the
+ 668:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! specified timer.
+ 669:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+ 670:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \return Returns the load value for the timer.
+ 671:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //
+ 672:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //*****************************************************************************
+ 673:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** uint32_t
+ 674:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** TimerLoadGet(uint32_t ui32Base, uint32_t ui32Timer)
+ 675:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** {
+ 823              		.loc 1 675 0
+ 824              		.cfi_startproc
+ 825              		@ args = 0, pretend = 0, frame = 8
+ 826              		@ frame_needed = 1, uses_anonymous_args = 0
+ 827              		@ link register save eliminated.
+ 828 0354 80B4     		push	{r7}
+ 829              		.cfi_def_cfa_offset 4
+ 830              		.cfi_offset 7, -4
+ 831 0356 83B0     		sub	sp, sp, #12
+ 832              		.cfi_def_cfa_offset 16
+ 833 0358 00AF     		add	r7, sp, #0
+ 834              		.cfi_def_cfa_register 7
+ 835 035a 7860     		str	r0, [r7, #4]
+ 836 035c 3960     		str	r1, [r7]
+ 676:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 677:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     // Check the arguments.
+ 678:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 679:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     ASSERT(TimerBaseValid(ui32Base));
+ 680:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     ASSERT((ui32Timer == GPTIMER_A) || (ui32Timer == GPTIMER_B));
+ 681:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** 
+ 682:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 683:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     // Return the appropriate load value.
+ 684:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 685:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     return((ui32Timer == GPTIMER_A) ? HWREG(ui32Base + GPTIMER_O_TAILR) :
+ 837              		.loc 1 685 0
+ 838 035e 3B68     		ldr	r3, [r7]
+ 839 0360 FF2B     		cmp	r3, #255
+ 840 0362 03D1     		bne	.L37
+ 841              		.loc 1 685 0 is_stmt 0 discriminator 1
+ 842 0364 7B68     		ldr	r3, [r7, #4]
+ 843 0366 2833     		adds	r3, r3, #40
+ 844 0368 1B68     		ldr	r3, [r3]
+ 845 036a 02E0     		b	.L38
+ 846              	.L37:
+ 686:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****            HWREG(ui32Base + GPTIMER_O_TBILR));
+ 847              		.loc 1 686 0 is_stmt 1 discriminator 2
+ 848 036c 7B68     		ldr	r3, [r7, #4]
+ 849 036e 2C33     		adds	r3, r3, #44
+ 685:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****            HWREG(ui32Base + GPTIMER_O_TBILR));
+ 850              		.loc 1 685 0 discriminator 2
+ 851 0370 1B68     		ldr	r3, [r3]
+ 852              	.L38:
+ 687:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** }
+ 853              		.loc 1 687 0 discriminator 4
+ 854 0372 1846     		mov	r0, r3
+ 855 0374 0C37     		adds	r7, r7, #12
+ 856              		.cfi_def_cfa_offset 4
+ 857 0376 BD46     		mov	sp, r7
+ 858              		.cfi_def_cfa_register 13
+ 859              		@ sp needed
+ 860 0378 5DF8047B 		ldr	r7, [sp], #4
+ 861              		.cfi_restore 7
+ 862              		.cfi_def_cfa_offset 0
+ 863 037c 7047     		bx	lr
+ 864              		.cfi_endproc
+ 865              	.LFE13:
+ 867 037e 00BF     		.align	2
+ 868              		.global	TimerValueGet
+ 869              		.thumb
+ 870              		.thumb_func
+ 872              	TimerValueGet:
+ 873              	.LFB14:
+ 688:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** 
+ 689:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** 
+ 690:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** 
+ 691:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //*****************************************************************************
+ 692:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //
+ 693:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! Gets the current timer value
+ 694:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+ 695:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \param ui32Base is the base address of the timer module.
+ 696:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \param ui32Timer specifies the timer; must be one of \b GPTIMER_A or
+ 697:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \b GPTIMER_B.  Only \b GPTIMER_A should be used when the timer is
+ 698:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! configured for 32-bit operation.
+ 699:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+ 700:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! This function reads the current value of the specified timer.
+ 701:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+ 702:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \return Returns the current value of the timer.
+ 703:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //
+ 704:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //*****************************************************************************
+ 705:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** uint32_t
+ 706:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** TimerValueGet(uint32_t ui32Base, uint32_t ui32Timer)
+ 707:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** {
+ 874              		.loc 1 707 0
+ 875              		.cfi_startproc
+ 876              		@ args = 0, pretend = 0, frame = 8
+ 877              		@ frame_needed = 1, uses_anonymous_args = 0
+ 878              		@ link register save eliminated.
+ 879 0380 80B4     		push	{r7}
+ 880              		.cfi_def_cfa_offset 4
+ 881              		.cfi_offset 7, -4
+ 882 0382 83B0     		sub	sp, sp, #12
+ 883              		.cfi_def_cfa_offset 16
+ 884 0384 00AF     		add	r7, sp, #0
+ 885              		.cfi_def_cfa_register 7
+ 886 0386 7860     		str	r0, [r7, #4]
+ 887 0388 3960     		str	r1, [r7]
+ 708:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 709:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     // Check the arguments.
+ 710:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 711:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     ASSERT(TimerBaseValid(ui32Base));
+ 712:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     ASSERT((ui32Timer == GPTIMER_A) || (ui32Timer == GPTIMER_B));
+ 713:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** 
+ 714:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 715:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     // Return the appropriate timer value.
+ 716:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 717:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     return((ui32Timer == GPTIMER_A) ? HWREG(ui32Base + GPTIMER_O_TAR) :
+ 888              		.loc 1 717 0
+ 889 038a 3B68     		ldr	r3, [r7]
+ 890 038c FF2B     		cmp	r3, #255
+ 891 038e 03D1     		bne	.L41
+ 892              		.loc 1 717 0 is_stmt 0 discriminator 1
+ 893 0390 7B68     		ldr	r3, [r7, #4]
+ 894 0392 4833     		adds	r3, r3, #72
+ 895 0394 1B68     		ldr	r3, [r3]
+ 896 0396 02E0     		b	.L42
+ 897              	.L41:
+ 718:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****            HWREG(ui32Base + GPTIMER_O_TBR));
+ 898              		.loc 1 718 0 is_stmt 1 discriminator 2
+ 899 0398 7B68     		ldr	r3, [r7, #4]
+ 900 039a 4C33     		adds	r3, r3, #76
+ 717:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****            HWREG(ui32Base + GPTIMER_O_TBR));
+ 901              		.loc 1 717 0 discriminator 2
+ 902 039c 1B68     		ldr	r3, [r3]
+ 903              	.L42:
+ 719:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** }
+ 904              		.loc 1 719 0 discriminator 4
+ 905 039e 1846     		mov	r0, r3
+ 906 03a0 0C37     		adds	r7, r7, #12
+ 907              		.cfi_def_cfa_offset 4
+ 908 03a2 BD46     		mov	sp, r7
+ 909              		.cfi_def_cfa_register 13
+ 910              		@ sp needed
+ 911 03a4 5DF8047B 		ldr	r7, [sp], #4
+ 912              		.cfi_restore 7
+ 913              		.cfi_def_cfa_offset 0
+ 914 03a8 7047     		bx	lr
+ 915              		.cfi_endproc
+ 916              	.LFE14:
+ 918 03aa 00BF     		.align	2
+ 919              		.global	TimerMatchSet
+ 920              		.thumb
+ 921              		.thumb_func
+ 923              	TimerMatchSet:
+ 924              	.LFB15:
+ 720:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** 
+ 721:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //*****************************************************************************
+ 722:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //
+ 723:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! Sets the timer match value
+ 724:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+ 725:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \param ui32Base is the base address of the timer module.
+ 726:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \param ui32Timer specifies the timer(s) to adjust; must be one of
+ 727:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \b GPTIMER_A, \b GPTIMER_B, or \b GPTIMER_BOTH.  Only \b GPTIMER_A should
+ 728:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! be used when the timer is configured for 32-bit operation.
+ 729:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \param ui32Value is the match value.
+ 730:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+ 731:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! This function sets the match value for a timer.  This is used in capture
+ 732:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! count mode to determine when to interrupt the processor and in PWM mode to
+ 733:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! determine the duty cycle of the output signal.
+ 734:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+ 735:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \return None
+ 736:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //
+ 737:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //*****************************************************************************
+ 738:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** void
+ 739:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** TimerMatchSet(uint32_t ui32Base, uint32_t ui32Timer,
+ 740:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****               uint32_t ui32Value)
+ 741:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** {
+ 925              		.loc 1 741 0
+ 926              		.cfi_startproc
+ 927              		@ args = 0, pretend = 0, frame = 16
+ 928              		@ frame_needed = 1, uses_anonymous_args = 0
+ 929              		@ link register save eliminated.
+ 930 03ac 80B4     		push	{r7}
+ 931              		.cfi_def_cfa_offset 4
+ 932              		.cfi_offset 7, -4
+ 933 03ae 85B0     		sub	sp, sp, #20
+ 934              		.cfi_def_cfa_offset 24
+ 935 03b0 00AF     		add	r7, sp, #0
+ 936              		.cfi_def_cfa_register 7
+ 937 03b2 F860     		str	r0, [r7, #12]
+ 938 03b4 B960     		str	r1, [r7, #8]
+ 939 03b6 7A60     		str	r2, [r7, #4]
+ 742:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 743:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     // Check the arguments.
+ 744:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 745:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     ASSERT(TimerBaseValid(ui32Base));
+ 746:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     ASSERT((ui32Timer == GPTIMER_A) || (ui32Timer == GPTIMER_B) ||
+ 747:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****            (ui32Timer == GPTIMER_BOTH));
+ 748:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** 
+ 749:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 750:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     // Set the timer A match value if requested.
+ 751:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 752:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     if(ui32Timer & GPTIMER_A)
+ 940              		.loc 1 752 0
+ 941 03b8 BB68     		ldr	r3, [r7, #8]
+ 942 03ba DBB2     		uxtb	r3, r3
+ 943 03bc 002B     		cmp	r3, #0
+ 944 03be 04D0     		beq	.L45
+ 753:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     {
+ 754:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****         HWREG(ui32Base + GPTIMER_O_TAMATCHR) = ui32Value;
+ 945              		.loc 1 754 0
+ 946 03c0 FB68     		ldr	r3, [r7, #12]
+ 947 03c2 3033     		adds	r3, r3, #48
+ 948 03c4 1A46     		mov	r2, r3
+ 949 03c6 7B68     		ldr	r3, [r7, #4]
+ 950 03c8 1360     		str	r3, [r2]
+ 951              	.L45:
+ 755:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     }
+ 756:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** 
+ 757:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 758:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     // Set the timer B match value if requested.
+ 759:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 760:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     if(ui32Timer & GPTIMER_B)
+ 952              		.loc 1 760 0
+ 953 03ca BB68     		ldr	r3, [r7, #8]
+ 954 03cc 03F47F43 		and	r3, r3, #65280
+ 955 03d0 002B     		cmp	r3, #0
+ 956 03d2 04D0     		beq	.L44
+ 761:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     {
+ 762:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****         HWREG(ui32Base + GPTIMER_O_TBMATCHR) = ui32Value;
+ 957              		.loc 1 762 0
+ 958 03d4 FB68     		ldr	r3, [r7, #12]
+ 959 03d6 3433     		adds	r3, r3, #52
+ 960 03d8 1A46     		mov	r2, r3
+ 961 03da 7B68     		ldr	r3, [r7, #4]
+ 962 03dc 1360     		str	r3, [r2]
+ 963              	.L44:
+ 763:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     }
+ 764:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** }
+ 964              		.loc 1 764 0
+ 965 03de 1437     		adds	r7, r7, #20
+ 966              		.cfi_def_cfa_offset 4
+ 967 03e0 BD46     		mov	sp, r7
+ 968              		.cfi_def_cfa_register 13
+ 969              		@ sp needed
+ 970 03e2 5DF8047B 		ldr	r7, [sp], #4
+ 971              		.cfi_restore 7
+ 972              		.cfi_def_cfa_offset 0
+ 973 03e6 7047     		bx	lr
+ 974              		.cfi_endproc
+ 975              	.LFE15:
+ 977              		.align	2
+ 978              		.global	TimerMatchGet
+ 979              		.thumb
+ 980              		.thumb_func
+ 982              	TimerMatchGet:
+ 983              	.LFB16:
+ 765:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** 
+ 766:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //*****************************************************************************
+ 767:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //
+ 768:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! Gets the timer match value
+ 769:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+ 770:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \param ui32Base is the base address of the timer module.
+ 771:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \param ui32Timer specifies the timer; must be one of \b GPTIMER_A or
+ 772:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \b GPTIMER_B.  Only \b GPTIMER_A should be used when the timer is
+ 773:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! configured for 32-bit operation.
+ 774:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+ 775:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! This function gets the match value for the specified timer.
+ 776:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+ 777:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \return Returns the match value for the timer.
+ 778:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //
+ 779:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //*****************************************************************************
+ 780:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** uint32_t
+ 781:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** TimerMatchGet(uint32_t ui32Base, uint32_t ui32Timer)
+ 782:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** {
+ 984              		.loc 1 782 0
+ 985              		.cfi_startproc
+ 986              		@ args = 0, pretend = 0, frame = 8
+ 987              		@ frame_needed = 1, uses_anonymous_args = 0
+ 988              		@ link register save eliminated.
+ 989 03e8 80B4     		push	{r7}
+ 990              		.cfi_def_cfa_offset 4
+ 991              		.cfi_offset 7, -4
+ 992 03ea 83B0     		sub	sp, sp, #12
+ 993              		.cfi_def_cfa_offset 16
+ 994 03ec 00AF     		add	r7, sp, #0
+ 995              		.cfi_def_cfa_register 7
+ 996 03ee 7860     		str	r0, [r7, #4]
+ 997 03f0 3960     		str	r1, [r7]
+ 783:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 784:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     // Check the arguments.
+ 785:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 786:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     ASSERT(TimerBaseValid(ui32Base));
+ 787:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     ASSERT((ui32Timer == GPTIMER_A) || (ui32Timer == GPTIMER_B));
+ 788:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** 
+ 789:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 790:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     // Return the appropriate match value.
+ 791:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 792:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     return((ui32Timer == GPTIMER_A) ? HWREG(ui32Base + GPTIMER_O_TAMATCHR) :
+ 998              		.loc 1 792 0
+ 999 03f2 3B68     		ldr	r3, [r7]
+ 1000 03f4 FF2B     		cmp	r3, #255
+ 1001 03f6 03D1     		bne	.L48
+ 1002              		.loc 1 792 0 is_stmt 0 discriminator 1
+ 1003 03f8 7B68     		ldr	r3, [r7, #4]
+ 1004 03fa 3033     		adds	r3, r3, #48
+ 1005 03fc 1B68     		ldr	r3, [r3]
+ 1006 03fe 02E0     		b	.L49
+ 1007              	.L48:
+ 793:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****            HWREG(ui32Base + GPTIMER_O_TBMATCHR));
+ 1008              		.loc 1 793 0 is_stmt 1 discriminator 2
+ 1009 0400 7B68     		ldr	r3, [r7, #4]
+ 1010 0402 3433     		adds	r3, r3, #52
+ 792:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****            HWREG(ui32Base + GPTIMER_O_TBMATCHR));
+ 1011              		.loc 1 792 0 discriminator 2
+ 1012 0404 1B68     		ldr	r3, [r3]
+ 1013              	.L49:
+ 794:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** }
+ 1014              		.loc 1 794 0 discriminator 4
+ 1015 0406 1846     		mov	r0, r3
+ 1016 0408 0C37     		adds	r7, r7, #12
+ 1017              		.cfi_def_cfa_offset 4
+ 1018 040a BD46     		mov	sp, r7
+ 1019              		.cfi_def_cfa_register 13
+ 1020              		@ sp needed
+ 1021 040c 5DF8047B 		ldr	r7, [sp], #4
+ 1022              		.cfi_restore 7
+ 1023              		.cfi_def_cfa_offset 0
+ 1024 0410 7047     		bx	lr
+ 1025              		.cfi_endproc
+ 1026              	.LFE16:
+ 1028 0412 00BF     		.align	2
+ 1029              		.global	TimerIntRegister
+ 1030              		.thumb
+ 1031              		.thumb_func
+ 1033              	TimerIntRegister:
+ 1034              	.LFB17:
+ 795:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** 
+ 796:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //*****************************************************************************
+ 797:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //
+ 798:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! Registers an interrupt handler for the timer interrupt
+ 799:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+ 800:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \param ui32Base is the base address of the timer module.
+ 801:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \param ui32Timer specifies the timer(s); must be one of \b GPTIMER_A,
+ 802:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \b GPTIMER_B, or \b GPTIMER_BOTH.
+ 803:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \param pfnHandler is a pointer to the function to be called when the timer
+ 804:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! interrupt occurs.
+ 805:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+ 806:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! This function sets the handler to be called when a timer interrupt occurs.
+ 807:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! In addition, this function enables the global interrupt in the interrupt
+ 808:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! controller; specific timer interrupts must be enabled via TimerIntEnable().
+ 809:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! It is the interrupt handler's responsibility to clear the interrupt source
+ 810:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! via TimerIntClear().
+ 811:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+ 812:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \sa See IntRegister() for important information about registering interrupt
+ 813:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! handlers.
+ 814:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+ 815:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \return None
+ 816:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //
+ 817:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //*****************************************************************************
+ 818:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** void
+ 819:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** TimerIntRegister(uint32_t ui32Base, uint32_t ui32Timer,
+ 820:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****                  void (*pfnHandler)(void))
+ 821:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** {
+ 1035              		.loc 1 821 0
+ 1036              		.cfi_startproc
+ 1037              		@ args = 0, pretend = 0, frame = 16
+ 1038              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1039 0414 80B5     		push	{r7, lr}
+ 1040              		.cfi_def_cfa_offset 8
+ 1041              		.cfi_offset 7, -8
+ 1042              		.cfi_offset 14, -4
+ 1043 0416 84B0     		sub	sp, sp, #16
+ 1044              		.cfi_def_cfa_offset 24
+ 1045 0418 00AF     		add	r7, sp, #0
+ 1046              		.cfi_def_cfa_register 7
+ 1047 041a F860     		str	r0, [r7, #12]
+ 1048 041c B960     		str	r1, [r7, #8]
+ 1049 041e 7A60     		str	r2, [r7, #4]
+ 822:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 823:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     // Check the arguments.
+ 824:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 825:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     ASSERT(TimerBaseValid(ui32Base));
+ 826:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     ASSERT((ui32Timer == GPTIMER_A) || (ui32Timer == GPTIMER_B) ||
+ 827:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****            (ui32Timer == GPTIMER_BOTH));
+ 828:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** 
+ 829:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 830:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     // Get the interrupt number for this timer module.
+ 831:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 832:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     ui32Base = ((ui32Base == GPTIMER0_BASE) ? INT_TIMER0A :
+ 1050              		.loc 1 832 0
+ 1051 0420 FB68     		ldr	r3, [r7, #12]
+ 1052 0422 184A     		ldr	r2, .L60
+ 1053 0424 9342     		cmp	r3, r2
+ 1054 0426 0DD0     		beq	.L52
+ 1055              		.loc 1 832 0 is_stmt 0 discriminator 1
+ 1056 0428 FB68     		ldr	r3, [r7, #12]
+ 1057 042a 174A     		ldr	r2, .L60+4
+ 1058 042c 9342     		cmp	r3, r2
+ 1059 042e 07D0     		beq	.L53
+ 1060              		.loc 1 832 0 discriminator 3
+ 1061 0430 FB68     		ldr	r3, [r7, #12]
+ 1062 0432 164A     		ldr	r2, .L60+8
+ 1063 0434 9342     		cmp	r3, r2
+ 1064 0436 01D1     		bne	.L54
+ 1065              		.loc 1 832 0 discriminator 5
+ 1066 0438 2723     		movs	r3, #39
+ 1067 043a 04E0     		b	.L57
+ 1068              	.L54:
+ 1069              		.loc 1 832 0 discriminator 6
+ 1070 043c 3323     		movs	r3, #51
+ 1071 043e 02E0     		b	.L57
+ 1072              	.L53:
+ 1073              		.loc 1 832 0 discriminator 4
+ 1074 0440 2523     		movs	r3, #37
+ 1075 0442 00E0     		b	.L57
+ 1076              	.L52:
+ 1077              		.loc 1 832 0 discriminator 2
+ 1078 0444 2323     		movs	r3, #35
+ 1079              	.L57:
+ 1080              		.loc 1 832 0 discriminator 12
+ 1081 0446 FB60     		str	r3, [r7, #12]
+ 833:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****                 ((ui32Base == GPTIMER1_BASE) ? INT_TIMER1A :
+ 834:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****                  ((ui32Base == GPTIMER2_BASE) ? INT_TIMER2A : INT_TIMER3A)));
+ 835:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** 
+ 836:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 837:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     // Register an interrupt handler for timer A if requested.
+ 838:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 839:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     if(ui32Timer & GPTIMER_A)
+ 1082              		.loc 1 839 0 is_stmt 1 discriminator 12
+ 1083 0448 BB68     		ldr	r3, [r7, #8]
+ 1084 044a DBB2     		uxtb	r3, r3
+ 1085 044c 002B     		cmp	r3, #0
+ 1086 044e 06D0     		beq	.L58
+ 840:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     {
+ 841:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****         //
+ 842:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****         // Register the interrupt handler.
+ 843:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****         //
+ 844:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****         IntRegister(ui32Base, pfnHandler);
+ 1087              		.loc 1 844 0
+ 1088 0450 F868     		ldr	r0, [r7, #12]
+ 1089 0452 7968     		ldr	r1, [r7, #4]
+ 1090 0454 FFF7FEFF 		bl	IntRegister
+ 845:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** 
+ 846:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****         //
+ 847:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****         // Enable the interrupt.
+ 848:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****         //
+ 849:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****         IntEnable(ui32Base);
+ 1091              		.loc 1 849 0
+ 1092 0458 F868     		ldr	r0, [r7, #12]
+ 1093 045a FFF7FEFF 		bl	IntEnable
+ 1094              	.L58:
+ 850:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     }
+ 851:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** 
+ 852:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 853:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     // Register an interrupt handler for timer B if requested.
+ 854:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 855:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     if(ui32Timer & GPTIMER_B)
+ 1095              		.loc 1 855 0
+ 1096 045e BB68     		ldr	r3, [r7, #8]
+ 1097 0460 03F47F43 		and	r3, r3, #65280
+ 1098 0464 002B     		cmp	r3, #0
+ 1099 0466 0AD0     		beq	.L51
+ 856:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     {
+ 857:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****         //
+ 858:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****         // Register the interrupt handler.
+ 859:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****         //
+ 860:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****         IntRegister(ui32Base + 1, pfnHandler);
+ 1100              		.loc 1 860 0
+ 1101 0468 FB68     		ldr	r3, [r7, #12]
+ 1102 046a 0133     		adds	r3, r3, #1
+ 1103 046c 1846     		mov	r0, r3
+ 1104 046e 7968     		ldr	r1, [r7, #4]
+ 1105 0470 FFF7FEFF 		bl	IntRegister
+ 861:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** 
+ 862:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****         //
+ 863:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****         // Enable the interrupt.
+ 864:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****         //
+ 865:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****         IntEnable(ui32Base + 1);
+ 1106              		.loc 1 865 0
+ 1107 0474 FB68     		ldr	r3, [r7, #12]
+ 1108 0476 0133     		adds	r3, r3, #1
+ 1109 0478 1846     		mov	r0, r3
+ 1110 047a FFF7FEFF 		bl	IntEnable
+ 1111              	.L51:
+ 866:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     }
+ 867:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** }
+ 1112              		.loc 1 867 0
+ 1113 047e 1037     		adds	r7, r7, #16
+ 1114              		.cfi_def_cfa_offset 8
+ 1115 0480 BD46     		mov	sp, r7
+ 1116              		.cfi_def_cfa_register 13
+ 1117              		@ sp needed
+ 1118 0482 80BD     		pop	{r7, pc}
+ 1119              	.L61:
+ 1120              		.align	2
+ 1121              	.L60:
+ 1122 0484 00000340 		.word	1073938432
+ 1123 0488 00100340 		.word	1073942528
+ 1124 048c 00200340 		.word	1073946624
+ 1125              		.cfi_endproc
+ 1126              	.LFE17:
+ 1128              		.align	2
+ 1129              		.global	TimerIntUnregister
+ 1130              		.thumb
+ 1131              		.thumb_func
+ 1133              	TimerIntUnregister:
+ 1134              	.LFB18:
+ 868:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** 
+ 869:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //*****************************************************************************
+ 870:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //
+ 871:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! Unregisters an interrupt handler for the timer interrupt
+ 872:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+ 873:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \param ui32Base is the base address of the timer module.
+ 874:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \param ui32Timer specifies the timer(s); must be one of \b GPTIMER_A,
+ 875:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \b GPTIMER_B, or \b GPTIMER_BOTH.
+ 876:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+ 877:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! This function clears the handler to be called when a timer interrupt
+ 878:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! occurs.  This function also masks off the interrupt in the interrupt
+ 879:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! controller so that the interrupt handler no longer is called.
+ 880:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+ 881:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \sa See IntRegister() for important information about registering interrupt
+ 882:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! handlers.
+ 883:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+ 884:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \return None
+ 885:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //
+ 886:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //*****************************************************************************
+ 887:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** void
+ 888:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** TimerIntUnregister(uint32_t ui32Base, uint32_t ui32Timer)
+ 889:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** {
+ 1135              		.loc 1 889 0
+ 1136              		.cfi_startproc
+ 1137              		@ args = 0, pretend = 0, frame = 8
+ 1138              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1139 0490 80B5     		push	{r7, lr}
+ 1140              		.cfi_def_cfa_offset 8
+ 1141              		.cfi_offset 7, -8
+ 1142              		.cfi_offset 14, -4
+ 1143 0492 82B0     		sub	sp, sp, #8
+ 1144              		.cfi_def_cfa_offset 16
+ 1145 0494 00AF     		add	r7, sp, #0
+ 1146              		.cfi_def_cfa_register 7
+ 1147 0496 7860     		str	r0, [r7, #4]
+ 1148 0498 3960     		str	r1, [r7]
+ 890:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 891:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     // Check the arguments.
+ 892:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 893:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     ASSERT(TimerBaseValid(ui32Base));
+ 894:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     ASSERT((ui32Timer == GPTIMER_A) || (ui32Timer == GPTIMER_B) ||
+ 895:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****            (ui32Timer == GPTIMER_BOTH));
+ 896:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** 
+ 897:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 898:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     // Get the interrupt number for this timer module.
+ 899:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 900:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     ui32Base = ((ui32Base == GPTIMER0_BASE) ? INT_TIMER0A :
+ 1149              		.loc 1 900 0
+ 1150 049a 7B68     		ldr	r3, [r7, #4]
+ 1151 049c 174A     		ldr	r2, .L71
+ 1152 049e 9342     		cmp	r3, r2
+ 1153 04a0 0DD0     		beq	.L63
+ 1154              		.loc 1 900 0 is_stmt 0 discriminator 1
+ 1155 04a2 7B68     		ldr	r3, [r7, #4]
+ 1156 04a4 164A     		ldr	r2, .L71+4
+ 1157 04a6 9342     		cmp	r3, r2
+ 1158 04a8 07D0     		beq	.L64
+ 1159              		.loc 1 900 0 discriminator 3
+ 1160 04aa 7B68     		ldr	r3, [r7, #4]
+ 1161 04ac 154A     		ldr	r2, .L71+8
+ 1162 04ae 9342     		cmp	r3, r2
+ 1163 04b0 01D1     		bne	.L65
+ 1164              		.loc 1 900 0 discriminator 5
+ 1165 04b2 2723     		movs	r3, #39
+ 1166 04b4 04E0     		b	.L68
+ 1167              	.L65:
+ 1168              		.loc 1 900 0 discriminator 6
+ 1169 04b6 3323     		movs	r3, #51
+ 1170 04b8 02E0     		b	.L68
+ 1171              	.L64:
+ 1172              		.loc 1 900 0 discriminator 4
+ 1173 04ba 2523     		movs	r3, #37
+ 1174 04bc 00E0     		b	.L68
+ 1175              	.L63:
+ 1176              		.loc 1 900 0 discriminator 2
+ 1177 04be 2323     		movs	r3, #35
+ 1178              	.L68:
+ 1179              		.loc 1 900 0 discriminator 12
+ 1180 04c0 7B60     		str	r3, [r7, #4]
+ 901:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****                 ((ui32Base == GPTIMER1_BASE) ? INT_TIMER1A :
+ 902:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****                  ((ui32Base == GPTIMER2_BASE) ? INT_TIMER2A : INT_TIMER3A)));
+ 903:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** 
+ 904:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 905:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     // Unregister the interrupt handler for timer A if requested.
+ 906:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 907:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     if(ui32Timer & GPTIMER_A)
+ 1181              		.loc 1 907 0 is_stmt 1 discriminator 12
+ 1182 04c2 3B68     		ldr	r3, [r7]
+ 1183 04c4 DBB2     		uxtb	r3, r3
+ 1184 04c6 002B     		cmp	r3, #0
+ 1185 04c8 05D0     		beq	.L69
+ 908:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     {
+ 909:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****         //
+ 910:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****         // Disable the interrupt.
+ 911:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****         //
+ 912:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****         IntDisable(ui32Base);
+ 1186              		.loc 1 912 0
+ 1187 04ca 7868     		ldr	r0, [r7, #4]
+ 1188 04cc FFF7FEFF 		bl	IntDisable
+ 913:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** 
+ 914:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****         //
+ 915:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****         // Unregister the interrupt handler.
+ 916:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****         //
+ 917:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****         IntUnregister(ui32Base);
+ 1189              		.loc 1 917 0
+ 1190 04d0 7868     		ldr	r0, [r7, #4]
+ 1191 04d2 FFF7FEFF 		bl	IntUnregister
+ 1192              	.L69:
+ 918:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     }
+ 919:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** 
+ 920:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 921:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     // Unregister the interrupt handler for timer B if requested.
+ 922:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 923:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     if(ui32Timer & GPTIMER_B)
+ 1193              		.loc 1 923 0
+ 1194 04d6 3B68     		ldr	r3, [r7]
+ 1195 04d8 03F47F43 		and	r3, r3, #65280
+ 1196 04dc 002B     		cmp	r3, #0
+ 1197 04de 09D0     		beq	.L62
+ 924:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     {
+ 925:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****         //
+ 926:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****         // Disable the interrupt.
+ 927:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****         //
+ 928:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****         IntDisable(ui32Base + 1);
+ 1198              		.loc 1 928 0
+ 1199 04e0 7B68     		ldr	r3, [r7, #4]
+ 1200 04e2 0133     		adds	r3, r3, #1
+ 1201 04e4 1846     		mov	r0, r3
+ 1202 04e6 FFF7FEFF 		bl	IntDisable
+ 929:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** 
+ 930:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****         //
+ 931:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****         // Unregister the interrupt handler.
+ 932:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****         //
+ 933:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****         IntUnregister(ui32Base + 1);
+ 1203              		.loc 1 933 0
+ 1204 04ea 7B68     		ldr	r3, [r7, #4]
+ 1205 04ec 0133     		adds	r3, r3, #1
+ 1206 04ee 1846     		mov	r0, r3
+ 1207 04f0 FFF7FEFF 		bl	IntUnregister
+ 1208              	.L62:
+ 934:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     }
+ 935:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** }
+ 1209              		.loc 1 935 0
+ 1210 04f4 0837     		adds	r7, r7, #8
+ 1211              		.cfi_def_cfa_offset 8
+ 1212 04f6 BD46     		mov	sp, r7
+ 1213              		.cfi_def_cfa_register 13
+ 1214              		@ sp needed
+ 1215 04f8 80BD     		pop	{r7, pc}
+ 1216              	.L72:
+ 1217 04fa 00BF     		.align	2
+ 1218              	.L71:
+ 1219 04fc 00000340 		.word	1073938432
+ 1220 0500 00100340 		.word	1073942528
+ 1221 0504 00200340 		.word	1073946624
+ 1222              		.cfi_endproc
+ 1223              	.LFE18:
+ 1225              		.align	2
+ 1226              		.global	TimerIntEnable
+ 1227              		.thumb
+ 1228              		.thumb_func
+ 1230              	TimerIntEnable:
+ 1231              	.LFB19:
+ 936:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** 
+ 937:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //*****************************************************************************
+ 938:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //
+ 939:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! Enables individual timer interrupt sources
+ 940:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+ 941:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \param ui32Base is the base address of the timer module.
+ 942:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \param ui32IntFlags is the bit mask of the interrupt sources to be enabled.
+ 943:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+ 944:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! Enables the indicated timer interrupt sources.  Only the sources that are
+ 945:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! enabled can be reflected to the processor interrupt; disabled sources have
+ 946:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! no effect on the processor.
+ 947:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+ 948:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! The \e ui32IntFlags parameter must be the logical OR of any combination of
+ 949:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! the following:
+ 950:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+ 951:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! - \b GPTIMER_CAPB_EVENT  - Capture B event interrupt
+ 952:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! - \b GPTIMER_CAPB_MATCH  - Capture B match interrupt
+ 953:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! - \b GPTIMER_TIMB_TIMEOUT  - Timer B timeout interrupt
+ 954:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! - \b GPTIMER_CAPA_EVENT  - Capture A event interrupt
+ 955:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! - \b GPTIMER_CAPA_MATCH  - Capture A match interrupt
+ 956:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! - \b GPTIMER_TIMA_TIMEOUT  - Timer A timeout interrupt
+ 957:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+ 958:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \return None
+ 959:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //
+ 960:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //*****************************************************************************
+ 961:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** void
+ 962:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** TimerIntEnable(uint32_t ui32Base, uint32_t ui32IntFlags)
+ 963:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** {
+ 1232              		.loc 1 963 0
+ 1233              		.cfi_startproc
+ 1234              		@ args = 0, pretend = 0, frame = 8
+ 1235              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1236              		@ link register save eliminated.
+ 1237 0508 80B4     		push	{r7}
+ 1238              		.cfi_def_cfa_offset 4
+ 1239              		.cfi_offset 7, -4
+ 1240 050a 83B0     		sub	sp, sp, #12
+ 1241              		.cfi_def_cfa_offset 16
+ 1242 050c 00AF     		add	r7, sp, #0
+ 1243              		.cfi_def_cfa_register 7
+ 1244 050e 7860     		str	r0, [r7, #4]
+ 1245 0510 3960     		str	r1, [r7]
+ 964:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 965:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     // Check the arguments.
+ 966:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 967:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     ASSERT(TimerBaseValid(ui32Base));
+ 968:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** 
+ 969:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 970:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     // Enable the specified interrupts.
+ 971:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 972:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     HWREG(ui32Base + GPTIMER_O_IMR) |= ui32IntFlags;
+ 1246              		.loc 1 972 0
+ 1247 0512 7B68     		ldr	r3, [r7, #4]
+ 1248 0514 1833     		adds	r3, r3, #24
+ 1249 0516 1946     		mov	r1, r3
+ 1250 0518 7B68     		ldr	r3, [r7, #4]
+ 1251 051a 1833     		adds	r3, r3, #24
+ 1252 051c 1A68     		ldr	r2, [r3]
+ 1253 051e 3B68     		ldr	r3, [r7]
+ 1254 0520 1343     		orrs	r3, r3, r2
+ 1255 0522 0B60     		str	r3, [r1]
+ 973:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** }
+ 1256              		.loc 1 973 0
+ 1257 0524 0C37     		adds	r7, r7, #12
+ 1258              		.cfi_def_cfa_offset 4
+ 1259 0526 BD46     		mov	sp, r7
+ 1260              		.cfi_def_cfa_register 13
+ 1261              		@ sp needed
+ 1262 0528 5DF8047B 		ldr	r7, [sp], #4
+ 1263              		.cfi_restore 7
+ 1264              		.cfi_def_cfa_offset 0
+ 1265 052c 7047     		bx	lr
+ 1266              		.cfi_endproc
+ 1267              	.LFE19:
+ 1269 052e 00BF     		.align	2
+ 1270              		.global	TimerIntDisable
+ 1271              		.thumb
+ 1272              		.thumb_func
+ 1274              	TimerIntDisable:
+ 1275              	.LFB20:
+ 974:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** 
+ 975:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //*****************************************************************************
+ 976:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //
+ 977:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! Disables individual timer interrupt sources
+ 978:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+ 979:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \param ui32Base is the base address of the timer module.
+ 980:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \param ui32IntFlags is the bit mask of the interrupt sources to be disabled.
+ 981:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+ 982:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! Disables the indicated timer interrupt sources.  Only the sources that are
+ 983:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! enabled can be reflected to the processor interrupt; disabled sources have
+ 984:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! no effect on the processor.
+ 985:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+ 986:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! The \e ui32IntFlags parameter has the same definition as the \e ui32IntFlags
+ 987:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! parameter to TimerIntEnable().
+ 988:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+ 989:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \return None
+ 990:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //
+ 991:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //*****************************************************************************
+ 992:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** void
+ 993:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** TimerIntDisable(uint32_t ui32Base, uint32_t ui32IntFlags)
+ 994:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** {
+ 1276              		.loc 1 994 0
+ 1277              		.cfi_startproc
+ 1278              		@ args = 0, pretend = 0, frame = 8
+ 1279              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1280              		@ link register save eliminated.
+ 1281 0530 80B4     		push	{r7}
+ 1282              		.cfi_def_cfa_offset 4
+ 1283              		.cfi_offset 7, -4
+ 1284 0532 83B0     		sub	sp, sp, #12
+ 1285              		.cfi_def_cfa_offset 16
+ 1286 0534 00AF     		add	r7, sp, #0
+ 1287              		.cfi_def_cfa_register 7
+ 1288 0536 7860     		str	r0, [r7, #4]
+ 1289 0538 3960     		str	r1, [r7]
+ 995:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 996:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     // Check the arguments.
+ 997:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+ 998:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     ASSERT(TimerBaseValid(ui32Base));
+ 999:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** 
+1000:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+1001:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     // Disable the specified interrupts.
+1002:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+1003:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     HWREG(ui32Base + GPTIMER_O_IMR) &= ~(ui32IntFlags);
+ 1290              		.loc 1 1003 0
+ 1291 053a 7B68     		ldr	r3, [r7, #4]
+ 1292 053c 1833     		adds	r3, r3, #24
+ 1293 053e 1946     		mov	r1, r3
+ 1294 0540 7B68     		ldr	r3, [r7, #4]
+ 1295 0542 1833     		adds	r3, r3, #24
+ 1296 0544 1A68     		ldr	r2, [r3]
+ 1297 0546 3B68     		ldr	r3, [r7]
+ 1298 0548 DB43     		mvns	r3, r3
+ 1299 054a 1340     		ands	r3, r3, r2
+ 1300 054c 0B60     		str	r3, [r1]
+1004:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** }
+ 1301              		.loc 1 1004 0
+ 1302 054e 0C37     		adds	r7, r7, #12
+ 1303              		.cfi_def_cfa_offset 4
+ 1304 0550 BD46     		mov	sp, r7
+ 1305              		.cfi_def_cfa_register 13
+ 1306              		@ sp needed
+ 1307 0552 5DF8047B 		ldr	r7, [sp], #4
+ 1308              		.cfi_restore 7
+ 1309              		.cfi_def_cfa_offset 0
+ 1310 0556 7047     		bx	lr
+ 1311              		.cfi_endproc
+ 1312              	.LFE20:
+ 1314              		.align	2
+ 1315              		.global	TimerIntStatus
+ 1316              		.thumb
+ 1317              		.thumb_func
+ 1319              	TimerIntStatus:
+ 1320              	.LFB21:
+1005:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** 
+1006:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //*****************************************************************************
+1007:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //
+1008:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! Gets the current interrupt status
+1009:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+1010:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \param ui32Base is the base address of the timer module.
+1011:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \param bMasked is false if the raw interrupt status is required and true if
+1012:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! the masked interrupt status is required.
+1013:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+1014:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! This function returns the interrupt status for the timer module.  Either
+1015:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! the raw interrupt status or the status of interrupts that are allowed to
+1016:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! reflect to the processor can be returned.
+1017:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+1018:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \return The current interrupt status, enumerated as a bit field of
+1019:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! values described in TimerIntEnable().
+1020:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //
+1021:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //*****************************************************************************
+1022:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** uint32_t
+1023:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** TimerIntStatus(uint32_t ui32Base, bool bMasked)
+1024:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** {
+ 1321              		.loc 1 1024 0
+ 1322              		.cfi_startproc
+ 1323              		@ args = 0, pretend = 0, frame = 8
+ 1324              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1325              		@ link register save eliminated.
+ 1326 0558 80B4     		push	{r7}
+ 1327              		.cfi_def_cfa_offset 4
+ 1328              		.cfi_offset 7, -4
+ 1329 055a 83B0     		sub	sp, sp, #12
+ 1330              		.cfi_def_cfa_offset 16
+ 1331 055c 00AF     		add	r7, sp, #0
+ 1332              		.cfi_def_cfa_register 7
+ 1333 055e 7860     		str	r0, [r7, #4]
+ 1334 0560 0B46     		mov	r3, r1
+ 1335 0562 FB70     		strb	r3, [r7, #3]
+1025:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+1026:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     // Check the arguments.
+1027:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+1028:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     ASSERT(TimerBaseValid(ui32Base));
+1029:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** 
+1030:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+1031:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     // Return either the interrupt status or the raw interrupt status as
+1032:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     // requested.
+1033:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+1034:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     return(bMasked ? HWREG(ui32Base + GPTIMER_O_MIS) :
+ 1336              		.loc 1 1034 0
+ 1337 0564 FB78     		ldrb	r3, [r7, #3]	@ zero_extendqisi2
+ 1338 0566 002B     		cmp	r3, #0
+ 1339 0568 03D0     		beq	.L76
+ 1340              		.loc 1 1034 0 is_stmt 0 discriminator 1
+ 1341 056a 7B68     		ldr	r3, [r7, #4]
+ 1342 056c 2033     		adds	r3, r3, #32
+ 1343 056e 1B68     		ldr	r3, [r3]
+ 1344 0570 02E0     		b	.L77
+ 1345              	.L76:
+1035:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****            HWREG(ui32Base + GPTIMER_O_RIS));
+ 1346              		.loc 1 1035 0 is_stmt 1 discriminator 2
+ 1347 0572 7B68     		ldr	r3, [r7, #4]
+ 1348 0574 1C33     		adds	r3, r3, #28
+1034:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****            HWREG(ui32Base + GPTIMER_O_RIS));
+ 1349              		.loc 1 1034 0 discriminator 2
+ 1350 0576 1B68     		ldr	r3, [r3]
+ 1351              	.L77:
+1036:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** }
+ 1352              		.loc 1 1036 0 discriminator 4
+ 1353 0578 1846     		mov	r0, r3
+ 1354 057a 0C37     		adds	r7, r7, #12
+ 1355              		.cfi_def_cfa_offset 4
+ 1356 057c BD46     		mov	sp, r7
+ 1357              		.cfi_def_cfa_register 13
+ 1358              		@ sp needed
+ 1359 057e 5DF8047B 		ldr	r7, [sp], #4
+ 1360              		.cfi_restore 7
+ 1361              		.cfi_def_cfa_offset 0
+ 1362 0582 7047     		bx	lr
+ 1363              		.cfi_endproc
+ 1364              	.LFE21:
+ 1366              		.align	2
+ 1367              		.global	TimerIntClear
+ 1368              		.thumb
+ 1369              		.thumb_func
+ 1371              	TimerIntClear:
+ 1372              	.LFB22:
+1037:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** 
+1038:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //*****************************************************************************
+1039:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //
+1040:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! Clears timer interrupt sources
+1041:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+1042:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \param ui32Base is the base address of the timer module.
+1043:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \param ui32IntFlags is a bit mask of the interrupt sources to be cleared.
+1044:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+1045:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! The specified timer interrupt sources are cleared, so that they no longer
+1046:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! assert.  This function must be called in the interrupt handler to keep the
+1047:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! interrupt from being triggered again immediately upon exit.
+1048:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+1049:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! The \e ui32IntFlags parameter has the same definition as the \e ui32IntFlags
+1050:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! parameter to TimerIntEnable().
+1051:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+1052:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \note Because there is a write buffer in the Cortex-M3 processor, it may
+1053:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! take several clock cycles before the interrupt source is actually cleared.
+1054:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! Therefore, it is recommended that the interrupt source be cleared early in
+1055:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! the interrupt handler (as opposed to the very last action) to avoid
+1056:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! returning from the interrupt handler before the interrupt source is
+1057:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! actually cleared.  Failure to do so may result in the interrupt handler
+1058:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! being immediately reentered (because the interrupt controller still sees
+1059:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! the interrupt source asserted).
+1060:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+1061:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \return None
+1062:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //
+1063:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //*****************************************************************************
+1064:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** void
+1065:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** TimerIntClear(uint32_t ui32Base, uint32_t ui32IntFlags)
+1066:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** {
+ 1373              		.loc 1 1066 0
+ 1374              		.cfi_startproc
+ 1375              		@ args = 0, pretend = 0, frame = 8
+ 1376              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1377              		@ link register save eliminated.
+ 1378 0584 80B4     		push	{r7}
+ 1379              		.cfi_def_cfa_offset 4
+ 1380              		.cfi_offset 7, -4
+ 1381 0586 83B0     		sub	sp, sp, #12
+ 1382              		.cfi_def_cfa_offset 16
+ 1383 0588 00AF     		add	r7, sp, #0
+ 1384              		.cfi_def_cfa_register 7
+ 1385 058a 7860     		str	r0, [r7, #4]
+ 1386 058c 3960     		str	r1, [r7]
+1067:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+1068:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     // Check the arguments.
+1069:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+1070:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     ASSERT(TimerBaseValid(ui32Base));
+1071:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** 
+1072:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+1073:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     // Clear the requested interrupt sources.
+1074:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+1075:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     HWREG(ui32Base + GPTIMER_O_ICR) = ui32IntFlags;
+ 1387              		.loc 1 1075 0
+ 1388 058e 7B68     		ldr	r3, [r7, #4]
+ 1389 0590 2433     		adds	r3, r3, #36
+ 1390 0592 1A46     		mov	r2, r3
+ 1391 0594 3B68     		ldr	r3, [r7]
+ 1392 0596 1360     		str	r3, [r2]
+1076:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** }
+ 1393              		.loc 1 1076 0
+ 1394 0598 0C37     		adds	r7, r7, #12
+ 1395              		.cfi_def_cfa_offset 4
+ 1396 059a BD46     		mov	sp, r7
+ 1397              		.cfi_def_cfa_register 13
+ 1398              		@ sp needed
+ 1399 059c 5DF8047B 		ldr	r7, [sp], #4
+ 1400              		.cfi_restore 7
+ 1401              		.cfi_def_cfa_offset 0
+ 1402 05a0 7047     		bx	lr
+ 1403              		.cfi_endproc
+ 1404              	.LFE22:
+ 1406 05a2 00BF     		.align	2
+ 1407              		.global	TimerSynchronize
+ 1408              		.thumb
+ 1409              		.thumb_func
+ 1411              	TimerSynchronize:
+ 1412              	.LFB23:
+1077:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** 
+1078:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //*****************************************************************************
+1079:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //
+1080:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! Synchronizes the counters in a set of timers
+1081:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+1082:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \param ui32Base is the base address of the timer module.  This must be the
+1083:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! base address of Timer0 (in other words, \b GPTIMER0_BASE).
+1084:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \param ui32Timers is the set of timers to synchronize.
+1085:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+1086:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! This function will synchronize the counters in a specified set of timers.
+1087:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! When a timer is running in half-width mode, each half can be included or
+1088:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! excluded in the synchronization event.  When a timer is running in
+1089:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! full-width mode, only the A timer can be synchronized (specifying the B
+1090:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! timer has no effect).
+1091:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+1092:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! The \e ui32Timers parameter is the logical OR of any of the following
+1093:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! defines:
+1094:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+1095:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! - \b GPTIMER_0A_SYNC
+1096:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! - \b GPTIMER_0B_SYNC
+1097:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! - \b GPTIMER_1A_SYNC
+1098:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! - \b GPTIMER_1B_SYNC
+1099:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! - \b GPTIMER_2A_SYNC
+1100:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! - \b GPTIMER_2B_SYNC
+1101:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! - \b GPTIMER_3A_SYNC
+1102:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! - \b GPTIMER_3B_SYNC
+1103:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+1104:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \note This functionality is not available on all parts.
+1105:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //!
+1106:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //! \return None
+1107:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //
+1108:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** //*****************************************************************************
+1109:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** void
+1110:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** TimerSynchronize(uint32_t ui32Base, uint32_t ui32Timers)
+1111:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** {
+ 1413              		.loc 1 1111 0
+ 1414              		.cfi_startproc
+ 1415              		@ args = 0, pretend = 0, frame = 8
+ 1416              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1417              		@ link register save eliminated.
+ 1418 05a4 80B4     		push	{r7}
+ 1419              		.cfi_def_cfa_offset 4
+ 1420              		.cfi_offset 7, -4
+ 1421 05a6 83B0     		sub	sp, sp, #12
+ 1422              		.cfi_def_cfa_offset 16
+ 1423 05a8 00AF     		add	r7, sp, #0
+ 1424              		.cfi_def_cfa_register 7
+ 1425 05aa 7860     		str	r0, [r7, #4]
+ 1426 05ac 3960     		str	r1, [r7]
+1112:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+1113:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     // Check the arguments.
+1114:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+1115:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     ASSERT(ui32Base == GPTIMER0_BASE);
+1116:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** 
+1117:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+1118:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     // Synchronize the specified timers.
+1119:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     //
+1120:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c ****     HWREG(ui32Base + GPTIMER_O_SYNC) = ui32Timers;
+ 1427              		.loc 1 1120 0
+ 1428 05ae 7B68     		ldr	r3, [r7, #4]
+ 1429 05b0 1033     		adds	r3, r3, #16
+ 1430 05b2 1A46     		mov	r2, r3
+ 1431 05b4 3B68     		ldr	r3, [r7]
+ 1432 05b6 1360     		str	r3, [r2]
+1121:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/source/gptimer.c **** }
+ 1433              		.loc 1 1121 0
+ 1434 05b8 0C37     		adds	r7, r7, #12
+ 1435              		.cfi_def_cfa_offset 4
+ 1436 05ba BD46     		mov	sp, r7
+ 1437              		.cfi_def_cfa_register 13
+ 1438              		@ sp needed
+ 1439 05bc 5DF8047B 		ldr	r7, [sp], #4
+ 1440              		.cfi_restore 7
+ 1441              		.cfi_def_cfa_offset 0
+ 1442 05c0 7047     		bx	lr
+ 1443              		.cfi_endproc
+ 1444              	.LFE23:
+ 1446              	.Letext0:
+ 1447              		.file 2 "/usr/arm-none-eabi/include/machine/_default_types.h"
+ 1448              		.file 3 "/usr/arm-none-eabi/include/sys/_stdint.h"
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 gptimer.c
+     /tmp/ccTr2Arn.s:18     .text:0000000000000000 $t
+     /tmp/ccTr2Arn.s:23     .text:0000000000000000 TimerEnable
+     /tmp/ccTr2Arn.s:70     .text:000000000000002c TimerDisable
+     /tmp/ccTr2Arn.s:117    .text:000000000000005c TimerConfigure
+     /tmp/ccTr2Arn.s:185    .text:00000000000000b0 TimerControlLevel
+     /tmp/ccTr2Arn.s:253    .text:00000000000000f8 TimerControlTrigger
+     /tmp/ccTr2Arn.s:321    .text:0000000000000140 TimerControlEvent
+     /tmp/ccTr2Arn.s:378    .text:000000000000017c TimerControlStall
+     /tmp/ccTr2Arn.s:446    .text:00000000000001c4 TimerControlWaitOnTrigger
+     /tmp/ccTr2Arn.s:542    .text:0000000000000248 TimerPrescaleSet
+     /tmp/ccTr2Arn.s:601    .text:0000000000000284 TimerPrescaleGet
+     /tmp/ccTr2Arn.s:652    .text:00000000000002b0 TimerPrescaleMatchSet
+     /tmp/ccTr2Arn.s:711    .text:00000000000002ec TimerPrescaleMatchGet
+     /tmp/ccTr2Arn.s:762    .text:0000000000000318 TimerLoadSet
+     /tmp/ccTr2Arn.s:821    .text:0000000000000354 TimerLoadGet
+     /tmp/ccTr2Arn.s:872    .text:0000000000000380 TimerValueGet
+     /tmp/ccTr2Arn.s:923    .text:00000000000003ac TimerMatchSet
+     /tmp/ccTr2Arn.s:982    .text:00000000000003e8 TimerMatchGet
+     /tmp/ccTr2Arn.s:1033   .text:0000000000000414 TimerIntRegister
+     /tmp/ccTr2Arn.s:1122   .text:0000000000000484 $d
+     /tmp/ccTr2Arn.s:1128   .text:0000000000000490 $t
+     /tmp/ccTr2Arn.s:1133   .text:0000000000000490 TimerIntUnregister
+     /tmp/ccTr2Arn.s:1219   .text:00000000000004fc $d
+     /tmp/ccTr2Arn.s:1225   .text:0000000000000508 $t
+     /tmp/ccTr2Arn.s:1230   .text:0000000000000508 TimerIntEnable
+     /tmp/ccTr2Arn.s:1274   .text:0000000000000530 TimerIntDisable
+     /tmp/ccTr2Arn.s:1319   .text:0000000000000558 TimerIntStatus
+     /tmp/ccTr2Arn.s:1371   .text:0000000000000584 TimerIntClear
+     /tmp/ccTr2Arn.s:1411   .text:00000000000005a4 TimerSynchronize
+                     .debug_frame:0000000000000010 $d
+                           .group:0000000000000000 wm4.0.59116071098782a37a9183a8102fe91b
+                           .group:0000000000000000 wm4.hw_gptimer.h.39.dea6f5e4e2bd4b37e815027f7cf18b04
+                           .group:0000000000000000 wm4.hw_ints.h.42.85b9479f2be35b086f1bb7cbb15bc097
+                           .group:0000000000000000 wm4.hw_memmap.h.39.19283c377d449c9bca5fdd8ccb62628c
+                           .group:0000000000000000 wm4.features.h.22.2e382148a0560adabf236cddd4e880f4
+                           .group:0000000000000000 wm4._default_types.h.15.933e8edd27a65e0b69af4a865eb623d2
+                           .group:0000000000000000 wm4._intsup.h.10.35a45952db64d30146faa63a55c20c1c
+                           .group:0000000000000000 wm4._stdint.h.10.f76354baea1c7088202064e6f3d4f5e3
+                           .group:0000000000000000 wm4.stdint.h.23.373a9d32a9e4c2e88fd347156532d281
+                           .group:0000000000000000 wm4.stdbool.h.29.1c9ee6859ce8145f7838a4f2549ccec2
+                           .group:0000000000000000 wm4.hw_types.h.67.b10589a0806dcc2d274d6fab6b736519
+                           .group:0000000000000000 wm4.interrupt.h.41.272fc4ec0e276feb439e7974d0f77eaf
+                           .group:0000000000000000 wm4.gptimer.h.41.51b4a65e82289454ba49ea8dab75309e
+
+UNDEFINED SYMBOLS
+IntRegister
+IntEnable
+IntDisable
+IntUnregister

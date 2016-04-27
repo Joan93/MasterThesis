@@ -1,0 +1,244 @@
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 6
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.file	"openapps_dyn.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.section	.rodata
+  19              		.align	2
+  22              	rreg_uriquery:
+  23 0000 683D7563 		.ascii	"h=ucb\000"
+  23      6200
+  24 0006 0000     		.align	2
+  27              	infoBoardname:
+  28 0008 43433235 		.ascii	"CC2538\000"
+  28      333800
+  29 000f 00       		.align	2
+  32              	infouCName:
+  33 0010 43433235 		.ascii	"CC2538\000"
+  33      333800
+  34 0017 00       		.align	2
+  37              	infoRadioName:
+  38 0018 43433235 		.ascii	"CC2538 SoC\000"
+  38      33382053 
+  38      6F4300
+  39 0023 00       		.align	2
+  42              	infoStackName:
+  43 0024 4F70656E 		.ascii	"OpenWSN \000"
+  43      57534E20 
+  43      00
+  44 002d 000000   		.align	2
+  47              	ipAddr_ipsoRD:
+  48 0030 26       		.byte	38
+  49 0031 07       		.byte	7
+  50 0032 F7       		.byte	-9
+  51 0033 40       		.byte	64
+  52 0034 00       		.byte	0
+  53 0035 00       		.byte	0
+  54 0036 00       		.byte	0
+  55 0037 3F       		.byte	63
+  56 0038 00       		.byte	0
+  57 0039 00       		.byte	0
+  58 003a 00       		.byte	0
+  59 003b 00       		.byte	0
+  60 003c 00       		.byte	0
+  61 003d 00       		.byte	0
+  62 003e 0E       		.byte	14
+  63 003f 29       		.byte	41
+  64              		.align	2
+  67              	ipAddr_motesEecs:
+  68 0040 20       		.byte	32
+  69 0041 01       		.byte	1
+  70 0042 04       		.byte	4
+  71 0043 70       		.byte	112
+  72 0044 00       		.byte	0
+  73 0045 66       		.byte	102
+  74 0046 00       		.byte	0
+  75 0047 19       		.byte	25
+  76 0048 00       		.byte	0
+  77 0049 00       		.byte	0
+  78 004a 00       		.byte	0
+  79 004b 00       		.byte	0
+  80 004c 00       		.byte	0
+  81 004d 00       		.byte	0
+  82 004e 00       		.byte	0
+  83 004f 02       		.byte	2
+  84              		.align	2
+  87              	ipAddr_local:
+  88 0050 26       		.byte	38
+  89 0051 07       		.byte	7
+  90 0052 F1       		.byte	-15
+  91 0053 40       		.byte	64
+  92 0054 04       		.byte	4
+  93 0055 00       		.byte	0
+  94 0056 10       		.byte	16
+  95 0057 36       		.byte	54
+  96 0058 4D       		.byte	77
+  97 0059 CD       		.byte	-51
+  98 005a AB       		.byte	-85
+  99 005b 54       		.byte	84
+ 100 005c 81       		.byte	-127
+ 101 005d 99       		.byte	-103
+ 102 005e C1       		.byte	-63
+ 103 005f F7       		.byte	-9
+ 104              		.align	2
+ 107              	ipAddr_motedata:
+ 108 0060 20       		.byte	32
+ 109 0061 01       		.byte	1
+ 110 0062 04       		.byte	4
+ 111 0063 70       		.byte	112
+ 112 0064 00       		.byte	0
+ 113 0065 66       		.byte	102
+ 114 0066 00       		.byte	0
+ 115 0067 17       		.byte	23
+ 116 0068 00       		.byte	0
+ 117 0069 00       		.byte	0
+ 118 006a 00       		.byte	0
+ 119 006b 00       		.byte	0
+ 120 006c 00       		.byte	0
+ 121 006d 00       		.byte	0
+ 122 006e 00       		.byte	0
+ 123 006f 02       		.byte	2
+ 124              		.align	2
+ 127              	ipAddr_ringmaster:
+ 128 0070 BB       		.byte	-69
+ 129 0071 BB       		.byte	-69
+ 130 0072 00       		.byte	0
+ 131 0073 00       		.byte	0
+ 132 0074 00       		.byte	0
+ 133 0075 00       		.byte	0
+ 134 0076 00       		.byte	0
+ 135 0077 00       		.byte	0
+ 136 0078 00       		.byte	0
+ 137 0079 00       		.byte	0
+ 138 007a 00       		.byte	0
+ 139 007b 00       		.byte	0
+ 140 007c 00       		.byte	0
+ 141 007d 00       		.byte	0
+ 142 007e 00       		.byte	0
+ 143 007f 01       		.byte	1
+ 144              		.text
+ 145              		.align	2
+ 146              		.global	openapps_init
+ 147              		.thumb
+ 148              		.thumb_func
+ 150              	openapps_init:
+ 151              	.LFB0:
+ 152              		.file 1 "build/OpenMote-CC2538_armgcc/openapps/openapps_dyn.c"
+   1:build/OpenMote-CC2538_armgcc/openapps/openapps_dyn.c **** #include "opendefs.h"
+   2:build/OpenMote-CC2538_armgcc/openapps/openapps_dyn.c **** 
+   3:build/OpenMote-CC2538_armgcc/openapps/openapps_dyn.c **** #include "c6t.h"
+   4:build/OpenMote-CC2538_armgcc/openapps/openapps_dyn.c **** #include "cinfo.h"
+   5:build/OpenMote-CC2538_armgcc/openapps/openapps_dyn.c **** #include "cleds.h"
+   6:build/OpenMote-CC2538_armgcc/openapps/openapps_dyn.c **** #include "cwellknown.h"
+   7:build/OpenMote-CC2538_armgcc/openapps/openapps_dyn.c **** #include "rrt.h"
+   8:build/OpenMote-CC2538_armgcc/openapps/openapps_dyn.c **** #include "techo.h"
+   9:build/OpenMote-CC2538_armgcc/openapps/openapps_dyn.c **** #include "uecho.h"
+  10:build/OpenMote-CC2538_armgcc/openapps/openapps_dyn.c **** #include "uinject.h"
+  11:build/OpenMote-CC2538_armgcc/openapps/openapps_dyn.c **** 
+  12:build/OpenMote-CC2538_armgcc/openapps/openapps_dyn.c **** void openapps_init(void) {
+ 153              		.loc 1 12 0
+ 154              		.cfi_startproc
+ 155              		@ args = 0, pretend = 0, frame = 0
+ 156              		@ frame_needed = 1, uses_anonymous_args = 0
+ 157 0000 80B5     		push	{r7, lr}
+ 158              		.cfi_def_cfa_offset 8
+ 159              		.cfi_offset 7, -8
+ 160              		.cfi_offset 14, -4
+ 161 0002 00AF     		add	r7, sp, #0
+ 162              		.cfi_def_cfa_register 7
+  13:build/OpenMote-CC2538_armgcc/openapps/openapps_dyn.c ****    c6t_init();
+ 163              		.loc 1 13 0
+ 164 0004 FFF7FEFF 		bl	c6t_init
+  14:build/OpenMote-CC2538_armgcc/openapps/openapps_dyn.c ****    cinfo_init();
+ 165              		.loc 1 14 0
+ 166 0008 FFF7FEFF 		bl	cinfo_init
+  15:build/OpenMote-CC2538_armgcc/openapps/openapps_dyn.c ****    cleds__init();
+ 167              		.loc 1 15 0
+ 168 000c FFF7FEFF 		bl	cleds__init
+  16:build/OpenMote-CC2538_armgcc/openapps/openapps_dyn.c ****    cwellknown_init();
+ 169              		.loc 1 16 0
+ 170 0010 FFF7FEFF 		bl	cwellknown_init
+  17:build/OpenMote-CC2538_armgcc/openapps/openapps_dyn.c ****    rrt_init();
+ 171              		.loc 1 17 0
+ 172 0014 FFF7FEFF 		bl	rrt_init
+  18:build/OpenMote-CC2538_armgcc/openapps/openapps_dyn.c ****    techo_init();
+ 173              		.loc 1 18 0
+ 174 0018 FFF7FEFF 		bl	techo_init
+  19:build/OpenMote-CC2538_armgcc/openapps/openapps_dyn.c ****    uecho_init();
+ 175              		.loc 1 19 0
+ 176 001c FFF7FEFF 		bl	uecho_init
+  20:build/OpenMote-CC2538_armgcc/openapps/openapps_dyn.c **** }...
+ 177              		.loc 1 20 0
+ 178 0020 80BD     		pop	{r7, pc}
+ 179              		.cfi_endproc
+ 180              	.LFE0:
+ 182              	.Letext0:
+ 183              		.file 2 "/usr/arm-none-eabi/include/machine/_default_types.h"
+ 184              		.file 3 "/usr/arm-none-eabi/include/sys/_stdint.h"
+ 185              		.file 4 "bsp/boards/OpenMote-CC2538/board_info.h"
+ 186              		.file 5 "inc/opendefs.h"
+ 187              		.file 6 "openstack/04-TRAN/opencoap.h"
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 openapps_dyn.c
+     /tmp/ccysGZI2.s:19     .rodata:0000000000000000 $d
+     /tmp/ccysGZI2.s:22     .rodata:0000000000000000 rreg_uriquery
+     /tmp/ccysGZI2.s:27     .rodata:0000000000000008 infoBoardname
+     /tmp/ccysGZI2.s:32     .rodata:0000000000000010 infouCName
+     /tmp/ccysGZI2.s:37     .rodata:0000000000000018 infoRadioName
+     /tmp/ccysGZI2.s:42     .rodata:0000000000000024 infoStackName
+     /tmp/ccysGZI2.s:47     .rodata:0000000000000030 ipAddr_ipsoRD
+     /tmp/ccysGZI2.s:67     .rodata:0000000000000040 ipAddr_motesEecs
+     /tmp/ccysGZI2.s:87     .rodata:0000000000000050 ipAddr_local
+     /tmp/ccysGZI2.s:107    .rodata:0000000000000060 ipAddr_motedata
+     /tmp/ccysGZI2.s:127    .rodata:0000000000000070 ipAddr_ringmaster
+     /tmp/ccysGZI2.s:145    .text:0000000000000000 $t
+     /tmp/ccysGZI2.s:150    .text:0000000000000000 openapps_init
+                     .debug_frame:0000000000000010 $d
+                           .group:0000000000000000 wm4.0.59116071098782a37a9183a8102fe91b
+                           .group:0000000000000000 wm4.features.h.22.2e382148a0560adabf236cddd4e880f4
+                           .group:0000000000000000 wm4._default_types.h.15.933e8edd27a65e0b69af4a865eb623d2
+                           .group:0000000000000000 wm4._intsup.h.10.35a45952db64d30146faa63a55c20c1c
+                           .group:0000000000000000 wm4._stdint.h.10.f76354baea1c7088202064e6f3d4f5e3
+                           .group:0000000000000000 wm4.stdint.h.23.373a9d32a9e4c2e88fd347156532d281
+                           .group:0000000000000000 wm4.toolchain_defs.h.2.e4ebbe6e0a48032a9b79077dc42e1ffd
+                           .group:0000000000000000 wm4.newlib.h.8.2702bca278809460f0af6fba1d84eb68
+                           .group:0000000000000000 wm4.config.h.220.a09b0b0de3c25be3f39d71990e617bff
+                           .group:0000000000000000 wm4._ansi.h.23.84af8eb8cd468d25cc5f45f5eb13ec51
+                           .group:0000000000000000 wm4.stddef.h.39.daafd3d79fe2f3a84d2d73d7d4e706f8
+                           .group:0000000000000000 wm4.lock.h.2.9bc98482741e5e2a9450b12934a684ea
+                           .group:0000000000000000 wm4._types.h.54.d3d34a3b7f3cc230cd159baf022b4b08
+                           .group:0000000000000000 wm4.stddef.h.158.61317cdbfb4026324507d123a50b0fd6
+                           .group:0000000000000000 wm4.reent.h.17.8bd9e4098e0428508c282cad794fae43
+                           .group:0000000000000000 wm4.cdefs.h.47.e6563c1c3863188ba4ac4eaa2c85b6f1
+                           .group:0000000000000000 wm4.string.h.15.dab3980bf35408a4c507182805e2de3a
+                           .group:0000000000000000 wm4.stddef.h.158.a7efb00f6cbc6f43213b50e183c9830c
+                           .group:0000000000000000 wm4.stdbool.h.29.1c9ee6859ce8145f7838a4f2549ccec2
+                           .group:0000000000000000 wm4.hw_types.h.67.b10589a0806dcc2d274d6fab6b736519
+                           .group:0000000000000000 wm4.interrupt.h.41.272fc4ec0e276feb439e7974d0f77eaf
+                           .group:0000000000000000 wm4.board_info.h.22.aeb00002354a4949fff54190040e37af
+                           .group:0000000000000000 wm4.opendefs.h.23.bdaf9c024be66ead04de21e3ce3dfaf2
+                           .group:0000000000000000 wm4.opentimers.h.8.044f2d040a134cdb0ddb58adfc2508be
+                           .group:0000000000000000 wm4.opencoap.h.31.8b768c0753d536a9548c9b7760597879
+                           .group:0000000000000000 wm4.schedule.h.2.80d40225a0ebadc3afa75a6755f49055
+                           .group:0000000000000000 wm4.uinject.h.2.ccae36565196a7f5395dac01980ad245
+
+UNDEFINED SYMBOLS
+c6t_init
+cinfo_init
+cleds__init
+cwellknown_init
+rrt_init
+techo_init
+uecho_init

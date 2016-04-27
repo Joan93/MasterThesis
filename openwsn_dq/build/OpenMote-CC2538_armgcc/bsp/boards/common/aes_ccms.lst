@@ -1,0 +1,1116 @@
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 6
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.file	"aes_ccms.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.section	.rodata
+  19              		.align	2
+  22              	rreg_uriquery:
+  23 0000 683D7563 		.ascii	"h=ucb\000"
+  23      6200
+  24 0006 0000     		.align	2
+  27              	infoBoardname:
+  28 0008 43433235 		.ascii	"CC2538\000"
+  28      333800
+  29 000f 00       		.align	2
+  32              	infouCName:
+  33 0010 43433235 		.ascii	"CC2538\000"
+  33      333800
+  34 0017 00       		.align	2
+  37              	infoRadioName:
+  38 0018 43433235 		.ascii	"CC2538 SoC\000"
+  38      33382053 
+  38      6F4300
+  39 0023 00       		.align	2
+  42              	infoStackName:
+  43 0024 4F70656E 		.ascii	"OpenWSN \000"
+  43      57534E20 
+  43      00
+  44              		.text
+  45              		.align	2
+  46              		.global	aes_ccms_enc
+  47              		.thumb
+  48              		.thumb_func
+  50              	aes_ccms_enc:
+  51              	.LFB0:
+  52              		.file 1 "build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c"
+   1:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** /**
+   2:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** \brief AES CCMS implementation
+   3:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****   
+   4:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** \author Marcelo Barros de Almeida <marcelobarrosalmeida@gmail.com>, March 2015.
+   5:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** \author Malisa Vucinic <malishav@gmail.com>, March 2015.
+   6:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** */
+   7:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** #include <string.h>
+   8:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** #include <stdint.h>
+   9:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** #include "opendefs.h"
+  10:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** #include "aes_ccms.h"
+  11:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** #include "crypto_engine.h"
+  12:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** 
+  13:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** static owerror_t aes_cbc_mac(uint8_t* a, uint8_t len_a, uint8_t* m, uint8_t len_m, uint8_t* nonce, 
+  14:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** 
+  15:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** static owerror_t aes_ctr_enc(uint8_t* m, uint8_t len_m, uint8_t* nonce, uint8_t key[16], uint8_t* m
+  16:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** 
+  17:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** /**
+  18:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** \brief CCM* forward transformation (i.e. encryption + authentication).
+  19:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** \param[in] a Pointer to the authentication only data.
+  20:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** \param[in] len_a Length of authentication only data.
+  21:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** \param[in,out] m Pointer to the data that is both authenticated and encrypted. Overwritten by
+  22:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    ciphertext and the trailing authentication tag. Buffer must hold len_m + CBC_MAC_SIZE.
+  23:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** \param[in,out] len_m Length of data that is both authenticated and encrypted. Accounts for
+  24:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    the added authentication tag of len_mac octets on return.
+  25:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** \param[in] nonce Buffer containing nonce (13 octets).
+  26:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** \param[in] l CCM parameter L that allows selection of different nonce length. This implementation
+  27:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    supports l = 2 (i.e. 13 octet long nonce) only.
+  28:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** \param[in] key Buffer containing the secret key (16 octets).
+  29:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** \param[in] len_mac Length of the authentication tag.
+  30:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** 
+  31:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** \returns E_SUCCESS when the generation was successful, E_FAIL otherwise. 
+  32:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** */
+  33:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** owerror_t aes_ccms_enc(uint8_t* a,
+  34:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****          uint8_t len_a,
+  35:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****          uint8_t* m,
+  36:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****          uint8_t* len_m,
+  37:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****          uint8_t* nonce,
+  38:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****          uint8_t l,
+  39:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****          uint8_t key[16],
+  40:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****          uint8_t len_mac) {
+  53              		.loc 1 40 0
+  54              		.cfi_startproc
+  55              		@ args = 16, pretend = 0, frame = 32
+  56              		@ frame_needed = 1, uses_anonymous_args = 0
+  57 0000 90B5     		push	{r4, r7, lr}
+  58              		.cfi_def_cfa_offset 12
+  59              		.cfi_offset 4, -12
+  60              		.cfi_offset 7, -8
+  61              		.cfi_offset 14, -4
+  62 0002 8FB0     		sub	sp, sp, #60
+  63              		.cfi_def_cfa_offset 72
+  64 0004 06AF     		add	r7, sp, #24
+  65              		.cfi_def_cfa 7, 48
+  66 0006 F860     		str	r0, [r7, #12]
+  67 0008 7A60     		str	r2, [r7, #4]
+  68 000a 3B60     		str	r3, [r7]
+  69 000c 0B46     		mov	r3, r1
+  70 000e FB72     		strb	r3, [r7, #11]
+  41:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** 
+  42:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    uint8_t mac[CBC_MAX_MAC_SIZE];
+  43:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** 
+  44:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    if ((len_mac > CBC_MAX_MAC_SIZE) || (l != 2)) {
+  71              		.loc 1 44 0
+  72 0010 97F83C30 		ldrb	r3, [r7, #60]	@ zero_extendqisi2
+  73 0014 102B     		cmp	r3, #16
+  74 0016 03D8     		bhi	.L2
+  75              		.loc 1 44 0 is_stmt 0 discriminator 1
+  76 0018 97F83430 		ldrb	r3, [r7, #52]	@ zero_extendqisi2
+  77 001c 022B     		cmp	r3, #2
+  78 001e 01D0     		beq	.L3
+  79              	.L2:
+  45:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****       return E_FAIL;
+  80              		.loc 1 45 0 is_stmt 1
+  81 0020 0123     		movs	r3, #1
+  82 0022 45E0     		b	.L6
+  83              	.L3:
+  46:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    }
+  47:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** 
+  48:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    if (aes_cbc_mac(a, len_a, m, *len_m, nonce, key, mac, len_mac, l) == E_SUCCESS) {
+  84              		.loc 1 48 0
+  85 0024 3B68     		ldr	r3, [r7]
+  86 0026 1C78     		ldrb	r4, [r3]	@ zero_extendqisi2
+  87 0028 FA7A     		ldrb	r2, [r7, #11]	@ zero_extendqisi2
+  88 002a 3B6B     		ldr	r3, [r7, #48]
+  89 002c 0093     		str	r3, [sp]
+  90 002e BB6B     		ldr	r3, [r7, #56]
+  91 0030 0193     		str	r3, [sp, #4]
+  92 0032 07F11003 		add	r3, r7, #16
+  93 0036 0293     		str	r3, [sp, #8]
+  94 0038 97F83C30 		ldrb	r3, [r7, #60]	@ zero_extendqisi2
+  95 003c 0393     		str	r3, [sp, #12]
+  96 003e 97F83430 		ldrb	r3, [r7, #52]	@ zero_extendqisi2
+  97 0042 0493     		str	r3, [sp, #16]
+  98 0044 F868     		ldr	r0, [r7, #12]
+  99 0046 1146     		mov	r1, r2
+ 100 0048 7A68     		ldr	r2, [r7, #4]
+ 101 004a 2346     		mov	r3, r4
+ 102 004c 00F09EF8 		bl	aes_cbc_mac
+ 103 0050 0346     		mov	r3, r0
+ 104 0052 002B     		cmp	r3, #0
+ 105 0054 2BD1     		bne	.L5
+  49:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****       if (aes_ctr_enc(m, *len_m, nonce, key, mac, len_mac, l) == E_SUCCESS) {
+ 106              		.loc 1 49 0
+ 107 0056 3B68     		ldr	r3, [r7]
+ 108 0058 1A78     		ldrb	r2, [r3]	@ zero_extendqisi2
+ 109 005a 07F11003 		add	r3, r7, #16
+ 110 005e 0093     		str	r3, [sp]
+ 111 0060 97F83C30 		ldrb	r3, [r7, #60]	@ zero_extendqisi2
+ 112 0064 0193     		str	r3, [sp, #4]
+ 113 0066 97F83430 		ldrb	r3, [r7, #52]	@ zero_extendqisi2
+ 114 006a 0293     		str	r3, [sp, #8]
+ 115 006c 7868     		ldr	r0, [r7, #4]
+ 116 006e 1146     		mov	r1, r2
+ 117 0070 3A6B     		ldr	r2, [r7, #48]
+ 118 0072 BB6B     		ldr	r3, [r7, #56]
+ 119 0074 00F0B6F9 		bl	aes_ctr_enc
+ 120 0078 0346     		mov	r3, r0
+ 121 007a 002B     		cmp	r3, #0
+ 122 007c 17D1     		bne	.L5
+  50:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****          memcpy(&m[*len_m], mac, len_mac);
+ 123              		.loc 1 50 0
+ 124 007e 3B68     		ldr	r3, [r7]
+ 125 0080 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 126 0082 1A46     		mov	r2, r3
+ 127 0084 7B68     		ldr	r3, [r7, #4]
+ 128 0086 9918     		adds	r1, r3, r2
+ 129 0088 97F83C30 		ldrb	r3, [r7, #60]	@ zero_extendqisi2
+ 130 008c 07F11002 		add	r2, r7, #16
+ 131 0090 0846     		mov	r0, r1
+ 132 0092 1146     		mov	r1, r2
+ 133 0094 1A46     		mov	r2, r3
+ 134 0096 FFF7FEFF 		bl	memcpy
+  51:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****          *len_m += len_mac;
+ 135              		.loc 1 51 0
+ 136 009a 3B68     		ldr	r3, [r7]
+ 137 009c 1A78     		ldrb	r2, [r3]	@ zero_extendqisi2
+ 138 009e 97F83C30 		ldrb	r3, [r7, #60]
+ 139 00a2 1344     		add	r3, r3, r2
+ 140 00a4 DAB2     		uxtb	r2, r3
+ 141 00a6 3B68     		ldr	r3, [r7]
+ 142 00a8 1A70     		strb	r2, [r3]
+  52:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** 
+  53:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****          return E_SUCCESS;
+ 143              		.loc 1 53 0
+ 144 00aa 0023     		movs	r3, #0
+ 145 00ac 00E0     		b	.L6
+ 146              	.L5:
+  54:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****       }
+  55:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    }
+  56:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** 
+  57:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    return E_FAIL;
+ 147              		.loc 1 57 0
+ 148 00ae 0123     		movs	r3, #1
+ 149              	.L6:
+  58:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** }
+ 150              		.loc 1 58 0 discriminator 1
+ 151 00b0 1846     		mov	r0, r3
+ 152 00b2 2437     		adds	r7, r7, #36
+ 153              		.cfi_def_cfa_offset 12
+ 154 00b4 BD46     		mov	sp, r7
+ 155              		.cfi_def_cfa_register 13
+ 156              		@ sp needed
+ 157 00b6 90BD     		pop	{r4, r7, pc}
+ 158              		.cfi_endproc
+ 159              	.LFE0:
+ 161              		.align	2
+ 162              		.global	aes_ccms_dec
+ 163              		.thumb
+ 164              		.thumb_func
+ 166              	aes_ccms_dec:
+ 167              	.LFB1:
+  59:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** 
+  60:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** /**
+  61:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** \brief CCM* inverse transformation (i.e. decryption + tag verification).
+  62:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** \param[in] a Pointer to the authentication only data.
+  63:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** \param[in] len_a Length of authentication only data.
+  64:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** \param[in,out] m Pointer to the data that is both authenticated and encrypted. Overwritten by
+  65:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    plaintext.
+  66:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** \param[in,out] len_m Length of data that is both authenticated and encrypted, including the
+  67:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    trailing authentication tag. On return it is reduced for len_mac octets to account for the
+  68:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    removed authentication tag.
+  69:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** \param[in] nonce Buffer containing nonce (13 octets).
+  70:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** \param[in] l CCM parameter L that allows selection of different nonce length. This implementation
+  71:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    supports l = 2 (i.e. 13 octet long nonce) only.
+  72:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** \param[in] key Buffer containing the secret key (16 octets).
+  73:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** \param[in] len_mac Length of the authentication tag.
+  74:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** 
+  75:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** \returns E_SUCCESS when decryption and verification were successful, E_FAIL otherwise. 
+  76:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** */
+  77:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** owerror_t aes_ccms_dec(uint8_t* a,
+  78:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****          uint8_t len_a,
+  79:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****          uint8_t* m,
+  80:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****          uint8_t* len_m,
+  81:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****          uint8_t* nonce,
+  82:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****          uint8_t l,
+  83:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****          uint8_t key[16],
+  84:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****          uint8_t len_mac) {
+ 168              		.loc 1 84 0
+ 169              		.cfi_startproc
+ 170              		@ args = 16, pretend = 0, frame = 48
+ 171              		@ frame_needed = 1, uses_anonymous_args = 0
+ 172 00b8 90B5     		push	{r4, r7, lr}
+ 173              		.cfi_def_cfa_offset 12
+ 174              		.cfi_offset 4, -12
+ 175              		.cfi_offset 7, -8
+ 176              		.cfi_offset 14, -4
+ 177 00ba 93B0     		sub	sp, sp, #76
+ 178              		.cfi_def_cfa_offset 88
+ 179 00bc 06AF     		add	r7, sp, #24
+ 180              		.cfi_def_cfa 7, 64
+ 181 00be F860     		str	r0, [r7, #12]
+ 182 00c0 7A60     		str	r2, [r7, #4]
+ 183 00c2 3B60     		str	r3, [r7]
+ 184 00c4 0B46     		mov	r3, r1
+ 185 00c6 FB72     		strb	r3, [r7, #11]
+  85:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** 
+  86:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    uint8_t mac[CBC_MAX_MAC_SIZE];
+  87:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    uint8_t orig_mac[CBC_MAX_MAC_SIZE];
+  88:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** 
+  89:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    if ((len_mac > CBC_MAX_MAC_SIZE) || (l != 2)) {
+ 186              		.loc 1 89 0
+ 187 00c8 97F84C30 		ldrb	r3, [r7, #76]	@ zero_extendqisi2
+ 188 00cc 102B     		cmp	r3, #16
+ 189 00ce 03D8     		bhi	.L8
+ 190              		.loc 1 89 0 is_stmt 0 discriminator 1
+ 191 00d0 97F84430 		ldrb	r3, [r7, #68]	@ zero_extendqisi2
+ 192 00d4 022B     		cmp	r3, #2
+ 193 00d6 01D0     		beq	.L9
+ 194              	.L8:
+  90:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****       return E_FAIL;
+ 195              		.loc 1 90 0 is_stmt 1
+ 196 00d8 0123     		movs	r3, #1
+ 197 00da 53E0     		b	.L12
+ 198              	.L9:
+  91:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    }
+  92:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** 
+  93:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    *len_m -= len_mac;
+ 199              		.loc 1 93 0
+ 200 00dc 3B68     		ldr	r3, [r7]
+ 201 00de 1A78     		ldrb	r2, [r3]	@ zero_extendqisi2
+ 202 00e0 97F84C30 		ldrb	r3, [r7, #76]
+ 203 00e4 D31A     		subs	r3, r2, r3
+ 204 00e6 DAB2     		uxtb	r2, r3
+ 205 00e8 3B68     		ldr	r3, [r7]
+ 206 00ea 1A70     		strb	r2, [r3]
+  94:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    memcpy(mac, &m[*len_m], len_mac);
+ 207              		.loc 1 94 0
+ 208 00ec 3B68     		ldr	r3, [r7]
+ 209 00ee 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 210 00f0 1A46     		mov	r2, r3
+ 211 00f2 7B68     		ldr	r3, [r7, #4]
+ 212 00f4 1A44     		add	r2, r2, r3
+ 213 00f6 97F84C30 		ldrb	r3, [r7, #76]	@ zero_extendqisi2
+ 214 00fa 07F12001 		add	r1, r7, #32
+ 215 00fe 0846     		mov	r0, r1
+ 216 0100 1146     		mov	r1, r2
+ 217 0102 1A46     		mov	r2, r3
+ 218 0104 FFF7FEFF 		bl	memcpy
+  95:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** 
+  96:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    if (aes_ctr_enc(m, *len_m, nonce, key, mac, len_mac, l) == E_SUCCESS) {
+ 219              		.loc 1 96 0
+ 220 0108 3B68     		ldr	r3, [r7]
+ 221 010a 1A78     		ldrb	r2, [r3]	@ zero_extendqisi2
+ 222 010c 07F12003 		add	r3, r7, #32
+ 223 0110 0093     		str	r3, [sp]
+ 224 0112 97F84C30 		ldrb	r3, [r7, #76]	@ zero_extendqisi2
+ 225 0116 0193     		str	r3, [sp, #4]
+ 226 0118 97F84430 		ldrb	r3, [r7, #68]	@ zero_extendqisi2
+ 227 011c 0293     		str	r3, [sp, #8]
+ 228 011e 7868     		ldr	r0, [r7, #4]
+ 229 0120 1146     		mov	r1, r2
+ 230 0122 3A6C     		ldr	r2, [r7, #64]
+ 231 0124 BB6C     		ldr	r3, [r7, #72]
+ 232 0126 00F05DF9 		bl	aes_ctr_enc
+ 233 012a 0346     		mov	r3, r0
+ 234 012c 002B     		cmp	r3, #0
+ 235 012e 28D1     		bne	.L11
+  97:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****       if (aes_cbc_mac(a, len_a, m, *len_m, nonce, key, orig_mac, len_mac, l) == E_SUCCESS) {
+ 236              		.loc 1 97 0
+ 237 0130 3B68     		ldr	r3, [r7]
+ 238 0132 1C78     		ldrb	r4, [r3]	@ zero_extendqisi2
+ 239 0134 FA7A     		ldrb	r2, [r7, #11]	@ zero_extendqisi2
+ 240 0136 3B6C     		ldr	r3, [r7, #64]
+ 241 0138 0093     		str	r3, [sp]
+ 242 013a BB6C     		ldr	r3, [r7, #72]
+ 243 013c 0193     		str	r3, [sp, #4]
+ 244 013e 07F11003 		add	r3, r7, #16
+ 245 0142 0293     		str	r3, [sp, #8]
+ 246 0144 97F84C30 		ldrb	r3, [r7, #76]	@ zero_extendqisi2
+ 247 0148 0393     		str	r3, [sp, #12]
+ 248 014a 97F84430 		ldrb	r3, [r7, #68]	@ zero_extendqisi2
+ 249 014e 0493     		str	r3, [sp, #16]
+ 250 0150 F868     		ldr	r0, [r7, #12]
+ 251 0152 1146     		mov	r1, r2
+ 252 0154 7A68     		ldr	r2, [r7, #4]
+ 253 0156 2346     		mov	r3, r4
+ 254 0158 00F018F8 		bl	aes_cbc_mac
+ 255 015c 0346     		mov	r3, r0
+ 256 015e 002B     		cmp	r3, #0
+ 257 0160 0FD1     		bne	.L11
+  98:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****          if (memcmp(mac, orig_mac, len_mac) == 0) {
+ 258              		.loc 1 98 0
+ 259 0162 97F84C30 		ldrb	r3, [r7, #76]	@ zero_extendqisi2
+ 260 0166 07F12001 		add	r1, r7, #32
+ 261 016a 07F11002 		add	r2, r7, #16
+ 262 016e 0846     		mov	r0, r1
+ 263 0170 1146     		mov	r1, r2
+ 264 0172 1A46     		mov	r2, r3
+ 265 0174 FFF7FEFF 		bl	memcmp
+ 266 0178 0346     		mov	r3, r0
+ 267 017a 002B     		cmp	r3, #0
+ 268 017c 01D1     		bne	.L11
+  99:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****             return E_SUCCESS;
+ 269              		.loc 1 99 0
+ 270 017e 0023     		movs	r3, #0
+ 271 0180 00E0     		b	.L12
+ 272              	.L11:
+ 100:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****          }
+ 101:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****       }
+ 102:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    }
+ 103:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** 
+ 104:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    return E_FAIL;
+ 273              		.loc 1 104 0
+ 274 0182 0123     		movs	r3, #1
+ 275              	.L12:
+ 105:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** }
+ 276              		.loc 1 105 0 discriminator 1
+ 277 0184 1846     		mov	r0, r3
+ 278 0186 3437     		adds	r7, r7, #52
+ 279              		.cfi_def_cfa_offset 12
+ 280 0188 BD46     		mov	sp, r7
+ 281              		.cfi_def_cfa_register 13
+ 282              		@ sp needed
+ 283 018a 90BD     		pop	{r4, r7, pc}
+ 284              		.cfi_endproc
+ 285              	.LFE1:
+ 287              		.align	2
+ 288              		.thumb
+ 289              		.thumb_func
+ 291              	aes_cbc_mac:
+ 292              	.LFB2:
+ 106:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** 
+ 107:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** /**
+ 108:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** \brief CBC-MAC generation specific to CCM*.
+ 109:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** \param[in] a Pointer to the authentication only data.
+ 110:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** \param[in] len_a Length of authentication only data.
+ 111:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** \param[in] m Pointer to the data that is both authenticated and encrypted.
+ 112:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** \param[in] len_m Length of data that is both authenticated and encrypted.
+ 113:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** \param[in] nonce Buffer containing nonce (13 octets).
+ 114:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** \param[in] key Buffer containing the secret key (16 octets).
+ 115:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** \param[out] mac Buffer where the value of the CBC-MAC tag will be written.
+ 116:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** \param[in] len_mac Length of the CBC-MAC tag. Must be 4, 8 or 16 octets.
+ 117:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** \param[in] l CCM parameter L that allows selection of different nonce length.
+ 118:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** 
+ 119:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** \returns E_SUCCESS when the generation was successful, E_FAIL otherwise. 
+ 120:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** */
+ 121:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** static owerror_t aes_cbc_mac(uint8_t* a,
+ 122:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****          uint8_t len_a,
+ 123:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****          uint8_t* m,
+ 124:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****          uint8_t len_m,
+ 125:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****          uint8_t* nonce,
+ 126:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****          uint8_t key[16],
+ 127:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****          uint8_t* mac,
+ 128:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****          uint8_t len_mac,
+ 129:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****          uint8_t l) {
+ 293              		.loc 1 129 0
+ 294              		.cfi_startproc
+ 295              		@ args = 20, pretend = 0, frame = 200
+ 296              		@ frame_needed = 1, uses_anonymous_args = 0
+ 297 018c 90B5     		push	{r4, r7, lr}
+ 298              		.cfi_def_cfa_offset 12
+ 299              		.cfi_offset 4, -12
+ 300              		.cfi_offset 7, -8
+ 301              		.cfi_offset 14, -4
+ 302 018e B3B0     		sub	sp, sp, #204
+ 303              		.cfi_def_cfa_offset 216
+ 304 0190 00AF     		add	r7, sp, #0
+ 305              		.cfi_def_cfa_register 7
+ 306 0192 F860     		str	r0, [r7, #12]
+ 307 0194 7A60     		str	r2, [r7, #4]
+ 308 0196 1A46     		mov	r2, r3
+ 309 0198 0B46     		mov	r3, r1
+ 310 019a FB72     		strb	r3, [r7, #11]
+ 311 019c 1346     		mov	r3, r2
+ 312 019e BB72     		strb	r3, [r7, #10]
+ 130:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    
+ 131:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    uint8_t  pad_len;
+ 132:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    uint8_t  len;
+ 133:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    uint8_t  cbc_mac_iv[16];
+ 134:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    uint8_t  buffer[128+16+16]; // max buffer plus IV
+ 135:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** 
+ 136:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    // asserts here
+ 137:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    if (!((len_mac == 0) || (len_mac == 4) || (len_mac == 8) || (len_mac == 16))) {
+ 313              		.loc 1 137 0
+ 314 01a0 97F8E430 		ldrb	r3, [r7, #228]	@ zero_extendqisi2
+ 315 01a4 002B     		cmp	r3, #0
+ 316 01a6 0DD0     		beq	.L14
+ 317              		.loc 1 137 0 is_stmt 0 discriminator 1
+ 318 01a8 97F8E430 		ldrb	r3, [r7, #228]	@ zero_extendqisi2
+ 319 01ac 042B     		cmp	r3, #4
+ 320 01ae 09D0     		beq	.L14
+ 321              		.loc 1 137 0 discriminator 2
+ 322 01b0 97F8E430 		ldrb	r3, [r7, #228]	@ zero_extendqisi2
+ 323 01b4 082B     		cmp	r3, #8
+ 324 01b6 05D0     		beq	.L14
+ 325              		.loc 1 137 0 discriminator 3
+ 326 01b8 97F8E430 		ldrb	r3, [r7, #228]	@ zero_extendqisi2
+ 327 01bc 102B     		cmp	r3, #16
+ 328 01be 01D0     		beq	.L14
+ 138:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****       return E_FAIL;
+ 329              		.loc 1 138 0 is_stmt 1
+ 330 01c0 0123     		movs	r3, #1
+ 331 01c2 09E1     		b	.L29
+ 332              	.L14:
+ 139:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    }
+ 140:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** 
+ 141:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    if ((len_a > 127) || (len_m > 127) || ((len_a + len_m) > 127)) {
+ 333              		.loc 1 141 0
+ 334 01c4 FB7A     		ldrb	r3, [r7, #11]	@ zero_extendqisi2
+ 335 01c6 5BB2     		sxtb	r3, r3
+ 336 01c8 002B     		cmp	r3, #0
+ 337 01ca 08DB     		blt	.L16
+ 338              		.loc 1 141 0 is_stmt 0 discriminator 1
+ 339 01cc BB7A     		ldrb	r3, [r7, #10]	@ zero_extendqisi2
+ 340 01ce 5BB2     		sxtb	r3, r3
+ 341 01d0 002B     		cmp	r3, #0
+ 342 01d2 04DB     		blt	.L16
+ 343              		.loc 1 141 0 discriminator 2
+ 344 01d4 FA7A     		ldrb	r2, [r7, #11]	@ zero_extendqisi2
+ 345 01d6 BB7A     		ldrb	r3, [r7, #10]	@ zero_extendqisi2
+ 346 01d8 1344     		add	r3, r3, r2
+ 347 01da 7F2B     		cmp	r3, #127
+ 348 01dc 01DD     		ble	.L17
+ 349              	.L16:
+ 142:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****       return E_FAIL;
+ 350              		.loc 1 142 0 is_stmt 1
+ 351 01de 0123     		movs	r3, #1
+ 352 01e0 FAE0     		b	.L29
+ 353              	.L17:
+ 143:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    }
+ 144:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** 
+ 145:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    if (mac == 0) {
+ 354              		.loc 1 145 0
+ 355 01e2 D7F8E030 		ldr	r3, [r7, #224]
+ 356 01e6 002B     		cmp	r3, #0
+ 357 01e8 01D1     		bne	.L18
+ 146:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****       return E_FAIL;
+ 358              		.loc 1 146 0
+ 359 01ea 0123     		movs	r3, #1
+ 360 01ec F4E0     		b	.L29
+ 361              	.L18:
+ 147:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    }
+ 148:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** 
+ 149:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    memset(cbc_mac_iv, 0x00, 16); // CBC-MAC Initialization Vector is a zero string
+ 362              		.loc 1 149 0
+ 363 01ee 07F1B403 		add	r3, r7, #180
+ 364 01f2 1846     		mov	r0, r3
+ 365 01f4 0021     		movs	r1, #0
+ 366 01f6 1022     		movs	r2, #16
+ 367 01f8 FFF7FEFF 		bl	memset
+ 150:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** 
+ 151:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    // IV: flags (1B) | SADDR (8B) | ASN (5B) | len(m) (2B)
+ 152:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    // X0 xor IV in first 16 bytes of buffer: set buffer[:16] as IV)
+ 153:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    buffer[0] = 0x00; // set flags to zero including reserved
+ 368              		.loc 1 153 0
+ 369 01fc 0023     		movs	r3, #0
+ 370 01fe 3B75     		strb	r3, [r7, #20]
+ 154:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    buffer[0] |= 0x07 & (l-1); // field L
+ 371              		.loc 1 154 0
+ 372 0200 3B7D     		ldrb	r3, [r7, #20]	@ zero_extendqisi2
+ 373 0202 DAB2     		uxtb	r2, r3
+ 374 0204 97F8E830 		ldrb	r3, [r7, #232]
+ 375 0208 013B     		subs	r3, r3, #1
+ 376 020a DBB2     		uxtb	r3, r3
+ 377 020c DBB2     		uxtb	r3, r3
+ 378 020e 03F00703 		and	r3, r3, #7
+ 379 0212 DBB2     		uxtb	r3, r3
+ 380 0214 1343     		orrs	r3, r3, r2
+ 381 0216 DBB2     		uxtb	r3, r3
+ 382 0218 DBB2     		uxtb	r3, r3
+ 383 021a 3B75     		strb	r3, [r7, #20]
+ 155:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    // (len_mac - 2)/2 shifted left 3 times corresponds to (len_mac - 2) << 2
+ 156:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    buffer[0] |= len_mac == 0 ? 0 : (0x07 & (len_mac - 2)) << 2; // field M
+ 384              		.loc 1 156 0
+ 385 021c 3B7D     		ldrb	r3, [r7, #20]	@ zero_extendqisi2
+ 386 021e DAB2     		uxtb	r2, r3
+ 387 0220 97F8E430 		ldrb	r3, [r7, #228]	@ zero_extendqisi2
+ 388 0224 002B     		cmp	r3, #0
+ 389 0226 07D0     		beq	.L19
+ 390              		.loc 1 156 0 is_stmt 0 discriminator 1
+ 391 0228 97F8E430 		ldrb	r3, [r7, #228]	@ zero_extendqisi2
+ 392 022c 023B     		subs	r3, r3, #2
+ 393 022e 03F00703 		and	r3, r3, #7
+ 394 0232 9B00     		lsls	r3, r3, #2
+ 395 0234 DBB2     		uxtb	r3, r3
+ 396 0236 00E0     		b	.L20
+ 397              	.L19:
+ 398              		.loc 1 156 0 discriminator 2
+ 399 0238 0023     		movs	r3, #0
+ 400              	.L20:
+ 401              		.loc 1 156 0 discriminator 4
+ 402 023a 1343     		orrs	r3, r3, r2
+ 403 023c DBB2     		uxtb	r3, r3
+ 404 023e DBB2     		uxtb	r3, r3
+ 405 0240 3B75     		strb	r3, [r7, #20]
+ 157:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    buffer[0] |= len_a != 0 ? 0x40 : 0; // field Adata
+ 406              		.loc 1 157 0 is_stmt 1 discriminator 4
+ 407 0242 3B7D     		ldrb	r3, [r7, #20]	@ zero_extendqisi2
+ 408 0244 DAB2     		uxtb	r2, r3
+ 409 0246 FB7A     		ldrb	r3, [r7, #11]	@ zero_extendqisi2
+ 410 0248 002B     		cmp	r3, #0
+ 411 024a 01D0     		beq	.L21
+ 412              		.loc 1 157 0 is_stmt 0 discriminator 1
+ 413 024c 4023     		movs	r3, #64
+ 414 024e 00E0     		b	.L22
+ 415              	.L21:
+ 416              		.loc 1 157 0 discriminator 2
+ 417 0250 0023     		movs	r3, #0
+ 418              	.L22:
+ 419              		.loc 1 157 0 discriminator 4
+ 420 0252 1343     		orrs	r3, r3, r2
+ 421 0254 DBB2     		uxtb	r3, r3
+ 422 0256 DBB2     		uxtb	r3, r3
+ 423 0258 3B75     		strb	r3, [r7, #20]
+ 158:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    
+ 159:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    memcpy(&buffer[1], nonce, 13);
+ 424              		.loc 1 159 0 is_stmt 1 discriminator 4
+ 425 025a 07F11403 		add	r3, r7, #20
+ 426 025e 0133     		adds	r3, r3, #1
+ 427 0260 1846     		mov	r0, r3
+ 428 0262 D7F8D810 		ldr	r1, [r7, #216]
+ 429 0266 0D22     		movs	r2, #13
+ 430 0268 FFF7FEFF 		bl	memcpy
+ 160:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** 
+ 161:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    if (l == 3) {
+ 431              		.loc 1 161 0 discriminator 4
+ 432 026c 97F8E830 		ldrb	r3, [r7, #232]	@ zero_extendqisi2
+ 433 0270 032B     		cmp	r3, #3
+ 434 0272 02D1     		bne	.L23
+ 162:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****       buffer[13] = 0;
+ 435              		.loc 1 162 0
+ 436 0274 0023     		movs	r3, #0
+ 437 0276 87F82130 		strb	r3, [r7, #33]
+ 438              	.L23:
+ 163:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    }
+ 164:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** 
+ 165:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    buffer[14] = 0;
+ 439              		.loc 1 165 0
+ 440 027a 0023     		movs	r3, #0
+ 441 027c 87F82230 		strb	r3, [r7, #34]
+ 166:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    buffer[15] = len_m;
+ 442              		.loc 1 166 0
+ 443 0280 BB7A     		ldrb	r3, [r7, #10]
+ 444 0282 87F82330 		strb	r3, [r7, #35]
+ 167:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** 
+ 168:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    len = 16;
+ 445              		.loc 1 168 0
+ 446 0286 1023     		movs	r3, #16
+ 447 0288 87F8C730 		strb	r3, [r7, #199]
+ 169:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    // len(a)
+ 170:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    if(len_a > 0) {
+ 448              		.loc 1 170 0
+ 449 028c FB7A     		ldrb	r3, [r7, #11]	@ zero_extendqisi2
+ 450 028e 002B     		cmp	r3, #0
+ 451 0290 0AD0     		beq	.L24
+ 171:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****       buffer[16] = 0;
+ 452              		.loc 1 171 0
+ 453 0292 0023     		movs	r3, #0
+ 454 0294 87F82430 		strb	r3, [r7, #36]
+ 172:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****       buffer[17] = len_a;
+ 455              		.loc 1 172 0
+ 456 0298 FB7A     		ldrb	r3, [r7, #11]
+ 457 029a 87F82530 		strb	r3, [r7, #37]
+ 173:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****       len += 2;
+ 458              		.loc 1 173 0
+ 459 029e 97F8C730 		ldrb	r3, [r7, #199]
+ 460 02a2 0233     		adds	r3, r3, #2
+ 461 02a4 87F8C730 		strb	r3, [r7, #199]
+ 462              	.L24:
+ 174:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    }
+ 175:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** 
+ 176:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    //  (((x >> 4) + 1)<<4) - x   or    16 - (x % 16) ?
+ 177:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    // a + padding
+ 178:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    pad_len = ((((len_a + len - 16) >> 4) + 1) << 4) - (len_a + len - 16);
+ 463              		.loc 1 178 0
+ 464 02a8 FA7A     		ldrb	r2, [r7, #11]	@ zero_extendqisi2
+ 465 02aa 97F8C730 		ldrb	r3, [r7, #199]	@ zero_extendqisi2
+ 466 02ae 1344     		add	r3, r3, r2
+ 467 02b0 103B     		subs	r3, r3, #16
+ 468 02b2 1B11     		asrs	r3, r3, #4
+ 469 02b4 DBB2     		uxtb	r3, r3
+ 470 02b6 0133     		adds	r3, r3, #1
+ 471 02b8 DBB2     		uxtb	r3, r3
+ 472 02ba 1B01     		lsls	r3, r3, #4
+ 473 02bc DAB2     		uxtb	r2, r3
+ 474 02be F97A     		ldrb	r1, [r7, #11]
+ 475 02c0 97F8C730 		ldrb	r3, [r7, #199]
+ 476 02c4 0B44     		add	r3, r3, r1
+ 477 02c6 DBB2     		uxtb	r3, r3
+ 478 02c8 D31A     		subs	r3, r2, r3
+ 479 02ca DBB2     		uxtb	r3, r3
+ 480 02cc 1033     		adds	r3, r3, #16
+ 481 02ce 87F8C630 		strb	r3, [r7, #198]
+ 179:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    pad_len = pad_len == 16 ? 0 : pad_len;
+ 482              		.loc 1 179 0
+ 483 02d2 97F8C630 		ldrb	r3, [r7, #198]	@ zero_extendqisi2
+ 484 02d6 102B     		cmp	r3, #16
+ 485 02d8 02D0     		beq	.L25
+ 486              		.loc 1 179 0 is_stmt 0 discriminator 1
+ 487 02da 97F8C630 		ldrb	r3, [r7, #198]	@ zero_extendqisi2
+ 488 02de 00E0     		b	.L26
+ 489              	.L25:
+ 490              		.loc 1 179 0 discriminator 2
+ 491 02e0 0023     		movs	r3, #0
+ 492              	.L26:
+ 493              		.loc 1 179 0 discriminator 4
+ 494 02e2 87F8C630 		strb	r3, [r7, #198]
+ 180:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    memcpy(&buffer[len], a, len_a);
+ 495              		.loc 1 180 0 is_stmt 1 discriminator 4
+ 496 02e6 97F8C730 		ldrb	r3, [r7, #199]	@ zero_extendqisi2
+ 497 02ea 07F11402 		add	r2, r7, #20
+ 498 02ee 1A44     		add	r2, r2, r3
+ 499 02f0 FB7A     		ldrb	r3, [r7, #11]	@ zero_extendqisi2
+ 500 02f2 1046     		mov	r0, r2
+ 501 02f4 F968     		ldr	r1, [r7, #12]
+ 502 02f6 1A46     		mov	r2, r3
+ 503 02f8 FFF7FEFF 		bl	memcpy
+ 181:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    len += len_a;
+ 504              		.loc 1 181 0 discriminator 4
+ 505 02fc 97F8C720 		ldrb	r2, [r7, #199]
+ 506 0300 FB7A     		ldrb	r3, [r7, #11]
+ 507 0302 1344     		add	r3, r3, r2
+ 508 0304 87F8C730 		strb	r3, [r7, #199]
+ 182:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    memset(&buffer[len], 0, pad_len);
+ 509              		.loc 1 182 0 discriminator 4
+ 510 0308 97F8C730 		ldrb	r3, [r7, #199]	@ zero_extendqisi2
+ 511 030c 07F11402 		add	r2, r7, #20
+ 512 0310 1A44     		add	r2, r2, r3
+ 513 0312 97F8C630 		ldrb	r3, [r7, #198]	@ zero_extendqisi2
+ 514 0316 1046     		mov	r0, r2
+ 515 0318 0021     		movs	r1, #0
+ 516 031a 1A46     		mov	r2, r3
+ 517 031c FFF7FEFF 		bl	memset
+ 183:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    len += pad_len;
+ 518              		.loc 1 183 0 discriminator 4
+ 519 0320 97F8C720 		ldrb	r2, [r7, #199]
+ 520 0324 97F8C630 		ldrb	r3, [r7, #198]
+ 521 0328 1344     		add	r3, r3, r2
+ 522 032a 87F8C730 		strb	r3, [r7, #199]
+ 184:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** 
+ 185:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    // m + padding
+ 186:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    pad_len = (((len_m >> 4) + 1) << 4) - len_m;
+ 523              		.loc 1 186 0 discriminator 4
+ 524 032e BB7A     		ldrb	r3, [r7, #10]	@ zero_extendqisi2
+ 525 0330 1B09     		lsrs	r3, r3, #4
+ 526 0332 DBB2     		uxtb	r3, r3
+ 527 0334 0133     		adds	r3, r3, #1
+ 528 0336 DBB2     		uxtb	r3, r3
+ 529 0338 1B01     		lsls	r3, r3, #4
+ 530 033a DAB2     		uxtb	r2, r3
+ 531 033c BB7A     		ldrb	r3, [r7, #10]
+ 532 033e D31A     		subs	r3, r2, r3
+ 533 0340 87F8C630 		strb	r3, [r7, #198]
+ 187:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    pad_len = pad_len == 16 ? 0 : pad_len;
+ 534              		.loc 1 187 0 discriminator 4
+ 535 0344 97F8C630 		ldrb	r3, [r7, #198]	@ zero_extendqisi2
+ 536 0348 102B     		cmp	r3, #16
+ 537 034a 02D0     		beq	.L27
+ 538              		.loc 1 187 0 is_stmt 0 discriminator 1
+ 539 034c 97F8C630 		ldrb	r3, [r7, #198]	@ zero_extendqisi2
+ 540 0350 00E0     		b	.L28
+ 541              	.L27:
+ 542              		.loc 1 187 0 discriminator 2
+ 543 0352 0023     		movs	r3, #0
+ 544              	.L28:
+ 545              		.loc 1 187 0 discriminator 4
+ 546 0354 87F8C630 		strb	r3, [r7, #198]
+ 188:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    memcpy(&buffer[len], m, len_m);
+ 547              		.loc 1 188 0 is_stmt 1 discriminator 4
+ 548 0358 97F8C730 		ldrb	r3, [r7, #199]	@ zero_extendqisi2
+ 549 035c 07F11402 		add	r2, r7, #20
+ 550 0360 1A44     		add	r2, r2, r3
+ 551 0362 BB7A     		ldrb	r3, [r7, #10]	@ zero_extendqisi2
+ 552 0364 1046     		mov	r0, r2
+ 553 0366 7968     		ldr	r1, [r7, #4]
+ 554 0368 1A46     		mov	r2, r3
+ 555 036a FFF7FEFF 		bl	memcpy
+ 189:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    len += len_m;
+ 556              		.loc 1 189 0 discriminator 4
+ 557 036e 97F8C720 		ldrb	r2, [r7, #199]
+ 558 0372 BB7A     		ldrb	r3, [r7, #10]
+ 559 0374 1344     		add	r3, r3, r2
+ 560 0376 87F8C730 		strb	r3, [r7, #199]
+ 190:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    memset(&buffer[len], 0, pad_len);
+ 561              		.loc 1 190 0 discriminator 4
+ 562 037a 97F8C730 		ldrb	r3, [r7, #199]	@ zero_extendqisi2
+ 563 037e 07F11402 		add	r2, r7, #20
+ 564 0382 1A44     		add	r2, r2, r3
+ 565 0384 97F8C630 		ldrb	r3, [r7, #198]	@ zero_extendqisi2
+ 566 0388 1046     		mov	r0, r2
+ 567 038a 0021     		movs	r1, #0
+ 568 038c 1A46     		mov	r2, r3
+ 569 038e FFF7FEFF 		bl	memset
+ 191:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    len += pad_len;
+ 570              		.loc 1 191 0 discriminator 4
+ 571 0392 97F8C720 		ldrb	r2, [r7, #199]
+ 572 0396 97F8C630 		ldrb	r3, [r7, #198]
+ 573 039a 1344     		add	r3, r3, r2
+ 574 039c 87F8C730 		strb	r3, [r7, #199]
+ 192:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** 
+ 193:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    CRYPTO_ENGINE.aes_cbc_enc_raw(buffer, len, key, cbc_mac_iv);
+ 575              		.loc 1 193 0 discriminator 4
+ 576 03a0 0F4B     		ldr	r3, .L30
+ 577 03a2 9C68     		ldr	r4, [r3, #8]
+ 578 03a4 07F11401 		add	r1, r7, #20
+ 579 03a8 97F8C720 		ldrb	r2, [r7, #199]	@ zero_extendqisi2
+ 580 03ac 07F1B403 		add	r3, r7, #180
+ 581 03b0 0846     		mov	r0, r1
+ 582 03b2 1146     		mov	r1, r2
+ 583 03b4 D7F8DC20 		ldr	r2, [r7, #220]
+ 584 03b8 A047     		blx	r4
+ 194:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** 
+ 195:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    // copy MAC
+ 196:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    memcpy(mac, &buffer[len - 16], len_mac);
+ 585              		.loc 1 196 0 discriminator 4
+ 586 03ba 97F8C730 		ldrb	r3, [r7, #199]	@ zero_extendqisi2
+ 587 03be 103B     		subs	r3, r3, #16
+ 588 03c0 07F11402 		add	r2, r7, #20
+ 589 03c4 1A44     		add	r2, r2, r3
+ 590 03c6 97F8E430 		ldrb	r3, [r7, #228]	@ zero_extendqisi2
+ 591 03ca D7F8E000 		ldr	r0, [r7, #224]
+ 592 03ce 1146     		mov	r1, r2
+ 593 03d0 1A46     		mov	r2, r3
+ 594 03d2 FFF7FEFF 		bl	memcpy
+ 197:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** 
+ 198:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    return E_SUCCESS;
+ 595              		.loc 1 198 0 discriminator 4
+ 596 03d6 0023     		movs	r3, #0
+ 597              	.L29:
+ 199:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** }
+ 598              		.loc 1 199 0 discriminator 1
+ 599 03d8 1846     		mov	r0, r3
+ 600 03da CC37     		adds	r7, r7, #204
+ 601              		.cfi_def_cfa_offset 12
+ 602 03dc BD46     		mov	sp, r7
+ 603              		.cfi_def_cfa_register 13
+ 604              		@ sp needed
+ 605 03de 90BD     		pop	{r4, r7, pc}
+ 606              	.L31:
+ 607              		.align	2
+ 608              	.L30:
+ 609 03e0 00000000 		.word	board_crypto_engine
+ 610              		.cfi_endproc
+ 611              	.LFE2:
+ 613              		.align	2
+ 614              		.thumb
+ 615              		.thumb_func
+ 617              	aes_ctr_enc:
+ 618              	.LFB3:
+ 200:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** 
+ 201:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** /**
+ 202:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** \brief Counter (CTR) mode encryption specific to IEEE 802.15.4E.
+ 203:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** \param[in,out] m Pointer to the data that is both authenticated and encrypted. Data is
+ 204:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    overwritten by ciphertext (i.e. plaintext in case of inverse CCM*).
+ 205:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** \param[in] len_m Length of data that is both authenticated and encrypted.
+ 206:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** \param[in] nonce Buffer containing nonce (13 octets).
+ 207:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** \param[in] key Buffer containing the secret key (16 octets).
+ 208:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** \param[in,out] mac Buffer containing the unencrypted or encrypted CBC-MAC tag, which depends
+ 209:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    on weather the function is called as part of CCM* forward or inverse transformation. It
+ 210:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    is overwrriten by the encrypted, i.e unencrypted, tag on return.
+ 211:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** \param[in] len_mac Length of the CBC-MAC tag. Must be 4, 8 or 16 octets.
+ 212:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** \param[in] l CCM parameter L that allows selection of different nonce length.
+ 213:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** 
+ 214:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** \returns E_SUCCESS when the encryption was successful, E_FAIL otherwise. 
+ 215:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** */
+ 216:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** static owerror_t aes_ctr_enc(uint8_t* m,
+ 217:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****          uint8_t len_m,
+ 218:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****          uint8_t* nonce,
+ 219:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****          uint8_t key[16],
+ 220:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****          uint8_t* mac,
+ 221:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****          uint8_t len_mac,
+ 222:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****          uint8_t l) {
+ 619              		.loc 1 222 0
+ 620              		.cfi_startproc
+ 621              		@ args = 12, pretend = 0, frame = 184
+ 622              		@ frame_needed = 1, uses_anonymous_args = 0
+ 623 03e4 90B5     		push	{r4, r7, lr}
+ 624              		.cfi_def_cfa_offset 12
+ 625              		.cfi_offset 4, -12
+ 626              		.cfi_offset 7, -8
+ 627              		.cfi_offset 14, -4
+ 628 03e6 AFB0     		sub	sp, sp, #188
+ 629              		.cfi_def_cfa_offset 200
+ 630 03e8 00AF     		add	r7, sp, #0
+ 631              		.cfi_def_cfa_register 7
+ 632 03ea F860     		str	r0, [r7, #12]
+ 633 03ec 7A60     		str	r2, [r7, #4]
+ 634 03ee 3B60     		str	r3, [r7]
+ 635 03f0 0B46     		mov	r3, r1
+ 636 03f2 FB72     		strb	r3, [r7, #11]
+ 223:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** 
+ 224:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    uint8_t pad_len;
+ 225:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    uint8_t len;
+ 226:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    uint8_t iv[16];
+ 227:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    uint8_t buffer[128 + 16]; // max buffer plus mac
+ 228:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** 
+ 229:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    // asserts here
+ 230:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    if (!((len_mac == 0) || (len_mac == 4) || (len_mac == 8) || (len_mac == 16))) {
+ 637              		.loc 1 230 0
+ 638 03f4 97F8CC30 		ldrb	r3, [r7, #204]	@ zero_extendqisi2
+ 639 03f8 002B     		cmp	r3, #0
+ 640 03fa 0DD0     		beq	.L33
+ 641              		.loc 1 230 0 is_stmt 0 discriminator 1
+ 642 03fc 97F8CC30 		ldrb	r3, [r7, #204]	@ zero_extendqisi2
+ 643 0400 042B     		cmp	r3, #4
+ 644 0402 09D0     		beq	.L33
+ 645              		.loc 1 230 0 discriminator 2
+ 646 0404 97F8CC30 		ldrb	r3, [r7, #204]	@ zero_extendqisi2
+ 647 0408 082B     		cmp	r3, #8
+ 648 040a 05D0     		beq	.L33
+ 649              		.loc 1 230 0 discriminator 3
+ 650 040c 97F8CC30 		ldrb	r3, [r7, #204]	@ zero_extendqisi2
+ 651 0410 102B     		cmp	r3, #16
+ 652 0412 01D0     		beq	.L33
+ 231:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****       return E_FAIL;
+ 653              		.loc 1 231 0 is_stmt 1
+ 654 0414 0123     		movs	r3, #1
+ 655 0416 99E0     		b	.L38
+ 656              	.L33:
+ 232:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    }
+ 233:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** 
+ 234:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    if (len_m > 127) {
+ 657              		.loc 1 234 0
+ 658 0418 FB7A     		ldrb	r3, [r7, #11]	@ zero_extendqisi2
+ 659 041a 5BB2     		sxtb	r3, r3
+ 660 041c 002B     		cmp	r3, #0
+ 661 041e 01DA     		bge	.L35
+ 235:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****       return E_FAIL;
+ 662              		.loc 1 235 0
+ 663 0420 0123     		movs	r3, #1
+ 664 0422 93E0     		b	.L38
+ 665              	.L35:
+ 236:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    }
+ 237:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** 
+ 238:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    // iv (flag (1B) | source addr (8B) | ASN (5B) | cnt (2B)
+ 239:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    iv[0] = 0x00;
+ 666              		.loc 1 239 0
+ 667 0424 0023     		movs	r3, #0
+ 668 0426 87F8A430 		strb	r3, [r7, #164]
+ 240:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    iv[0] |= 0x07 & (l-1); // field L
+ 669              		.loc 1 240 0
+ 670 042a 97F8A430 		ldrb	r3, [r7, #164]	@ zero_extendqisi2
+ 671 042e DAB2     		uxtb	r2, r3
+ 672 0430 97F8D030 		ldrb	r3, [r7, #208]
+ 673 0434 013B     		subs	r3, r3, #1
+ 674 0436 DBB2     		uxtb	r3, r3
+ 675 0438 DBB2     		uxtb	r3, r3
+ 676 043a 03F00703 		and	r3, r3, #7
+ 677 043e DBB2     		uxtb	r3, r3
+ 678 0440 1343     		orrs	r3, r3, r2
+ 679 0442 DBB2     		uxtb	r3, r3
+ 680 0444 DBB2     		uxtb	r3, r3
+ 681 0446 87F8A430 		strb	r3, [r7, #164]
+ 241:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** 
+ 242:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    memcpy(&iv[1], nonce, 13);
+ 682              		.loc 1 242 0
+ 683 044a 07F1A403 		add	r3, r7, #164
+ 684 044e 0133     		adds	r3, r3, #1
+ 685 0450 1846     		mov	r0, r3
+ 686 0452 7968     		ldr	r1, [r7, #4]
+ 687 0454 0D22     		movs	r2, #13
+ 688 0456 FFF7FEFF 		bl	memcpy
+ 243:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    iv[14] = 0x00;
+ 689              		.loc 1 243 0
+ 690 045a 0023     		movs	r3, #0
+ 691 045c 87F8B230 		strb	r3, [r7, #178]
+ 244:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    iv[15] = 0x00;
+ 692              		.loc 1 244 0
+ 693 0460 0023     		movs	r3, #0
+ 694 0462 87F8B330 		strb	r3, [r7, #179]
+ 245:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** 
+ 246:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    // first block is mac
+ 247:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    memcpy(buffer, mac, len_mac);
+ 695              		.loc 1 247 0
+ 696 0466 97F8CC30 		ldrb	r3, [r7, #204]	@ zero_extendqisi2
+ 697 046a 07F11402 		add	r2, r7, #20
+ 698 046e 1046     		mov	r0, r2
+ 699 0470 D7F8C810 		ldr	r1, [r7, #200]
+ 700 0474 1A46     		mov	r2, r3
+ 701 0476 FFF7FEFF 		bl	memcpy
+ 248:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    memset(&buffer[len_mac], 0, 16 - len_mac);
+ 702              		.loc 1 248 0
+ 703 047a 97F8CC30 		ldrb	r3, [r7, #204]	@ zero_extendqisi2
+ 704 047e 07F11402 		add	r2, r7, #20
+ 705 0482 1A44     		add	r2, r2, r3
+ 706 0484 97F8CC30 		ldrb	r3, [r7, #204]	@ zero_extendqisi2
+ 707 0488 C3F11003 		rsb	r3, r3, #16
+ 708 048c 1046     		mov	r0, r2
+ 709 048e 0021     		movs	r1, #0
+ 710 0490 1A46     		mov	r2, r3
+ 711 0492 FFF7FEFF 		bl	memset
+ 249:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    len = 16;
+ 712              		.loc 1 249 0
+ 713 0496 1023     		movs	r3, #16
+ 714 0498 87F8B730 		strb	r3, [r7, #183]
+ 250:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** 
+ 251:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    //  (((x >> 4) + 1)<<4) - x   or    16 - (x % 16) ?
+ 252:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    // m + padding
+ 253:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    pad_len = (((len_m >> 4) + 1) << 4) - len_m;
+ 715              		.loc 1 253 0
+ 716 049c FB7A     		ldrb	r3, [r7, #11]	@ zero_extendqisi2
+ 717 049e 1B09     		lsrs	r3, r3, #4
+ 718 04a0 DBB2     		uxtb	r3, r3
+ 719 04a2 0133     		adds	r3, r3, #1
+ 720 04a4 DBB2     		uxtb	r3, r3
+ 721 04a6 1B01     		lsls	r3, r3, #4
+ 722 04a8 DAB2     		uxtb	r2, r3
+ 723 04aa FB7A     		ldrb	r3, [r7, #11]
+ 724 04ac D31A     		subs	r3, r2, r3
+ 725 04ae 87F8B630 		strb	r3, [r7, #182]
+ 254:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    pad_len = pad_len == 16 ? 0 : pad_len;
+ 726              		.loc 1 254 0
+ 727 04b2 97F8B630 		ldrb	r3, [r7, #182]	@ zero_extendqisi2
+ 728 04b6 102B     		cmp	r3, #16
+ 729 04b8 02D0     		beq	.L36
+ 730              		.loc 1 254 0 is_stmt 0 discriminator 1
+ 731 04ba 97F8B630 		ldrb	r3, [r7, #182]	@ zero_extendqisi2
+ 732 04be 00E0     		b	.L37
+ 733              	.L36:
+ 734              		.loc 1 254 0 discriminator 2
+ 735 04c0 0023     		movs	r3, #0
+ 736              	.L37:
+ 737              		.loc 1 254 0 discriminator 4
+ 738 04c2 87F8B630 		strb	r3, [r7, #182]
+ 255:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    memcpy(&buffer[len], m, len_m);
+ 739              		.loc 1 255 0 is_stmt 1 discriminator 4
+ 740 04c6 97F8B730 		ldrb	r3, [r7, #183]	@ zero_extendqisi2
+ 741 04ca 07F11402 		add	r2, r7, #20
+ 742 04ce 1A44     		add	r2, r2, r3
+ 743 04d0 FB7A     		ldrb	r3, [r7, #11]	@ zero_extendqisi2
+ 744 04d2 1046     		mov	r0, r2
+ 745 04d4 F968     		ldr	r1, [r7, #12]
+ 746 04d6 1A46     		mov	r2, r3
+ 747 04d8 FFF7FEFF 		bl	memcpy
+ 256:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    len += len_m;
+ 748              		.loc 1 256 0 discriminator 4
+ 749 04dc 97F8B720 		ldrb	r2, [r7, #183]
+ 750 04e0 FB7A     		ldrb	r3, [r7, #11]
+ 751 04e2 1344     		add	r3, r3, r2
+ 752 04e4 87F8B730 		strb	r3, [r7, #183]
+ 257:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    memset(&buffer[len], 0, pad_len);
+ 753              		.loc 1 257 0 discriminator 4
+ 754 04e8 97F8B730 		ldrb	r3, [r7, #183]	@ zero_extendqisi2
+ 755 04ec 07F11402 		add	r2, r7, #20
+ 756 04f0 1A44     		add	r2, r2, r3
+ 757 04f2 97F8B630 		ldrb	r3, [r7, #182]	@ zero_extendqisi2
+ 758 04f6 1046     		mov	r0, r2
+ 759 04f8 0021     		movs	r1, #0
+ 760 04fa 1A46     		mov	r2, r3
+ 761 04fc FFF7FEFF 		bl	memset
+ 258:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    len += pad_len;
+ 762              		.loc 1 258 0 discriminator 4
+ 763 0500 97F8B720 		ldrb	r2, [r7, #183]
+ 764 0504 97F8B630 		ldrb	r3, [r7, #182]
+ 765 0508 1344     		add	r3, r3, r2
+ 766 050a 87F8B730 		strb	r3, [r7, #183]
+ 259:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** 
+ 260:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    CRYPTO_ENGINE.aes_ctr_enc_raw(buffer, len, key, iv);
+ 767              		.loc 1 260 0 discriminator 4
+ 768 050e 114B     		ldr	r3, .L39
+ 769 0510 DC68     		ldr	r4, [r3, #12]
+ 770 0512 07F11401 		add	r1, r7, #20
+ 771 0516 97F8B720 		ldrb	r2, [r7, #183]	@ zero_extendqisi2
+ 772 051a 07F1A403 		add	r3, r7, #164
+ 773 051e 0846     		mov	r0, r1
+ 774 0520 1146     		mov	r1, r2
+ 775 0522 3A68     		ldr	r2, [r7]
+ 776 0524 A047     		blx	r4
+ 261:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** 
+ 262:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    memcpy(m, &buffer[16], len_m);
+ 777              		.loc 1 262 0 discriminator 4
+ 778 0526 FA7A     		ldrb	r2, [r7, #11]	@ zero_extendqisi2
+ 779 0528 07F11403 		add	r3, r7, #20
+ 780 052c 1033     		adds	r3, r3, #16
+ 781 052e F868     		ldr	r0, [r7, #12]
+ 782 0530 1946     		mov	r1, r3
+ 783 0532 FFF7FEFF 		bl	memcpy
+ 263:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    memcpy(mac, buffer, len_mac);
+ 784              		.loc 1 263 0 discriminator 4
+ 785 0536 97F8CC30 		ldrb	r3, [r7, #204]	@ zero_extendqisi2
+ 786 053a 07F11402 		add	r2, r7, #20
+ 787 053e D7F8C800 		ldr	r0, [r7, #200]
+ 788 0542 1146     		mov	r1, r2
+ 789 0544 1A46     		mov	r2, r3
+ 790 0546 FFF7FEFF 		bl	memcpy
+ 264:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** 
+ 265:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c ****    return E_SUCCESS;
+ 791              		.loc 1 265 0 discriminator 4
+ 792 054a 0023     		movs	r3, #0
+ 793              	.L38:
+ 266:build/OpenMote-CC2538_armgcc/bsp/boards/common/aes_ccms.c **** }
+ 794              		.loc 1 266 0 discriminator 1
+ 795 054c 1846     		mov	r0, r3
+ 796 054e BC37     		adds	r7, r7, #188
+ 797              		.cfi_def_cfa_offset 12
+ 798 0550 BD46     		mov	sp, r7
+ 799              		.cfi_def_cfa_register 13
+ 800              		@ sp needed
+ 801 0552 90BD     		pop	{r4, r7, pc}
+ 802              	.L40:
+ 803              		.align	2
+ 804              	.L39:
+ 805 0554 00000000 		.word	board_crypto_engine
+ 806              		.cfi_endproc
+ 807              	.LFE3:
+ 809              	.Letext0:
+ 810              		.file 2 "/usr/arm-none-eabi/include/machine/_default_types.h"
+ 811              		.file 3 "/usr/arm-none-eabi/include/sys/_stdint.h"
+ 812              		.file 4 "inc/opendefs.h"
+ 813              		.file 5 "bsp/boards/crypto_engine.h"
+ 814              		.file 6 "bsp/boards/OpenMote-CC2538/board_info.h"
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 aes_ccms.c
+     /tmp/ccAKLCmW.s:19     .rodata:0000000000000000 $d
+     /tmp/ccAKLCmW.s:22     .rodata:0000000000000000 rreg_uriquery
+     /tmp/ccAKLCmW.s:27     .rodata:0000000000000008 infoBoardname
+     /tmp/ccAKLCmW.s:32     .rodata:0000000000000010 infouCName
+     /tmp/ccAKLCmW.s:37     .rodata:0000000000000018 infoRadioName
+     /tmp/ccAKLCmW.s:42     .rodata:0000000000000024 infoStackName
+     /tmp/ccAKLCmW.s:45     .text:0000000000000000 $t
+     /tmp/ccAKLCmW.s:50     .text:0000000000000000 aes_ccms_enc
+     /tmp/ccAKLCmW.s:291    .text:000000000000018c aes_cbc_mac
+     /tmp/ccAKLCmW.s:617    .text:00000000000003e4 aes_ctr_enc
+     /tmp/ccAKLCmW.s:166    .text:00000000000000b8 aes_ccms_dec
+     /tmp/ccAKLCmW.s:609    .text:00000000000003e0 $d
+     /tmp/ccAKLCmW.s:613    .text:00000000000003e4 $t
+     /tmp/ccAKLCmW.s:805    .text:0000000000000554 $d
+                     .debug_frame:0000000000000010 $d
+                           .group:0000000000000000 wm4.0.59116071098782a37a9183a8102fe91b
+                           .group:0000000000000000 wm4.newlib.h.8.2702bca278809460f0af6fba1d84eb68
+                           .group:0000000000000000 wm4.features.h.22.2e382148a0560adabf236cddd4e880f4
+                           .group:0000000000000000 wm4.config.h.220.a09b0b0de3c25be3f39d71990e617bff
+                           .group:0000000000000000 wm4._ansi.h.23.84af8eb8cd468d25cc5f45f5eb13ec51
+                           .group:0000000000000000 wm4.stddef.h.39.daafd3d79fe2f3a84d2d73d7d4e706f8
+                           .group:0000000000000000 wm4._default_types.h.6.35ee9e747940367bf2a634907d1c2382
+                           .group:0000000000000000 wm4.lock.h.2.9bc98482741e5e2a9450b12934a684ea
+                           .group:0000000000000000 wm4._types.h.54.d3d34a3b7f3cc230cd159baf022b4b08
+                           .group:0000000000000000 wm4.stddef.h.158.61317cdbfb4026324507d123a50b0fd6
+                           .group:0000000000000000 wm4.reent.h.17.8bd9e4098e0428508c282cad794fae43
+                           .group:0000000000000000 wm4.cdefs.h.47.e6563c1c3863188ba4ac4eaa2c85b6f1
+                           .group:0000000000000000 wm4.string.h.15.dab3980bf35408a4c507182805e2de3a
+                           .group:0000000000000000 wm4.stddef.h.158.a7efb00f6cbc6f43213b50e183c9830c
+                           .group:0000000000000000 wm4._intsup.h.10.35a45952db64d30146faa63a55c20c1c
+                           .group:0000000000000000 wm4._stdint.h.10.f76354baea1c7088202064e6f3d4f5e3
+                           .group:0000000000000000 wm4.stdint.h.23.373a9d32a9e4c2e88fd347156532d281
+                           .group:0000000000000000 wm4.toolchain_defs.h.2.e4ebbe6e0a48032a9b79077dc42e1ffd
+                           .group:0000000000000000 wm4.stdbool.h.29.1c9ee6859ce8145f7838a4f2549ccec2
+                           .group:0000000000000000 wm4.hw_types.h.67.b10589a0806dcc2d274d6fab6b736519
+                           .group:0000000000000000 wm4.interrupt.h.41.272fc4ec0e276feb439e7974d0f77eaf
+                           .group:0000000000000000 wm4.board_info.h.22.aeb00002354a4949fff54190040e37af
+                           .group:0000000000000000 wm4.opendefs.h.23.bdaf9c024be66ead04de21e3ce3dfaf2
+                           .group:0000000000000000 wm4.crypto_engine.h.8.a3dd976cbcb92c44f852cc7aa252f659
+
+UNDEFINED SYMBOLS
+memcpy
+memcmp
+memset
+board_crypto_engine

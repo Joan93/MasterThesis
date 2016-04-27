@@ -1,0 +1,415 @@
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 6
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.file	"openhdlc.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.section	.rodata
+  19              		.align	2
+  22              	rreg_uriquery:
+  23 0000 683D7563 		.ascii	"h=ucb\000"
+  23      6200
+  24 0006 0000     		.align	2
+  27              	infoBoardname:
+  28 0008 43433235 		.ascii	"CC2538\000"
+  28      333800
+  29 000f 00       		.align	2
+  32              	infouCName:
+  33 0010 43433235 		.ascii	"CC2538\000"
+  33      333800
+  34 0017 00       		.align	2
+  37              	infoRadioName:
+  38 0018 43433235 		.ascii	"CC2538 SoC\000"
+  38      33382053 
+  38      6F4300
+  39 0023 00       		.align	2
+  42              	infoStackName:
+  43 0024 4F70656E 		.ascii	"OpenWSN \000"
+  43      57534E20 
+  43      00
+  44 002d 000000   		.align	2
+  47              	fcstab:
+  48 0030 0000     		.short	0
+  49 0032 8911     		.short	4489
+  50 0034 1223     		.short	8978
+  51 0036 9B32     		.short	12955
+  52 0038 2446     		.short	17956
+  53 003a AD57     		.short	22445
+  54 003c 3665     		.short	25910
+  55 003e BF74     		.short	29887
+  56 0040 488C     		.short	-29624
+  57 0042 C19D     		.short	-25151
+  58 0044 5AAF     		.short	-20646
+  59 0046 D3BE     		.short	-16685
+  60 0048 6CCA     		.short	-13716
+  61 004a E5DB     		.short	-9243
+  62 004c 7EE9     		.short	-5762
+  63 004e F7F8     		.short	-1801
+  64 0050 8110     		.short	4225
+  65 0052 0801     		.short	264
+  66 0054 9333     		.short	13203
+  67 0056 1A22     		.short	8730
+  68 0058 A556     		.short	22181
+  69 005a 2C47     		.short	18220
+  70 005c B775     		.short	30135
+  71 005e 3E64     		.short	25662
+  72 0060 C99C     		.short	-25399
+  73 0062 408D     		.short	-29376
+  74 0064 DBBF     		.short	-16421
+  75 0066 52AE     		.short	-20910
+  76 0068 EDDA     		.short	-9491
+  77 006a 64CB     		.short	-13468
+  78 006c FFF9     		.short	-1537
+  79 006e 76E8     		.short	-6026
+  80 0070 0221     		.short	8450
+  81 0072 8B30     		.short	12427
+  82 0074 1002     		.short	528
+  83 0076 9913     		.short	5017
+  84 0078 2667     		.short	26406
+  85 007a AF76     		.short	30383
+  86 007c 3444     		.short	17460
+  87 007e BD55     		.short	21949
+  88 0080 4AAD     		.short	-21174
+  89 0082 C3BC     		.short	-17213
+  90 0084 588E     		.short	-29096
+  91 0086 D19F     		.short	-24623
+  92 0088 6EEB     		.short	-5266
+  93 008a E7FA     		.short	-1305
+  94 008c 7CC8     		.short	-14212
+  95 008e F5D9     		.short	-9739
+  96 0090 8331     		.short	12675
+  97 0092 0A20     		.short	8202
+  98 0094 9112     		.short	4753
+  99 0096 1803     		.short	792
+ 100 0098 A777     		.short	30631
+ 101 009a 2E66     		.short	26158
+ 102 009c B554     		.short	21685
+ 103 009e 3C45     		.short	17724
+ 104 00a0 CBBD     		.short	-16949
+ 105 00a2 42AC     		.short	-21438
+ 106 00a4 D99E     		.short	-24871
+ 107 00a6 508F     		.short	-28848
+ 108 00a8 EFFB     		.short	-1041
+ 109 00aa 66EA     		.short	-5530
+ 110 00ac FDD8     		.short	-9987
+ 111 00ae 74C9     		.short	-13964
+ 112 00b0 0442     		.short	16900
+ 113 00b2 8D53     		.short	21389
+ 114 00b4 1661     		.short	24854
+ 115 00b6 9F70     		.short	28831
+ 116 00b8 2004     		.short	1056
+ 117 00ba A915     		.short	5545
+ 118 00bc 3227     		.short	10034
+ 119 00be BB36     		.short	14011
+ 120 00c0 4CCE     		.short	-12724
+ 121 00c2 C5DF     		.short	-8251
+ 122 00c4 5EED     		.short	-4770
+ 123 00c6 D7FC     		.short	-809
+ 124 00c8 6888     		.short	-30616
+ 125 00ca E199     		.short	-26143
+ 126 00cc 7AAB     		.short	-21638
+ 127 00ce F3BA     		.short	-17677
+ 128 00d0 8552     		.short	21125
+ 129 00d2 0C43     		.short	17164
+ 130 00d4 9771     		.short	29079
+ 131 00d6 1E60     		.short	24606
+ 132 00d8 A114     		.short	5281
+ 133 00da 2805     		.short	1320
+ 134 00dc B337     		.short	14259
+ 135 00de 3A26     		.short	9786
+ 136 00e0 CDDE     		.short	-8499
+ 137 00e2 44CF     		.short	-12476
+ 138 00e4 DFFD     		.short	-545
+ 139 00e6 56EC     		.short	-5034
+ 140 00e8 E998     		.short	-26391
+ 141 00ea 6089     		.short	-30368
+ 142 00ec FBBB     		.short	-17413
+ 143 00ee 72AA     		.short	-21902
+ 144 00f0 0663     		.short	25350
+ 145 00f2 8F72     		.short	29327
+ 146 00f4 1440     		.short	16404
+ 147 00f6 9D51     		.short	20893
+ 148 00f8 2225     		.short	9506
+ 149 00fa AB34     		.short	13483
+ 150 00fc 3006     		.short	1584
+ 151 00fe B917     		.short	6073
+ 152 0100 4EEF     		.short	-4274
+ 153 0102 C7FE     		.short	-313
+ 154 0104 5CCC     		.short	-13220
+ 155 0106 D5DD     		.short	-8747
+ 156 0108 6AA9     		.short	-22166
+ 157 010a E3B8     		.short	-18205
+ 158 010c 788A     		.short	-30088
+ 159 010e F19B     		.short	-25615
+ 160 0110 8773     		.short	29575
+ 161 0112 0E62     		.short	25102
+ 162 0114 9550     		.short	20629
+ 163 0116 1C41     		.short	16668
+ 164 0118 A335     		.short	13731
+ 165 011a 2A24     		.short	9258
+ 166 011c B116     		.short	5809
+ 167 011e 3807     		.short	1848
+ 168 0120 CFFF     		.short	-49
+ 169 0122 46EE     		.short	-4538
+ 170 0124 DDDC     		.short	-8995
+ 171 0126 54CD     		.short	-12972
+ 172 0128 EBB9     		.short	-17941
+ 173 012a 62A8     		.short	-22430
+ 174 012c F99A     		.short	-25863
+ 175 012e 708B     		.short	-29840
+ 176 0130 0884     		.short	-31736
+ 177 0132 8195     		.short	-27263
+ 178 0134 1AA7     		.short	-22758
+ 179 0136 93B6     		.short	-18797
+ 180 0138 2CC2     		.short	-15828
+ 181 013a A5D3     		.short	-11355
+ 182 013c 3EE1     		.short	-7874
+ 183 013e B7F0     		.short	-3913
+ 184 0140 4008     		.short	2112
+ 185 0142 C919     		.short	6601
+ 186 0144 522B     		.short	11090
+ 187 0146 DB3A     		.short	15067
+ 188 0148 644E     		.short	20068
+ 189 014a ED5F     		.short	24557
+ 190 014c 766D     		.short	28022
+ 191 014e FF7C     		.short	31999
+ 192 0150 8994     		.short	-27511
+ 193 0152 0085     		.short	-31488
+ 194 0154 9BB7     		.short	-18533
+ 195 0156 12A6     		.short	-23022
+ 196 0158 ADD2     		.short	-11603
+ 197 015a 24C3     		.short	-15580
+ 198 015c BFF1     		.short	-3649
+ 199 015e 36E0     		.short	-8138
+ 200 0160 C118     		.short	6337
+ 201 0162 4809     		.short	2376
+ 202 0164 D33B     		.short	15315
+ 203 0166 5A2A     		.short	10842
+ 204 0168 E55E     		.short	24293
+ 205 016a 6C4F     		.short	20332
+ 206 016c F77D     		.short	32247
+ 207 016e 7E6C     		.short	27774
+ 208 0170 0AA5     		.short	-23286
+ 209 0172 83B4     		.short	-19325
+ 210 0174 1886     		.short	-31208
+ 211 0176 9197     		.short	-26735
+ 212 0178 2EE3     		.short	-7378
+ 213 017a A7F2     		.short	-3417
+ 214 017c 3CC0     		.short	-16324
+ 215 017e B5D1     		.short	-11851
+ 216 0180 4229     		.short	10562
+ 217 0182 CB38     		.short	14539
+ 218 0184 500A     		.short	2640
+ 219 0186 D91B     		.short	7129
+ 220 0188 666F     		.short	28518
+ 221 018a EF7E     		.short	32495
+ 222 018c 744C     		.short	19572
+ 223 018e FD5D     		.short	24061
+ 224 0190 8BB5     		.short	-19061
+ 225 0192 02A4     		.short	-23550
+ 226 0194 9996     		.short	-26983
+ 227 0196 1087     		.short	-30960
+ 228 0198 AFF3     		.short	-3153
+ 229 019a 26E2     		.short	-7642
+ 230 019c BDD0     		.short	-12099
+ 231 019e 34C1     		.short	-16076
+ 232 01a0 C339     		.short	14787
+ 233 01a2 4A28     		.short	10314
+ 234 01a4 D11A     		.short	6865
+ 235 01a6 580B     		.short	2904
+ 236 01a8 E77F     		.short	32743
+ 237 01aa 6E6E     		.short	28270
+ 238 01ac F55C     		.short	23797
+ 239 01ae 7C4D     		.short	19836
+ 240 01b0 0CC6     		.short	-14836
+ 241 01b2 85D7     		.short	-10363
+ 242 01b4 1EE5     		.short	-6882
+ 243 01b6 97F4     		.short	-2921
+ 244 01b8 2880     		.short	-32728
+ 245 01ba A191     		.short	-28255
+ 246 01bc 3AA3     		.short	-23750
+ 247 01be B3B2     		.short	-19789
+ 248 01c0 444A     		.short	19012
+ 249 01c2 CD5B     		.short	23501
+ 250 01c4 5669     		.short	26966
+ 251 01c6 DF78     		.short	30943
+ 252 01c8 600C     		.short	3168
+ 253 01ca E91D     		.short	7657
+ 254 01cc 722F     		.short	12146
+ 255 01ce FB3E     		.short	16123
+ 256 01d0 8DD6     		.short	-10611
+ 257 01d2 04C7     		.short	-14588
+ 258 01d4 9FF5     		.short	-2657
+ 259 01d6 16E4     		.short	-7146
+ 260 01d8 A990     		.short	-28503
+ 261 01da 2081     		.short	-32480
+ 262 01dc BBB3     		.short	-19525
+ 263 01de 32A2     		.short	-24014
+ 264 01e0 C55A     		.short	23237
+ 265 01e2 4C4B     		.short	19276
+ 266 01e4 D779     		.short	31191
+ 267 01e6 5E68     		.short	26718
+ 268 01e8 E11C     		.short	7393
+ 269 01ea 680D     		.short	3432
+ 270 01ec F33F     		.short	16371
+ 271 01ee 7A2E     		.short	11898
+ 272 01f0 0EE7     		.short	-6386
+ 273 01f2 87F6     		.short	-2425
+ 274 01f4 1CC4     		.short	-15332
+ 275 01f6 95D5     		.short	-10859
+ 276 01f8 2AA1     		.short	-24278
+ 277 01fa A3B0     		.short	-20317
+ 278 01fc 3882     		.short	-32200
+ 279 01fe B193     		.short	-27727
+ 280 0200 466B     		.short	27462
+ 281 0202 CF7A     		.short	31439
+ 282 0204 5448     		.short	18516
+ 283 0206 DD59     		.short	23005
+ 284 0208 622D     		.short	11618
+ 285 020a EB3C     		.short	15595
+ 286 020c 700E     		.short	3696
+ 287 020e F91F     		.short	8185
+ 288 0210 8FF7     		.short	-2161
+ 289 0212 06E6     		.short	-6650
+ 290 0214 9DD4     		.short	-11107
+ 291 0216 14C5     		.short	-15084
+ 292 0218 ABB1     		.short	-20053
+ 293 021a 22A0     		.short	-24542
+ 294 021c B992     		.short	-27975
+ 295 021e 3083     		.short	-31952
+ 296 0220 C77B     		.short	31687
+ 297 0222 4E6A     		.short	27214
+ 298 0224 D558     		.short	22741
+ 299 0226 5C49     		.short	18780
+ 300 0228 E33D     		.short	15843
+ 301 022a 6A2C     		.short	11370
+ 302 022c F11E     		.short	7921
+ 303 022e 780F     		.short	3960
+ 304              		.text
+ 305              		.align	2
+ 306              		.global	crcIteration
+ 307              		.thumb
+ 308              		.thumb_func
+ 310              	crcIteration:
+ 311              	.LFB0:
+ 312              		.file 1 "build/OpenMote-CC2538_armgcc/drivers/common/openhdlc.c"
+   1:build/OpenMote-CC2538_armgcc/drivers/common/openhdlc.c **** /**
+   2:build/OpenMote-CC2538_armgcc/drivers/common/openhdlc.c **** \brief Definition of the "openserial" driver.
+   3:build/OpenMote-CC2538_armgcc/drivers/common/openhdlc.c **** 
+   4:build/OpenMote-CC2538_armgcc/drivers/common/openhdlc.c **** \author Min Ting <tingm417@gmail.com>, October 2012.
+   5:build/OpenMote-CC2538_armgcc/drivers/common/openhdlc.c **** \author Fabien Chraim <chraim@eecs.berkeley.edu>, October 2012.
+   6:build/OpenMote-CC2538_armgcc/drivers/common/openhdlc.c **** */
+   7:build/OpenMote-CC2538_armgcc/drivers/common/openhdlc.c **** 
+   8:build/OpenMote-CC2538_armgcc/drivers/common/openhdlc.c **** #include "openhdlc.h"
+   9:build/OpenMote-CC2538_armgcc/drivers/common/openhdlc.c **** 
+  10:build/OpenMote-CC2538_armgcc/drivers/common/openhdlc.c **** //=========================== variables =======================================
+  11:build/OpenMote-CC2538_armgcc/drivers/common/openhdlc.c **** 
+  12:build/OpenMote-CC2538_armgcc/drivers/common/openhdlc.c **** //=========================== prototypes ======================================
+  13:build/OpenMote-CC2538_armgcc/drivers/common/openhdlc.c **** 
+  14:build/OpenMote-CC2538_armgcc/drivers/common/openhdlc.c **** //=========================== public ==========================================
+  15:build/OpenMote-CC2538_armgcc/drivers/common/openhdlc.c **** 
+  16:build/OpenMote-CC2538_armgcc/drivers/common/openhdlc.c **** uint16_t crcIteration(uint16_t crc, uint8_t byte) {
+ 313              		.loc 1 16 0
+ 314              		.cfi_startproc
+ 315              		@ args = 0, pretend = 0, frame = 8
+ 316              		@ frame_needed = 1, uses_anonymous_args = 0
+ 317              		@ link register save eliminated.
+ 318 0000 80B4     		push	{r7}
+ 319              		.cfi_def_cfa_offset 4
+ 320              		.cfi_offset 7, -4
+ 321 0002 83B0     		sub	sp, sp, #12
+ 322              		.cfi_def_cfa_offset 16
+ 323 0004 00AF     		add	r7, sp, #0
+ 324              		.cfi_def_cfa_register 7
+ 325 0006 0346     		mov	r3, r0
+ 326 0008 0A46     		mov	r2, r1
+ 327 000a FB80     		strh	r3, [r7, #6]	@ movhi
+ 328 000c 1346     		mov	r3, r2
+ 329 000e 7B71     		strb	r3, [r7, #5]
+  17:build/OpenMote-CC2538_armgcc/drivers/common/openhdlc.c ****    return (crc >> 8) ^ fcstab[(crc ^ byte) & 0xff];
+ 330              		.loc 1 17 0
+ 331 0010 FB88     		ldrh	r3, [r7, #6]
+ 332 0012 1B0A     		lsrs	r3, r3, #8
+ 333 0014 9AB2     		uxth	r2, r3
+ 334 0016 F988     		ldrh	r1, [r7, #6]
+ 335 0018 7B79     		ldrb	r3, [r7, #5]	@ zero_extendqisi2
+ 336 001a 4B40     		eors	r3, r3, r1
+ 337 001c DBB2     		uxtb	r3, r3
+ 338 001e 0549     		ldr	r1, .L3
+ 339 0020 31F81330 		ldrh	r3, [r1, r3, lsl #1]
+ 340 0024 5340     		eors	r3, r3, r2
+ 341 0026 9BB2     		uxth	r3, r3
+  18:build/OpenMote-CC2538_armgcc/drivers/common/openhdlc.c **** }
+ 342              		.loc 1 18 0
+ 343 0028 1846     		mov	r0, r3
+ 344 002a 0C37     		adds	r7, r7, #12
+ 345              		.cfi_def_cfa_offset 4
+ 346 002c BD46     		mov	sp, r7
+ 347              		.cfi_def_cfa_register 13
+ 348              		@ sp needed
+ 349 002e 5DF8047B 		ldr	r7, [sp], #4
+ 350              		.cfi_restore 7
+ 351              		.cfi_def_cfa_offset 0
+ 352 0032 7047     		bx	lr
+ 353              	.L4:
+ 354              		.align	2
+ 355              	.L3:
+ 356 0034 30000000 		.word	fcstab
+ 357              		.cfi_endproc
+ 358              	.LFE0:
+ 360              	.Letext0:
+ 361              		.file 2 "/usr/arm-none-eabi/include/machine/_default_types.h"
+ 362              		.file 3 "/usr/arm-none-eabi/include/sys/_stdint.h"
+ 363              		.file 4 "bsp/boards/OpenMote-CC2538/board_info.h"
+ 364              		.file 5 "inc/opendefs.h"
+ 365              		.file 6 "build/OpenMote-CC2538_armgcc/drivers/common/openhdlc.h"
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 openhdlc.c
+     /tmp/cc60slpa.s:19     .rodata:0000000000000000 $d
+     /tmp/cc60slpa.s:22     .rodata:0000000000000000 rreg_uriquery
+     /tmp/cc60slpa.s:27     .rodata:0000000000000008 infoBoardname
+     /tmp/cc60slpa.s:32     .rodata:0000000000000010 infouCName
+     /tmp/cc60slpa.s:37     .rodata:0000000000000018 infoRadioName
+     /tmp/cc60slpa.s:42     .rodata:0000000000000024 infoStackName
+     /tmp/cc60slpa.s:47     .rodata:0000000000000030 fcstab
+     /tmp/cc60slpa.s:305    .text:0000000000000000 $t
+     /tmp/cc60slpa.s:310    .text:0000000000000000 crcIteration
+     /tmp/cc60slpa.s:356    .text:0000000000000034 $d
+                     .debug_frame:0000000000000010 $d
+                           .group:0000000000000000 wm4.0.59116071098782a37a9183a8102fe91b
+                           .group:0000000000000000 wm4.features.h.22.2e382148a0560adabf236cddd4e880f4
+                           .group:0000000000000000 wm4._default_types.h.15.933e8edd27a65e0b69af4a865eb623d2
+                           .group:0000000000000000 wm4._intsup.h.10.35a45952db64d30146faa63a55c20c1c
+                           .group:0000000000000000 wm4._stdint.h.10.f76354baea1c7088202064e6f3d4f5e3
+                           .group:0000000000000000 wm4.stdint.h.23.373a9d32a9e4c2e88fd347156532d281
+                           .group:0000000000000000 wm4.toolchain_defs.h.2.e4ebbe6e0a48032a9b79077dc42e1ffd
+                           .group:0000000000000000 wm4.newlib.h.8.2702bca278809460f0af6fba1d84eb68
+                           .group:0000000000000000 wm4.config.h.220.a09b0b0de3c25be3f39d71990e617bff
+                           .group:0000000000000000 wm4._ansi.h.23.84af8eb8cd468d25cc5f45f5eb13ec51
+                           .group:0000000000000000 wm4.stddef.h.39.daafd3d79fe2f3a84d2d73d7d4e706f8
+                           .group:0000000000000000 wm4.lock.h.2.9bc98482741e5e2a9450b12934a684ea
+                           .group:0000000000000000 wm4._types.h.54.d3d34a3b7f3cc230cd159baf022b4b08
+                           .group:0000000000000000 wm4.stddef.h.158.61317cdbfb4026324507d123a50b0fd6
+                           .group:0000000000000000 wm4.reent.h.17.8bd9e4098e0428508c282cad794fae43
+                           .group:0000000000000000 wm4.cdefs.h.47.e6563c1c3863188ba4ac4eaa2c85b6f1
+                           .group:0000000000000000 wm4.string.h.15.dab3980bf35408a4c507182805e2de3a
+                           .group:0000000000000000 wm4.stddef.h.158.a7efb00f6cbc6f43213b50e183c9830c
+                           .group:0000000000000000 wm4.stdbool.h.29.1c9ee6859ce8145f7838a4f2549ccec2
+                           .group:0000000000000000 wm4.hw_types.h.67.b10589a0806dcc2d274d6fab6b736519
+                           .group:0000000000000000 wm4.interrupt.h.41.272fc4ec0e276feb439e7974d0f77eaf
+                           .group:0000000000000000 wm4.board_info.h.22.aeb00002354a4949fff54190040e37af
+                           .group:0000000000000000 wm4.opendefs.h.23.bdaf9c024be66ead04de21e3ce3dfaf2
+                           .group:0000000000000000 wm4.openhdlc.h.22.860d8df44c92492d8fa38a4ca640cb94
+
+NO UNDEFINED SYMBOLS

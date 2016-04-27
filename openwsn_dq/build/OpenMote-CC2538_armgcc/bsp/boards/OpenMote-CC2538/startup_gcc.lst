@@ -1,0 +1,740 @@
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 6
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.file	"startup_gcc.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.bss
+  19              		.align	2
+  20              	pui32Stack:
+  21 0000 00000000 		.space	2048
+  21      00000000 
+  21      00000000 
+  21      00000000 
+  21      00000000 
+  22              		.global	__cca
+  23              		.section	.flashcca,"a",%progbits
+  24              		.align	2
+  27              	__cca:
+  28 0000 FFFFFFF6 		.word	-150994945
+  29 0004 00000000 		.word	0
+  30 0008 00002000 		.word	2097152
+  31              		.global	gVectors
+  32              		.section	.vectors,"a",%progbits
+  33              		.align	2
+  36              	gVectors:
+  37 0000 00080000 		.word	pui32Stack+2048
+  38 0004 00000000 		.word	ResetISR
+  39 0008 00000000 		.word	NmiSR
+  40 000c 00000000 		.word	FaultISR
+  41 0010 00000000 		.word	IntDefaultHandler
+  42 0014 00000000 		.word	IntDefaultHandler
+  43 0018 00000000 		.word	IntDefaultHandler
+  44 001c 00000000 		.word	0
+  45 0020 00000000 		.word	0
+  46 0024 00000000 		.word	0
+  47 0028 00000000 		.word	0
+  48 002c 00000000 		.word	IntDefaultHandler
+  49 0030 00000000 		.word	IntDefaultHandler
+  50 0034 00000000 		.word	0
+  51 0038 00000000 		.word	IntDefaultHandler
+  52 003c 00000000 		.word	IntDefaultHandler
+  53 0040 00000000 		.word	IntDefaultHandler
+  54 0044 00000000 		.word	IntDefaultHandler
+  55 0048 00000000 		.word	IntDefaultHandler
+  56 004c 00000000 		.word	IntDefaultHandler
+  57 0050 00000000 		.word	0
+  58 0054 00000000 		.word	IntDefaultHandler
+  59 0058 00000000 		.word	IntDefaultHandler
+  60 005c 00000000 		.word	IntDefaultHandler
+  61 0060 00000000 		.word	IntDefaultHandler
+  62 0064 00000000 		.word	0
+  63 0068 00000000 		.word	0
+  64 006c 00000000 		.word	0
+  65 0070 00000000 		.word	0
+  66 0074 00000000 		.word	0
+  67 0078 00000000 		.word	IntDefaultHandler
+  68 007c 00000000 		.word	0
+  69 0080 00000000 		.word	0
+  70 0084 00000000 		.word	0
+  71 0088 00000000 		.word	IntDefaultHandler
+  72 008c 00000000 		.word	IntDefaultHandler
+  73 0090 00000000 		.word	IntDefaultHandler
+  74 0094 00000000 		.word	IntDefaultHandler
+  75 0098 00000000 		.word	IntDefaultHandler
+  76 009c 00000000 		.word	IntDefaultHandler
+  77 00a0 00000000 		.word	IntDefaultHandler
+  78 00a4 00000000 		.word	IntDefaultHandler
+  79 00a8 00000000 		.word	IntDefaultHandler
+  80 00ac 00000000 		.word	IntDefaultHandler
+  81 00b0 00000000 		.word	IntDefaultHandler
+  82 00b4 00000000 		.word	IntDefaultHandler
+  83 00b8 00000000 		.word	IntDefaultHandler
+  84 00bc 00000000 		.word	IntDefaultHandler
+  85 00c0 00000000 		.word	IntDefaultHandler
+  86 00c4 00000000 		.word	IntDefaultHandler
+  87 00c8 00000000 		.word	IntDefaultHandler
+  88 00cc 00000000 		.word	IntDefaultHandler
+  89 00d0 00000000 		.word	IntDefaultHandler
+  90 00d4 00000000 		.word	0
+  91 00d8 00000000 		.word	0
+  92 00dc 00000000 		.word	0
+  93 00e0 00000000 		.word	0
+  94 00e4 00000000 		.word	0
+  95 00e8 00000000 		.word	0
+  96 00ec 00000000 		.word	0
+  97 00f0 00000000 		.word	IntDefaultHandler
+  98 00f4 00000000 		.word	0
+  99 00f8 00000000 		.word	IntDefaultHandler
+ 100 00fc 00000000 		.word	IntDefaultHandler
+ 101 0100 00000000 		.word	0
+ 102 0104 00000000 		.word	0
+ 103 0108 00000000 		.word	0
+ 104 010c 00000000 		.word	0
+ 105 0110 00000000 		.word	0
+ 106 0114 00000000 		.word	0
+ 107 0118 00000000 		.word	0
+ 108 011c 00000000 		.word	0
+ 109 0120 00000000 		.word	0
+ 110 0124 00000000 		.word	0
+ 111 0128 00000000 		.word	0
+ 112 012c 00000000 		.word	0
+ 113 0130 00000000 		.word	0
+ 114 0134 00000000 		.word	0
+ 115 0138 00000000 		.word	0
+ 116 013c 00000000 		.word	0
+ 117 0140 00000000 		.word	0
+ 118 0144 00000000 		.word	0
+ 119 0148 00000000 		.word	0
+ 120 014c 00000000 		.word	0
+ 121 0150 00000000 		.word	0
+ 122 0154 00000000 		.word	0
+ 123 0158 00000000 		.word	0
+ 124 015c 00000000 		.word	0
+ 125 0160 00000000 		.word	0
+ 126 0164 00000000 		.word	0
+ 127 0168 00000000 		.word	0
+ 128 016c 00000000 		.word	0
+ 129 0170 00000000 		.word	0
+ 130 0174 00000000 		.word	0
+ 131 0178 00000000 		.word	0
+ 132 017c 00000000 		.word	0
+ 133 0180 00000000 		.word	0
+ 134 0184 00000000 		.word	0
+ 135 0188 00000000 		.word	0
+ 136 018c 00000000 		.word	0
+ 137 0190 00000000 		.word	0
+ 138 0194 00000000 		.word	0
+ 139 0198 00000000 		.word	0
+ 140 019c 00000000 		.word	0
+ 141 01a0 00000000 		.word	0
+ 142 01a4 00000000 		.word	0
+ 143 01a8 00000000 		.word	0
+ 144 01ac 00000000 		.word	0
+ 145 01b0 00000000 		.word	0
+ 146 01b4 00000000 		.word	0
+ 147 01b8 00000000 		.word	0
+ 148 01bc 00000000 		.word	0
+ 149 01c0 00000000 		.word	0
+ 150 01c4 00000000 		.word	0
+ 151 01c8 00000000 		.word	0
+ 152 01cc 00000000 		.word	0
+ 153 01d0 00000000 		.word	0
+ 154 01d4 00000000 		.word	0
+ 155 01d8 00000000 		.word	0
+ 156 01dc 00000000 		.word	0
+ 157 01e0 00000000 		.word	0
+ 158 01e4 00000000 		.word	0
+ 159 01e8 00000000 		.word	0
+ 160 01ec 00000000 		.word	0
+ 161 01f0 00000000 		.word	0
+ 162 01f4 00000000 		.word	0
+ 163 01f8 00000000 		.word	0
+ 164 01fc 00000000 		.word	0
+ 165 0200 00000000 		.word	0
+ 166 0204 00000000 		.word	0
+ 167 0208 00000000 		.word	0
+ 168 020c 00000000 		.word	0
+ 169 0210 00000000 		.word	0
+ 170 0214 00000000 		.word	0
+ 171 0218 00000000 		.word	0
+ 172 021c 00000000 		.word	0
+ 173 0220 00000000 		.word	0
+ 174 0224 00000000 		.word	0
+ 175 0228 00000000 		.word	0
+ 176 022c 00000000 		.word	0
+ 177 0230 00000000 		.word	0
+ 178 0234 00000000 		.word	0
+ 179 0238 00000000 		.word	0
+ 180 023c 00000000 		.word	0
+ 181 0240 00000000 		.word	0
+ 182 0244 00000000 		.word	0
+ 183 0248 00000000 		.word	0
+ 184 024c 00000000 		.word	0
+ 185 0250 00000000 		.word	0
+ 186 0254 00000000 		.word	0
+ 187 0258 00000000 		.word	0
+ 188 025c 00000000 		.word	0
+ 189 0260 00000000 		.word	0
+ 190 0264 00000000 		.word	0
+ 191 0268 00000000 		.word	0
+ 192 026c 00000000 		.word	0
+ 193 0270 00000000 		.word	IntDefaultHandler
+ 194 0274 00000000 		.word	IntDefaultHandler
+ 195 0278 00000000 		.word	IntDefaultHandler
+ 196 027c 00000000 		.word	IntDefaultHandler
+ 197 0280 00000000 		.word	IntDefaultHandler
+ 198 0284 00000000 		.word	IntDefaultHandler
+ 199 0288 00000000 		.word	IntDefaultHandler
+ 200              		.text
+ 201              		.align	2
+ 202              		.global	NmiSR
+ 203              		.thumb
+ 204              		.thumb_func
+ 206              	NmiSR:
+ 207              	.LFB0:
+ 208              		.file 1 "build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c"
+   1:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** //*****************************************************************************
+   2:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** //! @file       startup_gcc.c
+   3:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** //! @brief      Startup code for CC2538 for use with GCC.
+   4:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** //!
+   5:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** //! Revised     $Date: 2013-04-11 20:13:13 +0200 (Thu, 11 Apr 2013) $
+   6:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** //! Revision    $Revision: 9714 $
+   7:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** //
+   8:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** //  Copyright (C) 2013 Texas Instruments Incorporated - http://www.ti.com/
+   9:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** //
+  10:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** //
+  11:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** //  Redistribution and use in source and binary forms, with or without
+  12:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** //  modification, are permitted provided that the following conditions
+  13:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** //  are met:
+  14:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** //
+  15:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** //    Redistributions of source code must retain the above copyright
+  16:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** //    notice, this list of conditions and the following disclaimer.
+  17:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** //
+  18:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** //    Redistributions in binary form must reproduce the above copyright
+  19:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** //    notice, this list of conditions and the following disclaimer in the
+  20:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** //    documentation and/or other materials provided with the distribution.
+  21:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** //
+  22:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** //    Neither the name of Texas Instruments Incorporated nor the names of
+  23:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** //    its contributors may be used to endorse or promote products derived
+  24:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** //    from this software without specific prior written permission.
+  25:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** //
+  26:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** //  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  27:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** //  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  28:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** //  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  29:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** //  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  30:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** //  OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  31:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** //  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  32:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** //  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  33:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** //  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  34:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** //  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  35:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** //  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  36:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** //  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  37:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** //****************************************************************************/
+  38:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** 
+  39:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** #include <headers/hw_nvic.h>
+  40:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** 
+  41:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** #include <stdint.h>
+  42:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** 
+  43:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** #define FLASH_START_ADDR                0x00200000
+  44:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** #define BOOTLOADER_BACKDOOR_ENABLE      0xF6FFFFFF // ENABLED: PORT A, PIN 6, LOW
+  45:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** #define BOOTLOADER_BACKDOOR_DISABLE     0xEFFFFFFF // DISABLED
+  46:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** #define SYS_CTRL_EMUOVR                 0x400D20B4
+  47:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** #define SYS_CTRL_I_MAP                  0x400D2098
+  48:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** 
+  49:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** //*****************************************************************************
+  50:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** //
+  51:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** // Macro for hardware access, both direct and via the bit-band region.
+  52:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** //
+  53:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** //*****************************************************************************
+  54:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** #ifndef HWREG
+  55:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** #define HWREG(x)                                                              \
+  56:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****         (*((volatile unsigned long *)(x)))
+  57:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** #endif
+  58:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** 
+  59:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** extern int main (void);
+  60:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** 
+  61:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** void ResetISR(void);
+  62:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** void NmiSR(void);
+  63:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** void FaultISR(void);
+  64:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** void IntDefaultHandler(void);
+  65:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** 
+  66:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** //*****************************************************************************
+  67:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** //
+  68:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** // Reserve space for the system stack.
+  69:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** //
+  70:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** //*****************************************************************************
+  71:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** static uint32_t pui32Stack[512];
+  72:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** 
+  73:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** //*****************************************************************************
+  74:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** //
+  75:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** // Customer Configuration Area in Lock Page
+  76:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** // Holds Image Vector table address (bytes 2013 - 2015) and
+  77:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** // Image Valid bytes (bytes 2008 -2011)
+  78:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** //
+  79:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** //*****************************************************************************
+  80:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** typedef struct
+  81:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** {
+  82:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** 	uint32_t ui32BootldrCfg;
+  83:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****     uint32_t ui32ImageValid;
+  84:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****     uint32_t ui32ImageVectorAddr;
+  85:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** } 
+  86:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** lockPageCCA_t;
+  87:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** 
+  88:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** __attribute__ ((section(".flashcca"), used))
+  89:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** const lockPageCCA_t __cca =
+  90:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** {
+  91:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****   BOOTLOADER_BACKDOOR_ENABLE,   // Bootloader backdoor enabled
+  92:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****   0,               				// Image valid bytes
+  93:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****   FLASH_START_ADDR 				// Vector table located at flash start address
+  94:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** };
+  95:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** 
+  96:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** __attribute__ ((section(".vectors"), used))
+  97:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** void (* const gVectors[])(void) =
+  98:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** {
+  99:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    (void (*)(void))((uint32_t)pui32Stack + sizeof(pui32Stack)), // Stack pointer
+ 100:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    ResetISR,							   // Reset handler
+ 101:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    NmiSR,                                  // The NMI handler
+ 102:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    FaultISR,                               // The hard fault handler
+ 103:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    IntDefaultHandler,                      // 4 The MPU fault handler
+ 104:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    IntDefaultHandler,                      // 5 The bus fault handler
+ 105:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    IntDefaultHandler,                      // 6 The usage fault handler
+ 106:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 7 Reserved
+ 107:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 8 Reserved
+ 108:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 9 Reserved
+ 109:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 10 Reserved
+ 110:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    IntDefaultHandler,                      // 11 SVCall handler
+ 111:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    IntDefaultHandler,                      // 12 Debug monitor handler
+ 112:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 13 Reserved
+ 113:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    IntDefaultHandler,                      // 14 The PendSV handler
+ 114:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    IntDefaultHandler,                      // 15 The SysTick handler
+ 115:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    IntDefaultHandler,                      // 16 GPIO Port A
+ 116:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    IntDefaultHandler,                      // 17 GPIO Port B
+ 117:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    IntDefaultHandler,                      // 18 GPIO Port C
+ 118:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    IntDefaultHandler,                      // 19 GPIO Port D
+ 119:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 20 none
+ 120:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    IntDefaultHandler,                      // 21 UART0 Rx and Tx
+ 121:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    IntDefaultHandler,                      // 22 UART1 Rx and Tx
+ 122:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    IntDefaultHandler,                      // 23 SSI0 Rx and Tx
+ 123:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    IntDefaultHandler,                      // 24 I2C Master and Slave
+ 124:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 25 Reserved
+ 125:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 26 Reserved
+ 126:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 27 Reserved
+ 127:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 28 Reserved
+ 128:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 29 Reserved
+ 129:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    IntDefaultHandler,                      // 30 ADC Sequence 0
+ 130:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 31 Reserved
+ 131:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 32 Reserved
+ 132:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 33 Reserved
+ 133:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    IntDefaultHandler,                      // 34 Watchdog timer, timer 0
+ 134:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    IntDefaultHandler,                      // 35 Timer 0 subtimer A
+ 135:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    IntDefaultHandler,                      // 36 Timer 0 subtimer B
+ 136:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    IntDefaultHandler,                      // 37 Timer 1 subtimer A
+ 137:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    IntDefaultHandler,                      // 38 Timer 1 subtimer B
+ 138:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    IntDefaultHandler,                      // 39 Timer 2 subtimer A
+ 139:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    IntDefaultHandler,                      // 40 Timer 2 subtimer B
+ 140:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    IntDefaultHandler,                      // 41 Analog Comparator 0
+ 141:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    IntDefaultHandler,                      // 42 RFCore Rx/Tx
+ 142:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    IntDefaultHandler,                      // 43 RFCore Error
+ 143:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    IntDefaultHandler,                      // 44 IcePick
+ 144:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    IntDefaultHandler,                      // 45 FLASH Control
+ 145:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    IntDefaultHandler,                      // 46 AES
+ 146:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    IntDefaultHandler,                      // 47 PKA
+ 147:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    IntDefaultHandler,                      // 48 Sleep Timer
+ 148:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    IntDefaultHandler,                      // 49 MacTimer
+ 149:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    IntDefaultHandler,                      // 50 SSI1 Rx and Tx
+ 150:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    IntDefaultHandler,                      // 51 Timer 3 subtimer A
+ 151:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    IntDefaultHandler,                      // 52 Timer 3 subtimer B
+ 152:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 53 Reserved
+ 153:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 54 Reserved
+ 154:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 55 Reserved
+ 155:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 56 Reserved
+ 156:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 57 Reserved
+ 157:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 58 Reserved
+ 158:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 59 Reserved
+ 159:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    IntDefaultHandler,                      // 60 USB 2538
+ 160:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 61 Reserved
+ 161:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    IntDefaultHandler,                      // 62 uDMA
+ 162:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    IntDefaultHandler,                      // 63 uDMA Error
+ 163:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** #ifndef CC2538_USE_ALTERNATE_INTERRUPT_MAP
+ 164:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 64 64-155 are not in use
+ 165:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 65
+ 166:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 66
+ 167:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 67
+ 168:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 68
+ 169:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 69
+ 170:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 70
+ 171:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 71
+ 172:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 72
+ 173:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 73
+ 174:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 74
+ 175:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 75
+ 176:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 76
+ 177:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 77
+ 178:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 78
+ 179:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 79
+ 180:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 80
+ 181:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 81
+ 182:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 82
+ 183:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 83
+ 184:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 84
+ 185:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 85
+ 186:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 86
+ 187:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 87
+ 188:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 88
+ 189:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 89
+ 190:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 90
+ 191:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 91
+ 192:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 92
+ 193:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 93
+ 194:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 94
+ 195:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 95
+ 196:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 96
+ 197:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 97
+ 198:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 98
+ 199:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 99
+ 200:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 100
+ 201:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 101
+ 202:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 102
+ 203:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 103
+ 204:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 104
+ 205:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 105
+ 206:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 106
+ 207:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 107
+ 208:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 108
+ 209:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 109
+ 210:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 110
+ 211:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 111
+ 212:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 112
+ 213:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 113
+ 214:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 114
+ 215:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 115
+ 216:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 116
+ 217:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 117
+ 218:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 118
+ 219:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 119
+ 220:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 120
+ 221:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 121
+ 222:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 122
+ 223:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 123
+ 224:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 124
+ 225:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 125
+ 226:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 126
+ 227:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 127
+ 228:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 128
+ 229:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 129
+ 230:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 130
+ 231:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 131
+ 232:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 132
+ 233:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 133
+ 234:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 134
+ 235:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 135
+ 236:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 136
+ 237:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 137
+ 238:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 138
+ 239:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 139
+ 240:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 140
+ 241:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 141
+ 242:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 142
+ 243:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 143
+ 244:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 144
+ 245:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 145
+ 246:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 146
+ 247:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 147
+ 248:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 148
+ 249:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 149
+ 250:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 150
+ 251:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 151
+ 252:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 152
+ 253:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 153
+ 254:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 154
+ 255:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    0,                                      // 155
+ 256:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    IntDefaultHandler,                      // 156 USB
+ 257:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    IntDefaultHandler,                      // 157 RFCORE RX/TX
+ 258:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    IntDefaultHandler,                      // 158 RFCORE Error
+ 259:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    IntDefaultHandler,                      // 159 AES
+ 260:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    IntDefaultHandler,                      // 160 PKA
+ 261:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    IntDefaultHandler,                      // 161 SMTimer
+ 262:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    IntDefaultHandler,                      // 162 MACTimer
+ 263:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** #endif
+ 264:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** };
+ 265:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** 
+ 266:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** //*****************************************************************************
+ 267:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** //
+ 268:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** // The following are constructs created by the linker, indicating where the
+ 269:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** // the "data" and "bss" segments reside in memory.  The initializers for the
+ 270:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** // for the "data" segment resides immediately following the "text" segment.
+ 271:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** //
+ 272:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** //*****************************************************************************
+ 273:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** extern uint32_t _etext;
+ 274:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** extern uint32_t _data;
+ 275:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** extern uint32_t _edata;
+ 276:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** extern uint32_t _bss;
+ 277:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** extern uint32_t _ebss;
+ 278:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** 
+ 279:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** //
+ 280:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** // And here are the weak interrupt handlers.
+ 281:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** //
+ 282:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** void 
+ 283:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** NmiSR (void) 
+ 284:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** { 
+ 209              		.loc 1 284 0
+ 210              		.cfi_startproc
+ 211              		@ args = 0, pretend = 0, frame = 0
+ 212              		@ frame_needed = 1, uses_anonymous_args = 0
+ 213 0000 80B5     		push	{r7, lr}
+ 214              		.cfi_def_cfa_offset 8
+ 215              		.cfi_offset 7, -8
+ 216              		.cfi_offset 14, -4
+ 217 0002 00AF     		add	r7, sp, #0
+ 218              		.cfi_def_cfa_register 7
+ 285:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****     ResetISR(); 
+ 219              		.loc 1 285 0
+ 220 0004 FFF7FEFF 		bl	ResetISR
+ 221              	.L2:
+ 286:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****     while(1)
+ 287:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****     {
+ 288:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****     } 
+ 222              		.loc 1 288 0 discriminator 1
+ 223 0008 FEE7     		b	.L2
+ 224              		.cfi_endproc
+ 225              	.LFE0:
+ 227 000a 00BF     		.align	2
+ 228              		.global	FaultISR
+ 229              		.thumb
+ 230              		.thumb_func
+ 232              	FaultISR:
+ 233              	.LFB1:
+ 289:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** }
+ 290:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** 
+ 291:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** 
+ 292:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** void 
+ 293:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** FaultISR (void) 
+ 294:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** { 
+ 234              		.loc 1 294 0
+ 235              		.cfi_startproc
+ 236              		@ args = 0, pretend = 0, frame = 0
+ 237              		@ frame_needed = 1, uses_anonymous_args = 0
+ 238              		@ link register save eliminated.
+ 239 000c 80B4     		push	{r7}
+ 240              		.cfi_def_cfa_offset 4
+ 241              		.cfi_offset 7, -4
+ 242 000e 00AF     		add	r7, sp, #0
+ 243              		.cfi_def_cfa_register 7
+ 244              	.L4:
+ 295:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****     while(1)
+ 296:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****     {
+ 297:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****     } 
+ 245              		.loc 1 297 0 discriminator 1
+ 246 0010 FEE7     		b	.L4
+ 247              		.cfi_endproc
+ 248              	.LFE1:
+ 250 0012 00BF     		.align	2
+ 251              		.global	IntDefaultHandler
+ 252              		.thumb
+ 253              		.thumb_func
+ 255              	IntDefaultHandler:
+ 256              	.LFB2:
+ 298:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** }
+ 299:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** 
+ 300:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** 
+ 301:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** void 
+ 302:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** IntDefaultHandler (void) 
+ 303:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** { 
+ 257              		.loc 1 303 0
+ 258              		.cfi_startproc
+ 259              		@ args = 0, pretend = 0, frame = 0
+ 260              		@ frame_needed = 1, uses_anonymous_args = 0
+ 261              		@ link register save eliminated.
+ 262 0014 80B4     		push	{r7}
+ 263              		.cfi_def_cfa_offset 4
+ 264              		.cfi_offset 7, -4
+ 265 0016 00AF     		add	r7, sp, #0
+ 266              		.cfi_def_cfa_register 7
+ 267              	.L6:
+ 304:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****     while(1)
+ 305:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****     {
+ 306:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****     }
+ 268              		.loc 1 306 0 discriminator 1
+ 269 0018 FEE7     		b	.L6
+ 270              		.cfi_endproc
+ 271              	.LFE2:
+ 273 001a 00BF     		.align	2
+ 274              		.global	ResetISR
+ 275              		.thumb
+ 276              		.thumb_func
+ 278              	ResetISR:
+ 279              	.LFB3:
+ 307:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** }
+ 308:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** 
+ 309:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** void 
+ 310:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** ResetISR (void)
+ 311:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** {
+ 280              		.loc 1 311 0
+ 281              		.cfi_startproc
+ 282              		@ args = 0, pretend = 0, frame = 8
+ 283              		@ frame_needed = 1, uses_anonymous_args = 0
+ 284 001c 80B5     		push	{r7, lr}
+ 285              		.cfi_def_cfa_offset 8
+ 286              		.cfi_offset 7, -8
+ 287              		.cfi_offset 14, -4
+ 288 001e 82B0     		sub	sp, sp, #8
+ 289              		.cfi_def_cfa_offset 16
+ 290 0020 00AF     		add	r7, sp, #0
+ 291              		.cfi_def_cfa_register 7
+ 312:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** 	uint32_t *pui32Src, *pui32Dest;
+ 313:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** 
+ 314:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****     //
+ 315:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** 	// Workaround for PM debug issue
+ 316:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****     //
+ 317:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****     HWREG(SYS_CTRL_EMUOVR) = 0xFF;
+ 292              		.loc 1 317 0
+ 293 0022 114B     		ldr	r3, .L11
+ 294 0024 FF22     		movs	r2, #255
+ 295 0026 1A60     		str	r2, [r3]
+ 318:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** 
+ 319:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** 
+ 320:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****     /* Workaround for J-Link debug issue */
+ 321:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****     HWREG(NVIC_VTABLE) = (uint32_t)gVectors;
+ 296              		.loc 1 321 0
+ 297 0028 104B     		ldr	r3, .L11+4
+ 298 002a 114A     		ldr	r2, .L11+8
+ 299 002c 1A60     		str	r2, [r3]
+ 322:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** 
+ 323:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****     //
+ 324:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** 	// Copy the data segment initializers from flash to SRAM.
+ 325:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****     //
+ 326:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** 	pui32Src = &_etext;
+ 300              		.loc 1 326 0
+ 301 002e 114B     		ldr	r3, .L11+12
+ 302 0030 7B60     		str	r3, [r7, #4]
+ 327:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** 	for(pui32Dest = &_data; pui32Dest < &_edata; )
+ 303              		.loc 1 327 0
+ 304 0032 114B     		ldr	r3, .L11+16
+ 305 0034 3B60     		str	r3, [r7]
+ 306 0036 07E0     		b	.L8
+ 307              	.L9:
+ 328:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** 	{
+ 329:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** 		*pui32Dest++ = *pui32Src++;
+ 308              		.loc 1 329 0
+ 309 0038 3B68     		ldr	r3, [r7]
+ 310 003a 1A1D     		adds	r2, r3, #4
+ 311 003c 3A60     		str	r2, [r7]
+ 312 003e 7A68     		ldr	r2, [r7, #4]
+ 313 0040 111D     		adds	r1, r2, #4
+ 314 0042 7960     		str	r1, [r7, #4]
+ 315 0044 1268     		ldr	r2, [r2]
+ 316 0046 1A60     		str	r2, [r3]
+ 317              	.L8:
+ 327:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** 	for(pui32Dest = &_data; pui32Dest < &_edata; )
+ 318              		.loc 1 327 0 discriminator 1
+ 319 0048 3B68     		ldr	r3, [r7]
+ 320 004a 0C4A     		ldr	r2, .L11+20
+ 321 004c 9342     		cmp	r3, r2
+ 322 004e F3D3     		bcc	.L9
+ 330:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** 	}
+ 331:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** 
+ 332:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****     //
+ 333:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** 	// Zero fill the bss segment.
+ 334:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****     //
+ 335:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** 	__asm("    ldr     r0, =_bss\n"
+ 323              		.loc 1 335 0
+ 324              	@ 335 "build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c" 1
+ 325 0050 0B48     		    ldr     r0, =_bss
+ 326 0052 0C49     	    ldr     r1, =_ebss
+ 327 0054 4FF00002 	    mov     r2, #0
+ 328              	    .thumb_func
+ 329              	zero_loop:
+ 330 0058 8842     	        cmp     r0, r1
+ 331 005a B8BF     	        it      lt
+ 332 005c 40F8042B 	        strlt   r2, [r0], #4
+ 333 0060 FADB     	        blt     zero_loop
+ 334              	@ 0 "" 2
+ 336:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** 		  "    ldr     r1, =_ebss\n"
+ 337:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** 		  "    mov     r2, #0\n"
+ 338:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** 		  "    .thumb_func\n"
+ 339:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** 		  "zero_loop:\n"
+ 340:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** 		  "        cmp     r0, r1\n"
+ 341:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** 		  "        it      lt\n"
+ 342:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** 		  "        strlt   r2, [r0], #4\n"
+ 343:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** 		  "        blt     zero_loop");
+ 344:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** 
+ 345:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** #ifdef CC2538_USE_ALTERNATE_INTERRUPT_MAP
+ 346:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****     //
+ 347:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****     // Enable alternate interrupt mapping
+ 348:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****     //
+ 349:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****     HWREG(SYS_CTRL_I_MAP) |= 1;
+ 350:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** #endif
+ 351:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    //
+ 352:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    // Call the application's entry point.
+ 353:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    //
+ 354:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    main();
+ 335              		.loc 1 354 0
+ 336              		.thumb
+ 337 0062 FFF7FEFF 		bl	main
+ 338              	.L10:
+ 355:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c **** 
+ 356:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    //
+ 357:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    // End here if return from main()
+ 358:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    //
+ 359:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    while(1)
+ 360:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    {
+ 361:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/startup_gcc.c ****    }
+ 339              		.loc 1 361 0 discriminator 1
+ 340 0066 FEE7     		b	.L10
+ 341              	.L12:
+ 342              		.align	2
+ 343              	.L11:
+ 344 0068 B4200D40 		.word	1074602164
+ 345 006c 08ED00E0 		.word	-536810232
+ 346 0070 00000000 		.word	gVectors
+ 347 0074 00000000 		.word	_etext
+ 348 0078 00000000 		.word	_data
+ 349 007c 00000000 		.word	_edata
+ 350              		.cfi_endproc
+ 351              	.LFE3:
+ 353              	.Letext0:
+ 354              		.file 2 "/usr/arm-none-eabi/include/machine/_default_types.h"
+ 355              		.file 3 "/usr/arm-none-eabi/include/sys/_stdint.h"
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 startup_gcc.c
+     /tmp/ccnqLU4x.s:19     .bss:0000000000000000 $d
+     /tmp/ccnqLU4x.s:20     .bss:0000000000000000 pui32Stack
+     /tmp/ccnqLU4x.s:27     .flashcca:0000000000000000 __cca
+     /tmp/ccnqLU4x.s:24     .flashcca:0000000000000000 $d
+     /tmp/ccnqLU4x.s:36     .vectors:0000000000000000 gVectors
+     /tmp/ccnqLU4x.s:33     .vectors:0000000000000000 $d
+     /tmp/ccnqLU4x.s:278    .text:000000000000001c ResetISR
+     /tmp/ccnqLU4x.s:206    .text:0000000000000000 NmiSR
+     /tmp/ccnqLU4x.s:232    .text:000000000000000c FaultISR
+     /tmp/ccnqLU4x.s:255    .text:0000000000000014 IntDefaultHandler
+     /tmp/ccnqLU4x.s:201    .text:0000000000000000 $t
+     /tmp/ccnqLU4x.s:329    .text:0000000000000058 zero_loop
+     /tmp/ccnqLU4x.s:344    .text:0000000000000068 $d
+                     .debug_frame:0000000000000010 $d
+                           .group:0000000000000000 wm4.0.59116071098782a37a9183a8102fe91b
+                           .group:0000000000000000 wm4.hw_nvic.h.42.f3b9efa2537e728866c85de74b3e5811
+                           .group:0000000000000000 wm4.features.h.22.2e382148a0560adabf236cddd4e880f4
+                           .group:0000000000000000 wm4._default_types.h.15.933e8edd27a65e0b69af4a865eb623d2
+                           .group:0000000000000000 wm4._intsup.h.10.35a45952db64d30146faa63a55c20c1c
+                           .group:0000000000000000 wm4._stdint.h.10.f76354baea1c7088202064e6f3d4f5e3
+                           .group:0000000000000000 wm4.stdint.h.23.373a9d32a9e4c2e88fd347156532d281
+
+UNDEFINED SYMBOLS
+_bss
+_ebss
+main
+_etext
+_data
+_edata

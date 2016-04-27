@@ -1,0 +1,539 @@
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 6
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.file	"sensors.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.section	.rodata
+  19              		.align	2
+  22              	rreg_uriquery:
+  23 0000 683D7563 		.ascii	"h=ucb\000"
+  23      6200
+  24 0006 0000     		.align	2
+  27              	infoBoardname:
+  28 0008 43433235 		.ascii	"CC2538\000"
+  28      333800
+  29 000f 00       		.align	2
+  32              	infouCName:
+  33 0010 43433235 		.ascii	"CC2538\000"
+  33      333800
+  34 0017 00       		.align	2
+  37              	infoRadioName:
+  38 0018 43433235 		.ascii	"CC2538 SoC\000"
+  38      33382053 
+  38      6F4300
+  39              		.comm	sensors_vars,9,4
+  40              		.text
+  41              		.align	2
+  42              		.global	sensors_init
+  43              		.thumb
+  44              		.thumb_func
+  46              	sensors_init:
+  47              	.LFB0:
+  48              		.file 1 "build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c"
+   1:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c **** /**
+   2:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c ****     \brief Definition of the "sensors" board-specific driver.
+   3:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c ****     \author Nicola Accettura <nicola.accettura@eecs.berkeley.edu>, March 2015.
+   4:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c **** */
+   5:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c **** 
+   6:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c **** #include "board.h"
+   7:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c **** #include "sensors.h"
+   8:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c **** #include "adxl346.h"
+   9:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c **** #include "max44009.h"
+  10:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c **** #include "sht21.h"
+  11:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c **** #include "adc_sensor.h"
+  12:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c **** 
+  13:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c **** //=========================== defines =========================================
+  14:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c **** 
+  15:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c **** //=========================== typedef =========================================
+  16:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c **** 
+  17:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c **** //=========================== variables =======================================
+  18:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c **** 
+  19:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c **** sensors_vars_t sensors_vars;
+  20:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c **** 
+  21:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c **** //=========================== prototype =======================================
+  22:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c **** 
+  23:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c **** //=========================== public ==========================================
+  24:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c **** 
+  25:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c **** /**
+  26:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c ****    \brief Initialize sensors on the board
+  27:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c **** */
+  28:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c **** void sensors_init(void) {
+  49              		.loc 1 28 0
+  50              		.cfi_startproc
+  51              		@ args = 0, pretend = 0, frame = 0
+  52              		@ frame_needed = 1, uses_anonymous_args = 0
+  53 0000 80B5     		push	{r7, lr}
+  54              		.cfi_def_cfa_offset 8
+  55              		.cfi_offset 7, -8
+  56              		.cfi_offset 14, -4
+  57 0002 00AF     		add	r7, sp, #0
+  58              		.cfi_def_cfa_register 7
+  29:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c ****    
+  30:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c ****    memset(&sensors_vars,0,sizeof(sensors_vars_t));
+  59              		.loc 1 30 0
+  60 0004 1848     		ldr	r0, .L5
+  61 0006 0021     		movs	r1, #0
+  62 0008 0922     		movs	r2, #9
+  63 000a FFF7FEFF 		bl	memset
+  31:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c ****    
+  32:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c ****    if (sht21_is_present()==1) {
+  64              		.loc 1 32 0
+  65 000e FFF7FEFF 		bl	sht21_is_present
+  66 0012 0346     		mov	r3, r0
+  67 0014 012B     		cmp	r3, #1
+  68 0016 07D1     		bne	.L2
+  33:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c ****       sht21_init();
+  69              		.loc 1 33 0
+  70 0018 FFF7FEFF 		bl	sht21_init
+  34:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c ****       sensors_vars.sensorsTypes[SENSOR_TEMPERATURE] = 1;
+  71              		.loc 1 34 0
+  72 001c 124B     		ldr	r3, .L5
+  73 001e 0122     		movs	r2, #1
+  74 0020 5A70     		strb	r2, [r3, #1]
+  35:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c ****       sensors_vars.sensorsTypes[SENSOR_HUMIDITY] = 1;
+  75              		.loc 1 35 0
+  76 0022 114B     		ldr	r3, .L5
+  77 0024 0122     		movs	r2, #1
+  78 0026 9A70     		strb	r2, [r3, #2]
+  79              	.L2:
+  36:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c ****    }
+  37:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c ****    
+  38:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c ****    if (max44009_is_present()==1) {
+  80              		.loc 1 38 0
+  81 0028 FFF7FEFF 		bl	max44009_is_present
+  82 002c 0346     		mov	r3, r0
+  83 002e 012B     		cmp	r3, #1
+  84 0030 04D1     		bne	.L3
+  39:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c ****       max44009_init();
+  85              		.loc 1 39 0
+  86 0032 FFF7FEFF 		bl	max44009_init
+  40:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c ****       sensors_vars.sensorsTypes[SENSOR_LIGHT] = 1;
+  87              		.loc 1 40 0
+  88 0036 0C4B     		ldr	r3, .L5
+  89 0038 0122     		movs	r2, #1
+  90 003a DA70     		strb	r2, [r3, #3]
+  91              	.L3:
+  41:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c ****    }
+  42:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c ****    
+  43:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c ****    if (adxl346_is_present()==1) {
+  92              		.loc 1 43 0
+  93 003c FFF7FEFF 		bl	adxl346_is_present
+  94 0040 0346     		mov	r3, r0
+  95 0042 012B     		cmp	r3, #1
+  96 0044 0AD1     		bne	.L4
+  44:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c ****       adxl346_init();
+  97              		.loc 1 44 0
+  98 0046 FFF7FEFF 		bl	adxl346_init
+  45:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c ****       sensors_vars.sensorsTypes[SENSOR_XACCELERATION] = 1;
+  99              		.loc 1 45 0
+ 100 004a 074B     		ldr	r3, .L5
+ 101 004c 0122     		movs	r2, #1
+ 102 004e 1A71     		strb	r2, [r3, #4]
+  46:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c ****       sensors_vars.sensorsTypes[SENSOR_YACCELERATION] = 1;
+ 103              		.loc 1 46 0
+ 104 0050 054B     		ldr	r3, .L5
+ 105 0052 0122     		movs	r2, #1
+ 106 0054 5A71     		strb	r2, [r3, #5]
+  47:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c ****       sensors_vars.sensorsTypes[SENSOR_ZACCELERATION] = 1;
+ 107              		.loc 1 47 0
+ 108 0056 044B     		ldr	r3, .L5
+ 109 0058 0122     		movs	r2, #1
+ 110 005a 9A71     		strb	r2, [r3, #6]
+ 111              	.L4:
+  48:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c ****    }
+  49:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c ****    
+  50:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c ****    adc_sensor_init();
+ 112              		.loc 1 50 0
+ 113 005c FFF7FEFF 		bl	adc_sensor_init
+  51:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c ****    sensors_vars.sensorsTypes[SENSOR_ADCTEMPERATURE] = 1;
+ 114              		.loc 1 51 0
+ 115 0060 014B     		ldr	r3, .L5
+ 116 0062 0122     		movs	r2, #1
+ 117 0064 DA71     		strb	r2, [r3, #7]
+  52:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c ****    
+  53:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c **** }
+ 118              		.loc 1 53 0
+ 119 0066 80BD     		pop	{r7, pc}
+ 120              	.L6:
+ 121              		.align	2
+ 122              	.L5:
+ 123 0068 00000000 		.word	sensors_vars
+ 124              		.cfi_endproc
+ 125              	.LFE0:
+ 127              		.align	2
+ 128              		.global	sensors_is_present
+ 129              		.thumb
+ 130              		.thumb_func
+ 132              	sensors_is_present:
+ 133              	.LFB1:
+  54:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c **** 
+  55:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c **** /**
+  56:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c ****    \brief Returns a bool value indicating if a given sensor is present
+  57:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c ****    \param[in] sensorType sensor type polled.
+  58:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c ****    \param[out] returnVal presence of the sensor.
+  59:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c **** */
+  60:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c **** bool sensors_is_present(uint8_t sensorType) {
+ 134              		.loc 1 60 0
+ 135              		.cfi_startproc
+ 136              		@ args = 0, pretend = 0, frame = 8
+ 137              		@ frame_needed = 1, uses_anonymous_args = 0
+ 138              		@ link register save eliminated.
+ 139 006c 80B4     		push	{r7}
+ 140              		.cfi_def_cfa_offset 4
+ 141              		.cfi_offset 7, -4
+ 142 006e 83B0     		sub	sp, sp, #12
+ 143              		.cfi_def_cfa_offset 16
+ 144 0070 00AF     		add	r7, sp, #0
+ 145              		.cfi_def_cfa_register 7
+ 146 0072 0346     		mov	r3, r0
+ 147 0074 FB71     		strb	r3, [r7, #7]
+  61:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c ****    return sensors_vars.sensorsTypes[sensorType];
+ 148              		.loc 1 61 0
+ 149 0076 FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 150 0078 064A     		ldr	r2, .L9
+ 151 007a D35C     		ldrb	r3, [r2, r3]	@ zero_extendqisi2
+ 152 007c 002B     		cmp	r3, #0
+ 153 007e 14BF     		ite	ne
+ 154 0080 0123     		movne	r3, #1
+ 155 0082 0023     		moveq	r3, #0
+ 156 0084 DBB2     		uxtb	r3, r3
+  62:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c **** }
+ 157              		.loc 1 62 0
+ 158 0086 1846     		mov	r0, r3
+ 159 0088 0C37     		adds	r7, r7, #12
+ 160              		.cfi_def_cfa_offset 4
+ 161 008a BD46     		mov	sp, r7
+ 162              		.cfi_def_cfa_register 13
+ 163              		@ sp needed
+ 164 008c 5DF8047B 		ldr	r7, [sp], #4
+ 165              		.cfi_restore 7
+ 166              		.cfi_def_cfa_offset 0
+ 167 0090 7047     		bx	lr
+ 168              	.L10:
+ 169 0092 00BF     		.align	2
+ 170              	.L9:
+ 171 0094 00000000 		.word	sensors_vars
+ 172              		.cfi_endproc
+ 173              	.LFE1:
+ 175              		.align	2
+ 176              		.global	sensors_getCallbackRead
+ 177              		.thumb
+ 178              		.thumb_func
+ 180              	sensors_getCallbackRead:
+ 181              	.LFB2:
+  63:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c **** 
+  64:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c **** /**
+  65:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c ****    \brief Returns the callback for reading data from a given sensor
+  66:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c ****    \param[in] sensorType sensor type used to associate the callback.
+  67:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c ****    \param[out] callback for reading data.
+  68:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c **** */
+  69:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c **** callbackRead_cbt sensors_getCallbackRead(uint8_t sensorType) {
+ 182              		.loc 1 69 0
+ 183              		.cfi_startproc
+ 184              		@ args = 0, pretend = 0, frame = 8
+ 185              		@ frame_needed = 1, uses_anonymous_args = 0
+ 186              		@ link register save eliminated.
+ 187 0098 80B4     		push	{r7}
+ 188              		.cfi_def_cfa_offset 4
+ 189              		.cfi_offset 7, -4
+ 190 009a 83B0     		sub	sp, sp, #12
+ 191              		.cfi_def_cfa_offset 16
+ 192 009c 00AF     		add	r7, sp, #0
+ 193              		.cfi_def_cfa_register 7
+ 194 009e 0346     		mov	r3, r0
+ 195 00a0 FB71     		strb	r3, [r7, #7]
+  70:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c ****    
+  71:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c ****    switch (sensorType) {
+ 196              		.loc 1 71 0
+ 197 00a2 FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 198 00a4 013B     		subs	r3, r3, #1
+ 199 00a6 062B     		cmp	r3, #6
+ 200 00a8 1ED8     		bhi	.L12
+ 201 00aa 01A2     		adr	r2, .L14
+ 202 00ac 52F823F0 		ldr	pc, [r2, r3, lsl #2]
+ 203              		.p2align 2
+ 204              	.L14:
+ 205 00b0 CD000000 		.word	.L13+1
+ 206 00b4 D1000000 		.word	.L15+1
+ 207 00b8 D5000000 		.word	.L16+1
+ 208 00bc D9000000 		.word	.L17+1
+ 209 00c0 DD000000 		.word	.L18+1
+ 210 00c4 E1000000 		.word	.L19+1
+ 211 00c8 E5000000 		.word	.L20+1
+ 212              		.p2align 1
+ 213              	.L13:
+  72:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c ****       case SENSOR_TEMPERATURE:
+  73:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c ****          return &sht21_read_temperature;
+ 214              		.loc 1 73 0
+ 215 00cc 0A4B     		ldr	r3, .L22
+ 216 00ce 0CE0     		b	.L21
+ 217              	.L15:
+  74:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c ****       case SENSOR_HUMIDITY:
+  75:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c ****          return &sht21_read_humidity;
+ 218              		.loc 1 75 0
+ 219 00d0 0A4B     		ldr	r3, .L22+4
+ 220 00d2 0AE0     		b	.L21
+ 221              	.L16:
+  76:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c ****       case SENSOR_LIGHT:
+  77:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c ****          return &max44009_read_light;
+ 222              		.loc 1 77 0
+ 223 00d4 0A4B     		ldr	r3, .L22+8
+ 224 00d6 08E0     		b	.L21
+ 225              	.L17:
+  78:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c ****       case SENSOR_XACCELERATION:
+  79:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c ****          return (callbackRead_cbt)&adxl346_read_x;
+ 226              		.loc 1 79 0
+ 227 00d8 0A4B     		ldr	r3, .L22+12
+ 228 00da 06E0     		b	.L21
+ 229              	.L18:
+  80:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c ****       case SENSOR_YACCELERATION:
+  81:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c ****          return (callbackRead_cbt)&adxl346_read_y;
+ 230              		.loc 1 81 0
+ 231 00dc 0A4B     		ldr	r3, .L22+16
+ 232 00de 04E0     		b	.L21
+ 233              	.L19:
+  82:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c ****       case SENSOR_ZACCELERATION:
+  83:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c ****          return (callbackRead_cbt)&adxl346_read_z;
+ 234              		.loc 1 83 0
+ 235 00e0 0A4B     		ldr	r3, .L22+20
+ 236 00e2 02E0     		b	.L21
+ 237              	.L20:
+  84:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c ****       case SENSOR_ADCTEMPERATURE:
+  85:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c ****          return &adc_sens_read_temperature;
+ 238              		.loc 1 85 0
+ 239 00e4 0A4B     		ldr	r3, .L22+24
+ 240 00e6 00E0     		b	.L21
+ 241              	.L12:
+  86:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c ****       default:
+  87:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c ****          return NULL;
+ 242              		.loc 1 87 0
+ 243 00e8 0023     		movs	r3, #0
+ 244              	.L21:
+  88:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c ****    }
+  89:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c ****    
+  90:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c **** }
+ 245              		.loc 1 90 0
+ 246 00ea 1846     		mov	r0, r3
+ 247 00ec 0C37     		adds	r7, r7, #12
+ 248              		.cfi_def_cfa_offset 4
+ 249 00ee BD46     		mov	sp, r7
+ 250              		.cfi_def_cfa_register 13
+ 251              		@ sp needed
+ 252 00f0 5DF8047B 		ldr	r7, [sp], #4
+ 253              		.cfi_restore 7
+ 254              		.cfi_def_cfa_offset 0
+ 255 00f4 7047     		bx	lr
+ 256              	.L23:
+ 257 00f6 00BF     		.align	2
+ 258              	.L22:
+ 259 00f8 00000000 		.word	sht21_read_temperature
+ 260 00fc 00000000 		.word	sht21_read_humidity
+ 261 0100 00000000 		.word	max44009_read_light
+ 262 0104 00000000 		.word	adxl346_read_x
+ 263 0108 00000000 		.word	adxl346_read_y
+ 264 010c 00000000 		.word	adxl346_read_z
+ 265 0110 00000000 		.word	adc_sens_read_temperature
+ 266              		.cfi_endproc
+ 267              	.LFE2:
+ 269              		.align	2
+ 270              		.global	sensors_getCallbackConvert
+ 271              		.thumb
+ 272              		.thumb_func
+ 274              	sensors_getCallbackConvert:
+ 275              	.LFB3:
+  91:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c **** 
+  92:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c **** /**
+  93:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c ****    \brief Returns the callback for converting data from a given sensor
+  94:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c ****    \param[in] sensorType sensor type used to associate the callback.
+  95:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c ****    \param[out] callback for converting data.
+  96:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c **** */
+  97:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c **** callbackConvert_cbt sensors_getCallbackConvert(uint8_t sensorType) {
+ 276              		.loc 1 97 0
+ 277              		.cfi_startproc
+ 278              		@ args = 0, pretend = 0, frame = 8
+ 279              		@ frame_needed = 1, uses_anonymous_args = 0
+ 280              		@ link register save eliminated.
+ 281 0114 80B4     		push	{r7}
+ 282              		.cfi_def_cfa_offset 4
+ 283              		.cfi_offset 7, -4
+ 284 0116 83B0     		sub	sp, sp, #12
+ 285              		.cfi_def_cfa_offset 16
+ 286 0118 00AF     		add	r7, sp, #0
+ 287              		.cfi_def_cfa_register 7
+ 288 011a 0346     		mov	r3, r0
+ 289 011c FB71     		strb	r3, [r7, #7]
+  98:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c ****    
+  99:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c ****    switch (sensorType) {
+ 290              		.loc 1 99 0
+ 291 011e FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 292 0120 013B     		subs	r3, r3, #1
+ 293 0122 062B     		cmp	r3, #6
+ 294 0124 1ED8     		bhi	.L25
+ 295 0126 01A2     		adr	r2, .L27
+ 296 0128 52F823F0 		ldr	pc, [r2, r3, lsl #2]
+ 297              		.p2align 2
+ 298              	.L27:
+ 299 012c 49010000 		.word	.L26+1
+ 300 0130 4D010000 		.word	.L28+1
+ 301 0134 51010000 		.word	.L29+1
+ 302 0138 55010000 		.word	.L30+1
+ 303 013c 59010000 		.word	.L31+1
+ 304 0140 5D010000 		.word	.L32+1
+ 305 0144 61010000 		.word	.L33+1
+ 306              		.p2align 1
+ 307              	.L26:
+ 100:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c ****       case SENSOR_TEMPERATURE:
+ 101:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c ****          return &sht21_convert_temperature;
+ 308              		.loc 1 101 0
+ 309 0148 0A4B     		ldr	r3, .L35
+ 310 014a 0CE0     		b	.L34
+ 311              	.L28:
+ 102:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c ****       case SENSOR_HUMIDITY:
+ 103:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c ****          return &sht21_convert_humidity;
+ 312              		.loc 1 103 0
+ 313 014c 0A4B     		ldr	r3, .L35+4
+ 314 014e 0AE0     		b	.L34
+ 315              	.L29:
+ 104:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c ****       case SENSOR_LIGHT:
+ 105:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c ****          return &max44009_convert_light;
+ 316              		.loc 1 105 0
+ 317 0150 0A4B     		ldr	r3, .L35+8
+ 318 0152 08E0     		b	.L34
+ 319              	.L30:
+ 106:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c ****       case SENSOR_XACCELERATION:
+ 107:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c ****          return NULL;
+ 320              		.loc 1 107 0
+ 321 0154 0023     		movs	r3, #0
+ 322 0156 06E0     		b	.L34
+ 323              	.L31:
+ 108:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c ****       case SENSOR_YACCELERATION:
+ 109:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c ****          return NULL;
+ 324              		.loc 1 109 0
+ 325 0158 0023     		movs	r3, #0
+ 326 015a 04E0     		b	.L34
+ 327              	.L32:
+ 110:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c ****       case SENSOR_ZACCELERATION:
+ 111:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c ****          return NULL;
+ 328              		.loc 1 111 0
+ 329 015c 0023     		movs	r3, #0
+ 330 015e 02E0     		b	.L34
+ 331              	.L33:
+ 112:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c ****       case SENSOR_ADCTEMPERATURE:
+ 113:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c ****          return &adc_sens_convert_temperature;
+ 332              		.loc 1 113 0
+ 333 0160 074B     		ldr	r3, .L35+12
+ 334 0162 00E0     		b	.L34
+ 335              	.L25:
+ 114:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c ****       default:
+ 115:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c ****          return NULL;
+ 336              		.loc 1 115 0
+ 337 0164 0023     		movs	r3, #0
+ 338              	.L34:
+ 116:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c ****    }
+ 117:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c ****    
+ 118:build/OpenMote-CC2538_armgcc/bsp/boards/OpenMote-CC2538/sensors.c **** }
+ 339              		.loc 1 118 0
+ 340 0166 1846     		mov	r0, r3
+ 341 0168 0C37     		adds	r7, r7, #12
+ 342              		.cfi_def_cfa_offset 4
+ 343 016a BD46     		mov	sp, r7
+ 344              		.cfi_def_cfa_register 13
+ 345              		@ sp needed
+ 346 016c 5DF8047B 		ldr	r7, [sp], #4
+ 347              		.cfi_restore 7
+ 348              		.cfi_def_cfa_offset 0
+ 349 0170 7047     		bx	lr
+ 350              	.L36:
+ 351 0172 00BF     		.align	2
+ 352              	.L35:
+ 353 0174 00000000 		.word	sht21_convert_temperature
+ 354 0178 00000000 		.word	sht21_convert_humidity
+ 355 017c 00000000 		.word	max44009_convert_light
+ 356 0180 00000000 		.word	adc_sens_convert_temperature
+ 357              		.cfi_endproc
+ 358              	.LFE3:
+ 360              	.Letext0:
+ 361              		.file 2 "/usr/arm-none-eabi/include/machine/_default_types.h"
+ 362              		.file 3 "/usr/arm-none-eabi/include/sys/_stdint.h"
+ 363              		.file 4 "bsp/boards/sensors.h"
+ 364              		.file 5 "bsp/boards/OpenMote-CC2538/board_info.h"
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 sensors.c
+     /tmp/ccWZZgIu.s:19     .rodata:0000000000000000 $d
+     /tmp/ccWZZgIu.s:22     .rodata:0000000000000000 rreg_uriquery
+     /tmp/ccWZZgIu.s:27     .rodata:0000000000000008 infoBoardname
+     /tmp/ccWZZgIu.s:32     .rodata:0000000000000010 infouCName
+     /tmp/ccWZZgIu.s:37     .rodata:0000000000000018 infoRadioName
+                            *COM*:0000000000000009 sensors_vars
+     /tmp/ccWZZgIu.s:41     .text:0000000000000000 $t
+     /tmp/ccWZZgIu.s:46     .text:0000000000000000 sensors_init
+     /tmp/ccWZZgIu.s:123    .text:0000000000000068 $d
+     /tmp/ccWZZgIu.s:127    .text:000000000000006c $t
+     /tmp/ccWZZgIu.s:132    .text:000000000000006c sensors_is_present
+     /tmp/ccWZZgIu.s:171    .text:0000000000000094 $d
+     /tmp/ccWZZgIu.s:175    .text:0000000000000098 $t
+     /tmp/ccWZZgIu.s:180    .text:0000000000000098 sensors_getCallbackRead
+     /tmp/ccWZZgIu.s:205    .text:00000000000000b0 $d
+     /tmp/ccWZZgIu.s:212    .text:00000000000000cc $t
+     /tmp/ccWZZgIu.s:259    .text:00000000000000f8 $d
+     /tmp/ccWZZgIu.s:269    .text:0000000000000114 $t
+     /tmp/ccWZZgIu.s:274    .text:0000000000000114 sensors_getCallbackConvert
+     /tmp/ccWZZgIu.s:299    .text:000000000000012c $d
+     /tmp/ccWZZgIu.s:306    .text:0000000000000148 $t
+     /tmp/ccWZZgIu.s:353    .text:0000000000000174 $d
+                     .debug_frame:0000000000000010 $d
+                           .group:0000000000000000 wm4.0.59116071098782a37a9183a8102fe91b
+                           .group:0000000000000000 wm4.features.h.22.2e382148a0560adabf236cddd4e880f4
+                           .group:0000000000000000 wm4._default_types.h.15.933e8edd27a65e0b69af4a865eb623d2
+                           .group:0000000000000000 wm4._intsup.h.10.35a45952db64d30146faa63a55c20c1c
+                           .group:0000000000000000 wm4._stdint.h.10.f76354baea1c7088202064e6f3d4f5e3
+                           .group:0000000000000000 wm4.stdint.h.23.373a9d32a9e4c2e88fd347156532d281
+                           .group:0000000000000000 wm4.newlib.h.8.2702bca278809460f0af6fba1d84eb68
+                           .group:0000000000000000 wm4.config.h.220.a09b0b0de3c25be3f39d71990e617bff
+                           .group:0000000000000000 wm4._ansi.h.23.84af8eb8cd468d25cc5f45f5eb13ec51
+                           .group:0000000000000000 wm4.stddef.h.39.daafd3d79fe2f3a84d2d73d7d4e706f8
+                           .group:0000000000000000 wm4.lock.h.2.9bc98482741e5e2a9450b12934a684ea
+                           .group:0000000000000000 wm4._types.h.54.d3d34a3b7f3cc230cd159baf022b4b08
+                           .group:0000000000000000 wm4.stddef.h.158.61317cdbfb4026324507d123a50b0fd6
+                           .group:0000000000000000 wm4.reent.h.17.8bd9e4098e0428508c282cad794fae43
+                           .group:0000000000000000 wm4.cdefs.h.47.e6563c1c3863188ba4ac4eaa2c85b6f1
+                           .group:0000000000000000 wm4.string.h.15.dab3980bf35408a4c507182805e2de3a
+                           .group:0000000000000000 wm4.stddef.h.158.a7efb00f6cbc6f43213b50e183c9830c
+                           .group:0000000000000000 wm4.stdbool.h.29.1c9ee6859ce8145f7838a4f2549ccec2
+                           .group:0000000000000000 wm4.hw_types.h.67.b10589a0806dcc2d274d6fab6b736519
+                           .group:0000000000000000 wm4.interrupt.h.41.272fc4ec0e276feb439e7974d0f77eaf
+                           .group:0000000000000000 wm4.board_info.h.22.aeb00002354a4949fff54190040e37af
+                           .group:0000000000000000 wm4.toolchain_defs.h.2.59a5259f74cb714abc17e042354ff20f
+
+UNDEFINED SYMBOLS
+memset
+sht21_is_present
+sht21_init
+max44009_is_present
+max44009_init
+adxl346_is_present
+adxl346_init
+adc_sensor_init
+sht21_read_temperature
+sht21_read_humidity
+max44009_read_light
+adxl346_read_x
+adxl346_read_y
+adxl346_read_z
+adc_sens_read_temperature
+sht21_convert_temperature
+sht21_convert_humidity
+max44009_convert_light
+adc_sens_convert_temperature

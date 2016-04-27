@@ -1,7 +1,17 @@
 # MasterThesis
 
+
+By: Joan Ignasi Florit Mir.
+jfloritmir@gmail.com
+
+Contact me at CTTC's mail: joan.mir@cttc.cat
+
+
 This is my Master's Thesis Project, studies at Polythechnic University of Catalonia.
     MASTEAM (Master’s Degree in Applied Telecommunications and Engineering Management)
+
+In work with: Telecomunicacions Technology Centre of Catalonia (CTTC)
+
 
 
     TITLE: Implementation of DQ in OpenWSN over a LoRaWAN Network
